@@ -11,7 +11,7 @@ public class Bullet : MonoBehaviour {
 	// Use this for initialization
 	void Start () {
 		rb = GetComponent<Rigidbody2D> ();
-		FireBullet ();
+		rb.AddForce ( direction * moveForce);
 	}
 	
 	// Update is called once per frame
@@ -22,9 +22,5 @@ public class Bullet : MonoBehaviour {
 	public void SetDirection (Vector2 dir) {
 		direction = dir;
 		direction.Normalize ();
-	}
-
-	public void FireBullet() {
-		rb.AddForce ( direction * moveForce);
 	}
 }
