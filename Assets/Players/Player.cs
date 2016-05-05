@@ -6,7 +6,6 @@ public class Player : MonoBehaviour {
 	public int hp = 100;
 	public float moveForce = 20f;
 	public float releaseBoost = 60f;
-	public Bullet bulletPrefab;
 	public string LSHorizontal = "LS_Horizontal_P1";
 	public string LSVertical = "LS_Vertical_P1";
 	public string RSHorizontal = "RS_Horizontal_P1";
@@ -51,6 +50,23 @@ public class Player : MonoBehaviour {
 		}
 	}
 
+	void OnTriggerEnter2D ( Collider2D other) {
+		if (other.name == "BigBird") {
+			if (!docked) {
+				Dock ();
+			}
+		}
+		else if (other.tag == "EnemyBullet") {
+			TakeDamage (other.GetComponent<Bullet> ().damage);
+			Destroy (other.gameObject);
+		}
+		else if (other.tag == "Enemy") {
+			print ("hit enemy");
+			TakeDamage (other.GetComponent<Enemy> ().kamikazeDamage);
+			Destroy (other.gameObject);
+		}
+	}
+
 	void HandleFlyingInput () {
 		direction = new Vector2( Input.GetAxis(LSHorizontal), Input.GetAxis(LSVertical));
 		Vector2 rightStick = new Vector2( Input.GetAxis(RSHorizontal), Input.GetAxis(RSVertical));
@@ -76,26 +92,9 @@ public class Player : MonoBehaviour {
 	}
 
 	public void FireBullet() {
-		Bullet b = (Bullet)Instantiate (bulletPrefab, transform.position, Quaternion.identity);
-		b.SetDirection (aim);
-		//Bullet b = (Bullet)objectPooler.GetPooledObject();
-	}
-
-	void OnTriggerEnter2D ( Collider2D other) {
-		if (other.name == "BigBird") {
-			if (!docked) {
-				Dock ();
-			}
-		}
-		else if (other.tag == "EnemyBullet") {
-			TakeDamage (other.GetComponent<Bullet> ().damage);
-			Destroy (other.gameObject);
-		}
-		else if (other.tag == "Enemy") {
-			print ("hit enemy");
-			TakeDamage (other.GetComponent<Enemy> ().kamikazeDamage);
-			Destroy (other.gameObject);
-		}
+		GameObject bullet = objectPooler.GetPooledObject();
+		bullet.SetActive (true);
+		bullet.GetComponent<Bullet> ().Fire (transform, aim);
 	}
 
 	void TakeDamage( int dam) {

@@ -10,13 +10,19 @@ public class ObjectPooler : MonoBehaviour
 
 	public List<GameObject> pooledObjects;
 
+	private GameObject container;
+
 	void Start ()
 	{
+		container = new GameObject ( pooledObject.name + "Container");
+		container.transform.parent = transform;
+
 		pooledObjects = new List<GameObject>();
 		for(int i = 0; i < pooledAmount; i++)
 		{
 			GameObject obj = (GameObject)Instantiate(pooledObject);
 			obj.SetActive(false);
+			obj.transform.parent = container.transform;
 			pooledObjects.Add(obj);
 		}
 	}
@@ -42,6 +48,7 @@ public class ObjectPooler : MonoBehaviour
 		{
 			GameObject obj = (GameObject)Instantiate(pooledObject);
 			pooledObjects.Add(obj);
+			obj.transform.parent = container.transform;
 			return obj;
 		}
 

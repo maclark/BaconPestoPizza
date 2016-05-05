@@ -9,21 +9,23 @@ public class Enemy : MonoBehaviour {
 	public float moveForce = 80f;
 	public int hp = 100;
 	public int kamikazeDamage = 200;
-	public GameObject enemyBullet;
 	public float fireRate = 1f;
 	public float attackRange = 6f;
+
 	private Rigidbody2D rb;
 	private GameManager gm;
+	private ObjectPooler objectPooler;
 
 	// Use this for initialization
 	void Awake(){
 		gm = GameObject.FindGameObjectWithTag ("GameManager").GetComponent<GameManager> ();
 		rb = GetComponent<Rigidbody2D> ();
+		objectPooler = GetComponent<ObjectPooler> ();
 	}
 
 	void Start () {
 		SetNearestTarget ();
-		InvokeRepeating ("Fire", 1f,  fireRate);
+		InvokeRepeating ("FireBullet", fireRate, fireRate);
 	}
 
 	void FixedUpdate () {
@@ -34,7 +36,7 @@ public class Enemy : MonoBehaviour {
 	void OnTriggerEnter2D ( Collider2D other) {
 		if (other.tag == "PlayerBullet") {
 			TakeDamage (other.GetComponent<Bullet> ().damage);
-			Destroy (other.gameObject);
+			other.GetComponent<Bullet> ().Die ();
 		}
 	}
 
@@ -75,9 +77,10 @@ public class Enemy : MonoBehaviour {
 		}
 	}
 
-	void Fire () {
-		GameObject go = Instantiate (enemyBullet, transform.position, Quaternion.identity) as GameObject;
-		go.GetComponent<Bullet> ().SetDirection (target - transform.position);
+	public void FireBullet() {
+		GameObject bullet = objectPooler.GetPooledObject();
+		bullet.SetActive (true);
+		bullet.GetComponent<Bullet> ().Fire (transform, target - transform.position);
 	}
 
 	void Kamikaze() {
