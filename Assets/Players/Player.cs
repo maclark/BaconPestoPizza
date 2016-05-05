@@ -18,11 +18,13 @@ public class Player : MonoBehaviour {
 	private Vector2 aim = Vector2.zero;
 	private Rigidbody2D rb;
 	private BigBird bigBird;
+	private ObjectPooler objectPooler;
 
 	// Use this for initialization
 	void Start () {
 		rb = GetComponent<Rigidbody2D> ();
 		bigBird = GameObject.FindObjectOfType<BigBird>() as BigBird;
+		objectPooler = GetComponent<ObjectPool> ();
 	}
 	
 	// Update is called once per frame
@@ -97,7 +99,6 @@ public class Player : MonoBehaviour {
 		rb.WakeUp ();
 		Vector3 releaseDirection = transform.position - bigBird.transform.position;
 		releaseDirection.Normalize ();
-		print (releaseDirection);
 		rb.AddForce (releaseDirection * releaseBoost);
 		Invoke( "EnableCollider", .5f);
 	}

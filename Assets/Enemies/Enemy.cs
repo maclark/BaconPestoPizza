@@ -12,4 +12,17 @@ public class Enemy : MonoBehaviour {
 	void Update () {
 	
 	}
+
+	void OnTriggerEnter2D ( Collider2D other) {
+		print ("collided");
+		if (other.tag == "Bullet") {
+			Die ();
+			print ("collided with bullet");
+			Destroy (other.gameObject);
+		}
+	}
+
+	void Die() {
+		Destroy (gameObject);
+	}
 }

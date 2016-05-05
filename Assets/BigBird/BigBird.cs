@@ -16,7 +16,7 @@ public class BigBird : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-	
+
 	}
 
 	void FixedUpdate () {
@@ -24,13 +24,13 @@ public class BigBird : MonoBehaviour {
 	}
 
 	public Vector3 GetNearestOpenDock (Vector3 dockingShipPos) {
-		dockTransforms = GetComponentsInChildren<Transform> ();
-		float closestDockDistance = 100f;
+		dockTransforms = GetComponentsInChildren<Dock> ();
+		float closestDockDistance = 10000f;
 		Vector3 closestDock = Vector3.zero;
-		foreach (Transform t in dockTransforms) {
-			float d = Vector3.Distance( t.position, dockingShipPos);
+		foreach (Dock k in dockTransforms) {
+			float d = Vector3.Distance( k.transform.position, dockingShipPos);
 			if (d < closestDockDistance) {
-				closestDock = t.position;
+				closestDock = k.transform.position;
 				closestDockDistance = d;
 			}
 		}

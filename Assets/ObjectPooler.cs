@@ -2,7 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 
-public class ObjectPoolScript : MonoBehaviour
+public class ObjectPooler : MonoBehaviour
 {
 	public GameObject pooledObject;
 	public int pooledAmount = 20;
