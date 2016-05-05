@@ -5,6 +5,7 @@ public class Bullet : MonoBehaviour {
 
 	public Vector2 direction = Vector2.zero;
 	public float moveForce = 100f;
+	public int damage = 100;
 
 	private Rigidbody2D rb;
 

@@ -3,6 +3,7 @@ using System.Collections;
 
 public class Player : MonoBehaviour {
 
+	public int hp = 100;
 	public float moveForce = 20f;
 	public float releaseBoost = 60f;
 	public Bullet bulletPrefab;
@@ -17,14 +18,20 @@ public class Player : MonoBehaviour {
 	private Vector2 direction = Vector2.zero;
 	private Vector2 aim = Vector2.zero;
 	private Rigidbody2D rb;
+	private GameManager gm;
 	private BigBird bigBird;
 	private ObjectPooler objectPooler;
 
 	// Use this for initialization
-	void Start () {
+	void Awake() {
 		rb = GetComponent<Rigidbody2D> ();
+		gm = GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager> ();
 		bigBird = GameObject.FindObjectOfType<BigBird>() as BigBird;
-		objectPooler = GetComponent<ObjectPool> ();
+		objectPooler = GetComponent<ObjectPooler> ();
+
+	}
+
+	void Start () {
 	}
 	
 	// Update is called once per frame
@@ -71,6 +78,7 @@ public class Player : MonoBehaviour {
 	public void FireBullet() {
 		Bullet b = (Bullet)Instantiate (bulletPrefab, transform.position, Quaternion.identity);
 		b.SetDirection (aim);
+		//Bullet b = (Bullet)objectPooler.GetPooledObject();
 	}
 
 	void OnTriggerEnter2D ( Collider2D other) {
@@ -79,6 +87,27 @@ public class Player : MonoBehaviour {
 				Dock ();
 			}
 		}
+		else if (other.tag == "EnemyBullet") {
+			TakeDamage (other.GetComponent<Bullet> ().damage);
+			Destroy (other.gameObject);
+		}
+		else if (other.tag == "Enemy") {
+			print ("hit enemy");
+			TakeDamage (other.GetComponent<Enemy> ().kamikazeDamage);
+			Destroy (other.gameObject);
+		}
+	}
+
+	void TakeDamage( int dam) {
+		hp -= dam;
+		if (hp <= 0) {
+			Die ();
+		}
+	}
+
+	void Die() {
+		Destroy (gameObject);
+		gm.RemoveAlliedTransform (transform);
 	}
 			
 	private bool Dock () {
