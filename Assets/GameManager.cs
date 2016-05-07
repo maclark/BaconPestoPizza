@@ -9,8 +9,12 @@ public class GameManager : MonoBehaviour {
 	//private Player player2;
 	//private Player player3;
 	//private Player player4;
+	public bool inNavigation = false;
+	public GameObject navPointerPrefab;
 
 	private List<Transform> alliedTransforms; 
+	private bool paused = false;
+	private GameObject navPointer;
 
 
 	// Use this for initialization
@@ -28,7 +32,6 @@ public class GameManager : MonoBehaviour {
 
 	// Update is called once per frame
 	void Update () {
-
 	}
 
 	public List<Transform> GetAlliedTransforms () {
@@ -43,5 +46,26 @@ public class GameManager : MonoBehaviour {
 		alliedTransforms.Add (toAdd);
 	}
 	
+	public void TogglePause () {
+		paused = !paused;
+		if (paused) {
+			Time.timeScale = 0.0f;
+			RenderSettings.skybox.color = Color.blue;
+		} else {
+			Time.timeScale = 1f;
+			RenderSettings.skybox.color = Color.white;
+		}
+	}
 
+	public void ToggleNavPanel (string leftHorizontal, string leftVertical) {
+		if (!inNavigation) {
+			inNavigation = true;
+			print ("bigBird.transform.position " + bigBird.transform.position);
+			navPointer = Instantiate (navPointerPrefab, bigBird.transform.position, Quaternion.identity) as GameObject; 
+			navPointer.GetComponent<NavPointer> ().SetAxes (leftHorizontal, leftVertical);
+		} else {
+			inNavigation = false;
+			Destroy (navPointer);
+		}
+	}
 }

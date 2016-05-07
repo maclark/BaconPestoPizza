@@ -36,8 +36,6 @@ public class BigBird : MonoBehaviour {
 		if (turning) {
 			transform.rotation = Quaternion.Lerp (transform.rotation, targetRotation, Time.deltaTime * rotateSpeed);
 		}
-
-		print (rb.velocity);
 	}
 
 	public Vector3 GetNearestOpenDock (Vector3 dockingShipPos) {

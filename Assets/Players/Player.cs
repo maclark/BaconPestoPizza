@@ -13,6 +13,7 @@ public class Player : MonoBehaviour {
 	public string RSHorizontal = "RS_Horizontal_P1";
 	public string RSVertical = "RS_Vertical_P1";
 	public string rightTrigger = "RT_P1";
+	public string menuButton = "Menu_P1";
 	public string aButton = "A_P1";
 	public string interactButton = "B_P1";
 	public string boostButton = "LB_P1";
@@ -31,6 +32,7 @@ public class Player : MonoBehaviour {
 	private BigBird bigBird;
 	private ObjectPooler objectPooler;
 	private bool firing = false;
+	private bool navigating = false;
 	private bool damaged = false;
 	private bool invincible = false;
 	private bool canBoost = true;
@@ -45,6 +47,10 @@ public class Player : MonoBehaviour {
 	}
 	
 	void Update () {
+
+		if (Input.GetButtonDown (menuButton)) {
+			gm.TogglePause();
+		}
 
 		if (docked) {
 			HandleDockedInput ();
@@ -128,7 +134,12 @@ public class Player : MonoBehaviour {
 
 	void HandleDockedInput () {
 		if (Input.GetButtonDown (interactButton)) {
-			Undock ();
+			if (!navigating) {
+				Undock ();
+			} else {
+				//navigating = false;
+				//gm.CloseNavPanel ();
+			}
 		} else {
 			float x = Input.GetAxis (RSHorizontal);
 			float y = Input.GetAxis(RSVertical); 
@@ -141,8 +152,14 @@ public class Player : MonoBehaviour {
 				bigBird.turning = false;
 		}
 
-		if (Input.GetButtonDown (aButton)) {
+		if (Input.GetButtonDown (rightTrigger)) {
 			bigBird.engineOn = !bigBird.engineOn;
+		}
+
+		if (Input.GetButtonDown (aButton)) {
+			navigating = !navigating;
+			gm.TogglePause ();
+			gm.ToggleNavPanel (LSHorizontal, LSVertical);
 		}
 	}
 
