@@ -78,9 +78,9 @@ public class Enemy : MonoBehaviour {
 	}
 
 	public void FireBullet() {
-		GameObject bullet = objectPooler.GetPooledObject();
-		bullet.SetActive (true);
-		bullet.GetComponent<Bullet> ().Fire (transform, target - transform.position);
+		Bullet bullet = objectPooler.GetPooledObject().GetComponent<Bullet>();
+		bullet.gameObject.SetActive (true);
+		bullet.Fire (transform, target - transform.position);	
 	}
 
 	void Kamikaze() {

@@ -19,19 +19,18 @@ public class Bullet : MonoBehaviour {
 		direction.Normalize ();
 	}
 
-	void Unenable () {
-		gameObject.SetActive (false);
-	}
-
 	public void Fire (Transform start, Vector2 aim) {
 		transform.position = start.position;
 		transform.rotation = start.rotation;
 		SetDirection (aim);
 		rb.AddForce ( direction * moveForce);
-		Invoke ("Unenable", bulletDuration);
 	}
 
 	public void Die () {
-		Unenable ();
+		gameObject.SetActive (false);
+	}
+
+	void OnBecameInvisible () {
+		gameObject.SetActive (false);
 	}
 }

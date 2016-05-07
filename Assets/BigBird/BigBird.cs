@@ -5,11 +5,13 @@ public class BigBird : MonoBehaviour {
 
 	public float moveForce = 75f;
 	public int hp = 1000;
+	public float rotateSpeed = .1f;
+	public bool engineOn = false;
 
-	private Vector2 direction = Vector2.up;
 	private GameManager gm;
 	private Rigidbody2D rb;
 	private Component[] dockTransforms;
+	private Quaternion targetRotation = Quaternion.identity;
 
 	// Use this for initialization
 	void Awake() {
@@ -27,7 +29,15 @@ public class BigBird : MonoBehaviour {
 	}
 
 	void FixedUpdate () {
-		rb.AddForce (direction * moveForce);
+		if (engineOn) {
+			rb.AddForce (transform.up * moveForce);
+		}
+
+		if (turning) {
+			transform.rotation = Quaternion.Lerp (transform.rotation, targetRotation, Time.deltaTime * rotateSpeed);
+		}
+
+		print (rb.velocity);
 	}
 
 	public Vector3 GetNearestOpenDock (Vector3 dockingShipPos) {
@@ -46,10 +56,10 @@ public class BigBird : MonoBehaviour {
 
 	void OnTriggerEnter2D (Collider2D other) {
 		if (other.tag == "EnemyBullet") {
-			TakeDamage (other.GetComponent<Bullet> ().damage);
-			Destroy (other.gameObject);
+			if (Random.Range (0, 1f) > .5) {
+				other.GetComponent<Bullet>().Die();
+			}
 		} else if (other.tag == "Enemy") {
-			print ("hit enemy");
 			TakeDamage (other.GetComponent<Enemy> ().kamikazeDamage);
 			Destroy (other.gameObject);
 		}
@@ -66,4 +76,11 @@ public class BigBird : MonoBehaviour {
 		gm.RemoveAlliedTransform (transform);
 		Destroy (gameObject);
 	}
+
+	public void SetTargetRotationZAngle (float zAngle) {
+		targetRotation.eulerAngles = new Vector3( 0, 0, zAngle);
+	}
+
+	public bool turning { get; set; }
+
 }
