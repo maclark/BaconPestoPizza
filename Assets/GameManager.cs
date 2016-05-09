@@ -60,7 +60,6 @@ public class GameManager : MonoBehaviour {
 	public void ToggleNavPanel (string leftHorizontal, string leftVertical) {
 		if (!inNavigation) {
 			inNavigation = true;
-			print ("bigBird.transform.position " + bigBird.transform.position);
 			navPointer = Instantiate (navPointerPrefab, bigBird.transform.position, Quaternion.identity) as GameObject; 
 			navPointer.GetComponent<NavPointer> ().SetAxes (leftHorizontal, leftVertical);
 		} else {

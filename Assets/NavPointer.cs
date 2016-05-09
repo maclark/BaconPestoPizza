@@ -5,6 +5,7 @@ public class NavPointer : MonoBehaviour {
 
 	public float navPointSpeed;
 
+
 	private string LSHorizontal;
 	private string LSVertical;
 	private Vector2 direction = Vector2.zero;
@@ -43,5 +44,4 @@ public class NavPointer : MonoBehaviour {
 		positions [1] = transform.position;
 		GetComponent<LineRenderer> ().SetPositions (positions);
 	}
-
 }

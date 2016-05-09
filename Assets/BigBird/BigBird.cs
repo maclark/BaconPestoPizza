@@ -5,13 +5,17 @@ public class BigBird : MonoBehaviour {
 
 	public float moveForce = 75f;
 	public int hp = 1000;
-	public float rotateSpeed = .1f;
+	public float engineOnRotateSpeed = .2f;
+	public float engineOffRotateSpeed = .1f;
 	public bool engineOn = false;
 
 	private GameManager gm;
 	private Rigidbody2D rb;
 	private Component[] dockTransforms;
 	private Quaternion targetRotation = Quaternion.identity;
+
+	public bool turning { get; set; }
+	public float rotateSpeed { get; set; }
 
 	// Use this for initialization
 	void Awake() {
@@ -78,7 +82,5 @@ public class BigBird : MonoBehaviour {
 	public void SetTargetRotationZAngle (float zAngle) {
 		targetRotation.eulerAngles = new Vector3( 0, 0, zAngle);
 	}
-
-	public bool turning { get; set; }
 
 }

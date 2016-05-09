@@ -23,7 +23,7 @@ public class Bullet : MonoBehaviour {
 		transform.position = start.position;
 		transform.rotation = start.rotation;
 		SetDirection (aim);
-		rb.AddForce ( direction * moveForce);
+		rb.AddForce (direction * moveForce);
 	}
 
 	public void Die () {

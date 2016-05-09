@@ -8,15 +8,6 @@ public class Player : MonoBehaviour {
 	public float moveForce = 20f;
 	public float fireRate = .1f;
 	public float releaseBoost = 60f;
-	public string LSHorizontal = "LS_Horizontal_P1";
-	public string LSVertical = "LS_Vertical_P1";
-	public string RSHorizontal = "RS_Horizontal_P1";
-	public string RSVertical = "RS_Vertical_P1";
-	public string rightTrigger = "RT_P1";
-	public string menuButton = "Menu_P1";
-	public string aButton = "A_P1";
-	public string interactButton = "B_P1";
-	public string boostButton = "LB_P1";
 	public bool docked = false;
 	public float thresholdToTurnBigBird = .2f;
 	public float flashGap = 1f;
@@ -24,19 +15,24 @@ public class Player : MonoBehaviour {
 	public float flashDampener = .1f;
 	public float hitInvincibilityDuration = .25f;
 	public float boostCooldown = 2f;
+	public int clipSize = 100;
+	public float reloadSpeed = .5f;
+	public int gas = 100;
+	public GameObject harpoonPrefab;
 
-	private Vector2 direction = Vector2.zero;
-	private Vector2 aim = Vector2.zero;
+	[HideInInspector]
+	public Color originalColor;
+	[HideInInspector]
+	public int roundsLeftInClip;
+	[HideInInspector]
+	public bool firing = false, navigating = false, damaged = false, invincible = false, canBoost = true, hasHarpoon = true;
+	[HideInInspector]
+	public Vector2 direction = Vector2.zero, aim = Vector2.zero;
+
 	private Rigidbody2D rb;
 	private GameManager gm;
 	private BigBird bigBird;
 	private ObjectPooler objectPooler;
-	private bool firing = false;
-	private bool navigating = false;
-	private bool damaged = false;
-	private bool invincible = false;
-	private bool canBoost = true;
-	private Color originalColor;
 
 	void Awake() {
 		rb = GetComponent<Rigidbody2D> ();
@@ -45,18 +41,9 @@ public class Player : MonoBehaviour {
 		objectPooler = GetComponent<ObjectPooler> ();
 		originalColor = GetComponent<SpriteRenderer> ().color;
 	}
-	
-	void Update () {
 
-		if (Input.GetButtonDown (menuButton)) {
-			gm.TogglePause();
-		}
-
-		if (docked) {
-			HandleDockedInput ();
-		} else {
-			HandleFlyingInput ();
-		}
+	void Start () {
+		roundsLeftInClip = clipSize;
 	}
 
 	void FixedUpdate () {
@@ -83,90 +70,16 @@ public class Player : MonoBehaviour {
 				Destroy (other.gameObject);
 			}
 		}
-	}
-
-	void HandleFlyingInput () {
-		direction = new Vector2( Input.GetAxis(LSHorizontal), Input.GetAxis(LSVertical));
-		Vector2 rightStick = new Vector2( Input.GetAxis(RSHorizontal), Input.GetAxis(RSVertical));
-
-		if (rightStick != Vector2.zero) {
-			aim = rightStick;
-		} 
-		else if (aim == Vector2.zero) {
-			if (direction != Vector2.zero) {
-				aim = direction;
-			}
-		}
-			
-		if (!firing && Input.GetAxis (rightTrigger) > 0) {
-			firing = true;
-			InvokeRepeating ("FireBullet", fireRate, fireRate);
-		} else if (firing && Input.GetAxis (rightTrigger) <= 0) {
-			firing = false;
-			CancelInvoke ();
-		}
-
-		if (Input.GetButton (boostButton)) {
-			if (canBoost) {
-				StartCoroutine( Boost ());
-			}
-		}
-
-		else if (Input.GetButton ("10_P1")) {
-			print ("10_P1");
-		}
-		else if (Input.GetButton ("11_P1")) {
-			print ("11_P1");
-		}
-		else if (Input.GetButton ("12_P1")) {
-			print ("12_P1");
-		}
-		else if (Input.GetButton ("13_P1")) {
-			print ("13_P1");
-		}
-		else if (Input.GetButton ("14_P1")) {
-			print ("14_P1");
-		}
-		else if (Input.GetButton ("15_P1")) {
-			print ("15_P1");
-		}
-	}
-
-	void HandleDockedInput () {
-		if (Input.GetButtonDown (interactButton)) {
-			if (!navigating) {
-				Undock ();
+		else if (other.name == "Harpoon") {
+			if (other.GetComponent<Harpoon> ().harpooner.name == gameObject.name) {
+				hasHarpoon = true;
+				print ("got harp back");
+				Destroy (other.gameObject);
 			} else {
-				//navigating = false;
-				//gm.CloseNavPanel ();
+				//implement linking
+				other.GetComponent<Harpoon> ().SetHarpooned (gameObject);
 			}
-		} else {
-			float x = Input.GetAxis (RSHorizontal);
-			float y = Input.GetAxis(RSVertical); 
-
-			if (Mathf.Sqrt (x * x + y * y) > thresholdToTurnBigBird) {
-				float angle = Mathf.Atan2 (Input.GetAxis (RSHorizontal), Input.GetAxis (RSVertical)) * Mathf.Rad2Deg;
-				bigBird.turning = true;
-				bigBird.SetTargetRotationZAngle (-angle);
-			} else
-				bigBird.turning = false;
 		}
-
-		if (Input.GetButtonDown (rightTrigger)) {
-			bigBird.engineOn = !bigBird.engineOn;
-		}
-
-		if (Input.GetButtonDown (aButton)) {
-			navigating = !navigating;
-			gm.TogglePause ();
-			gm.ToggleNavPanel (LSHorizontal, LSVertical);
-		}
-	}
-
-	public void FireBullet() {
-		Bullet bullet = objectPooler.GetPooledObject().GetComponent<Bullet>();
-		bullet.gameObject.SetActive (true);
-		bullet.Fire (transform, aim);
 	}
 
 	/// <summary>
@@ -190,7 +103,7 @@ public class Player : MonoBehaviour {
 		gm.RemoveAlliedTransform (transform);
 	}
 			
-	private bool Dock () {
+	public bool Dock () {
 		Vector3 dockPosition = bigBird.GetNearestOpenDock(transform.position);
 		if (dockPosition != Vector3.zero) {
 			transform.Translate (dockPosition - transform.position);
@@ -199,15 +112,17 @@ public class Player : MonoBehaviour {
 			GetComponent<SpriteRenderer> ().color = originalColor;
 			rb.Sleep ();
 			CancelInvoke ();
+			GetComponent<PlayerInput> ().CancelInvoke ();
 			firing = false;
 			damaged = false;
 			invincible = false;
 			docked = true;
+			//hasHarpoon = true;
 			return true;
 		} else return false;
 	}
 
-	private void Undock () {
+	public void Undock () {
 		docked = false;
 		transform.parent = null;
 		transform.rotation = Quaternion.identity;
@@ -237,10 +152,43 @@ public class Player : MonoBehaviour {
 			if (flashGapModifier > 1) {
 				//explode
 				Die();
-				return true;
+				yield break;
 			}
 			yield return new WaitForSeconds (Mathf.Max (0f, flashGap - flashGapModifier));
 			StartCoroutine (FlashDamage (timeAtDamage));
+		}
+	}
+
+	public void FireBullet () {
+		if (roundsLeftInClip > 0) {
+			Bullet bullet = objectPooler.GetPooledObject ().GetComponent<Bullet> ();
+			bullet.gameObject.SetActive (true);
+			bullet.Fire (transform, aim);
+			roundsLeftInClip--;
+		}
+
+		if (roundsLeftInClip <= 0) {
+			StartCoroutine (Reload ());
+		}
+	}
+
+	public void FireHarpoon () {
+		if (hasHarpoon) {
+			
+			//Offset harp so it doesn't immediately collide with ship
+			Vector3 aim3 = new Vector3 (aim.x, aim.y, 0);
+			aim3.Normalize ();
+			float x = GetComponent<BoxCollider2D> ().size.x;
+			float y = GetComponent<BoxCollider2D> ().size.y;
+			float d = Mathf.Sqrt (x * x + y * y);
+			Vector3 startPosition = transform.position + aim3 * d;
+
+			GameObject harp = Instantiate (harpoonPrefab, transform.position, transform.rotation) as GameObject;
+			harp.transform.position = startPosition;
+			harp.name = "Harpoon";
+			harp.GetComponent<Harpoon>().SetHarpooner (gameObject);
+			harp.GetComponent<Harpoon>().Fire (harp.transform, aim);
+			hasHarpoon = false;
 		}
 	}
 
@@ -254,11 +202,16 @@ public class Player : MonoBehaviour {
 		invincible = false;
 	}
 
-	IEnumerator Boost () {
+	public IEnumerator Boost () {
 		canBoost = false;
 		rb.AddForce (direction * releaseBoost);
 		yield return new WaitForSeconds (boostCooldown);
 		canBoost = true;
+	}
+
+	IEnumerator Reload () {
+		yield return new WaitForSeconds (reloadSpeed);
+		roundsLeftInClip = clipSize;
 	}
 
 }
