@@ -10,15 +10,15 @@ public class Harpoon : MonoBehaviour {
 	public float minWidthTetherLength = 3;
 	public float tetherMaxLength = 10f;
 	public bool atMaxTether = false;
-	public float detachForceMag	= 100f;
+	public float recallForceMag	= 100f;
 	public float detachDelay = .3f;
 	public float recallVelocity = 10f;
+	public bool recalling = false;
 	public GameObject harpooner = null;
 	public GameObject harpooned = null;
 
 	private Rigidbody2D rb;
 	private Vector3[] tetherPositions = new Vector3[2];
-	private bool recalling = false;
 
 	void Awake () {
 		rb = GetComponent<Rigidbody2D> ();
@@ -32,14 +32,16 @@ public class Harpoon : MonoBehaviour {
 	}
 	void Update () {
 		DrawTether ();
-		CheckTetherCollision ();
+		if (harpooned != null) {
+			CheckTetherCollision ();
+		}
 	}
 
 	void FixedUpdate () {
 		if (recalling) {
 			Vector3 detachDir = harpooner.transform.position - transform.position;
 			detachDir.Normalize ();
-			rb.AddForce (detachDir * detachForceMag);
+			rb.AddForce (detachDir * recallForceMag);
 		}
 	}
 
@@ -76,11 +78,13 @@ public class Harpoon : MonoBehaviour {
 		float tetherWidth = Mathf.Lerp (maxWidth, minWidth, (distance - minWidthTetherLength )/ tetherMaxLength);
 		lr.SetWidth (tetherWidth, tetherWidth);
 
+		//for determining when to stop thinning the line renderered
 		if (distance < minWidthTetherLength) {
 			atMaxTether = false;
-			lr.material.color = Color.blue;
-
-		} else if (distance < tetherMaxLength + minWidthTetherLength) {
+			lr.material.color = Color.gray;
+			//lr.material.color = Color.blue;
+		} 
+		else if (distance < tetherMaxLength + minWidthTetherLength) {
 			atMaxTether = false;
 			lr.material.color = Color.gray;
 		}
@@ -89,27 +93,6 @@ public class Harpoon : MonoBehaviour {
 			atMaxTether = true;
 		} 
 	}
-
-	/*void CreateTether () {
-		Vector3 instantiatePoint = (transform.position - harpooner.transform.position) / 2;
-		tether = Instantiate (prefabChain, instantiatePoint, Quaternion.identity) as GameObject;
-		Chain invisibleChain = tether.GetComponent<Chain> ();
-		invisibleChain.A = harpooner;
-		if (harpooned == null) {
-			invisibleChain.B = gameObject;
-		} else {
-			invisibleChain.B = harpooned;
-		}
-		List<GameObject> prefabList = new List<GameObject> ();
-		prefabList.Add (prefabChainLink);
-		invisibleChain.getPrefabList = prefabList;
-		atMaxTether = true;
-	}
-
-	void BreakTether () {
-		Destroy (tether);
-		atMaxTether = false;
-	}*/
 
 	public void SetHarpooner (GameObject harpoonThrower) {
 		harpooner = harpoonThrower;
@@ -132,33 +115,31 @@ public class Harpoon : MonoBehaviour {
 	}
 
 	public void DetachAndRecall (bool overrideToggle=false) {
+		SpriteRenderer[] renderers = GetComponentsInChildren<SpriteRenderer> ();
+
 		if (harpooned != null) {
 			harpooned = null;
-			GetComponent<Rigidbody2D> ().WakeUp ();
-			GetComponent<BoxCollider2D> ().enabled = false;
 			transform.parent = null;
-			SpriteRenderer[] renderers = GetComponentsInChildren<SpriteRenderer> ();
+			GetComponent<Rigidbody2D> ().WakeUp ();
+			GetComponent<BoxCollider2D> ().enabled = true;
 			foreach (SpriteRenderer r in renderers) {
 				r.enabled = true;
 				r.color = new Color (r.color.r, r.color.g, r.color.b, .5f);
 			}
-			Invoke ("TurnOn", detachDelay);
 		}
 
 		if (overrideToggle) {
 			recalling = true;
 		} else {
 			recalling = !recalling;
+			if (!recalling) {
+				foreach (SpriteRenderer r in renderers) {
+					r.color = new Color (r.color.r, r.color.g, r.color.b, 1f);
+				}
+			}
 		}
 	}
 
-	void TurnOn () {
-		GetComponent<BoxCollider2D> ().enabled = true;
-		SpriteRenderer[] renderers = GetComponentsInChildren<SpriteRenderer> ();
-		foreach (SpriteRenderer r in renderers) {
-			r.color = new Color (r.color.r, r.color.g, r.color.b, 1f);
-		}
-	}
 
 	//#TODO what happens when objects cross a tether?
 	void CheckTetherCollision () {
@@ -174,16 +155,16 @@ public class Harpoon : MonoBehaviour {
 		}
 
 		if (hits.Length == 0) {
-			print ("hitting nothing");
+			//print ("hitting nothing");
 		}
 		else if (hits.Length == 1) {
-			print (hits [0].transform.name);
+			//print (hits [0].transform.name);
 		}
 		else if (hits.Length == 2) {
-			print (hits [0].transform.name + " " + hits[1].transform.name);
+			//print (hits [0].transform.name + " " + hits[1].transform.name);
 		}
 		else if (hits.Length == 3) {
-			print (hits [0].transform.name + " " + hits[1].transform.name + " " + hits[2].transform.name);
+			//print (hits [0].transform.name + " " + hits[1].transform.name + " " + hits[2].transform.name);
 		}
 	}
 }
