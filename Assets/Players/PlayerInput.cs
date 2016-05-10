@@ -9,6 +9,7 @@ public class PlayerInput : MonoBehaviour {
 	public string RSVertical = "RS_Vertical_P1";
 	public string rightTrigger = "RT_P1";
 	public string leftTrigger = "LT_P1";
+	public string rightClick = "R_Click_P1";
 	public string menuButton = "Menu_P1";
 	public string aButton = "A_P1";
 	public string interactButton = "B_P1";
@@ -59,8 +60,8 @@ public class PlayerInput : MonoBehaviour {
 			CancelInvoke ();
 		}
 
-		if (Input.GetAxis (leftTrigger) > 0) {
-			p.FireHarpoon ();
+		if (Input.GetButtonDown (rightClick)) {
+			p.HarpoonAction ();
 		}
 
 		if (Input.GetButton (LBumper)) {
@@ -112,11 +113,10 @@ public class PlayerInput : MonoBehaviour {
 		}
 
 		if (Input.GetButtonDown (LBumper)) {
-			bigBird.engineOn = !bigBird.engineOn;
-			if (bigBird.engineOn) {
-				bigBird.rotateSpeed = bigBird.engineOnRotateSpeed;
+			if (bigBird.GetEngineOn ()) {
+				bigBird.TurnEngineOff ();
 			} else {
-				bigBird.rotateSpeed = bigBird.engineOffRotateSpeed;
+				bigBird.TurnEngineOn ();
 			}
 		}
 

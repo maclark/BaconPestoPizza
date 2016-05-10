@@ -3,19 +3,18 @@ using System.Collections;
 
 public class BigBird : MonoBehaviour {
 
-	public float moveForce = 75f;
+	public float moveForceMagnitude = 75f;
 	public int hp = 1000;
 	public float engineOnRotateSpeed = .2f;
 	public float engineOffRotateSpeed = .1f;
-	public bool engineOn = false;
+	public bool turning { get; set; }
+	public float rotateSpeed { get; set; }
 
 	private GameManager gm;
 	private Rigidbody2D rb;
 	private Component[] dockTransforms;
 	private Quaternion targetRotation = Quaternion.identity;
-
-	public bool turning { get; set; }
-	public float rotateSpeed { get; set; }
+	private bool engineOn = false;
 
 	// Use this for initialization
 	void Awake() {
@@ -25,16 +24,12 @@ public class BigBird : MonoBehaviour {
 	}
 
 	void Start () {
-	}
-	
-	// Update is called once per frame
-	void Update () {
-
+		GetComponent<SpriteRenderer> ().color = Color.gray;
 	}
 
 	void FixedUpdate () {
 		if (engineOn) {
-			rb.AddForce (transform.up * moveForce);
+			rb.AddForce (transform.up * moveForceMagnitude);
 		}
 
 		if (turning) {
@@ -83,4 +78,19 @@ public class BigBird : MonoBehaviour {
 		targetRotation.eulerAngles = new Vector3( 0, 0, zAngle);
 	}
 
+	public void TurnEngineOn () {
+		engineOn = true;
+		GetComponent<SpriteRenderer> ().color = Color.white;
+		rotateSpeed = engineOnRotateSpeed;
+	}
+
+	public void TurnEngineOff () {
+		engineOn = false;
+		GetComponent<SpriteRenderer> ().color = Color.gray;
+		rotateSpeed = engineOffRotateSpeed;
+	}
+
+	public bool GetEngineOn () {
+		return engineOn;
+	}
 }

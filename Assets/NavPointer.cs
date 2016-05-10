@@ -28,7 +28,6 @@ public class NavPointer : MonoBehaviour {
 		realTimeOfLastUpdate = Time.realtimeSinceStartup;
 		direction = new Vector2( Input.GetAxis(LSHorizontal), Input.GetAxis(LSVertical));
 		direction.Normalize ();
-		//print("navpoint translateion: " + );
 		transform.Translate (direction * navPointSpeed * deltaTime);
 		DrawNavLine ();
 	}

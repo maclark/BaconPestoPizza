@@ -5,7 +5,7 @@ using System.Collections;
 public class Player : MonoBehaviour {
 
 	public int hp = 100;
-	public float moveForce = 20f;
+	public float moveForceMagnitude = 60f;
 	public float fireRate = .1f;
 	public float releaseBoost = 60f;
 	public bool docked = false;
@@ -27,12 +27,14 @@ public class Player : MonoBehaviour {
 	[HideInInspector]
 	public bool firing = false, navigating = false, damaged = false, invincible = false, canBoost = true, hasHarpoon = true;
 	[HideInInspector]
-	public Vector2 direction = Vector2.zero, aim = Vector2.zero;
+	public Vector2 direction = Vector2.zero, pullDir = Vector2.zero, orthoPullDir = Vector2.zero, aim = Vector2.zero;
 
 	private Rigidbody2D rb;
 	private GameManager gm;
 	private BigBird bigBird;
 	private ObjectPooler objectPooler;
+	private Harpoon harp;
+	private Harpoon otherHarp;
 
 	void Awake() {
 		rb = GetComponent<Rigidbody2D> ();
@@ -48,7 +50,15 @@ public class Player : MonoBehaviour {
 
 	void FixedUpdate () {
 		if (!docked) {
-			rb.AddForce (direction * moveForce);
+
+			if (harp != null && harp.atMaxTether) {
+				HandlePulling ();
+			} else if (otherHarp != null && otherHarp.atMaxTether) {
+				HandleHarpoonedPulling ();
+			}
+			else {
+				rb.AddForce (direction * moveForceMagnitude);
+			}
 		}
 	}
 
@@ -73,14 +83,58 @@ public class Player : MonoBehaviour {
 		else if (other.name == "Harpoon") {
 			if (other.GetComponent<Harpoon> ().harpooner.name == gameObject.name) {
 				hasHarpoon = true;
-				print ("got harp back");
 				Destroy (other.gameObject);
 			} else {
 				//implement linking
-				other.GetComponent<Harpoon> ().SetHarpooned (gameObject);
+				otherHarp = other.GetComponent<Harpoon> ();
+				otherHarp.HarpoonObject (gameObject);
 			}
 		}
 	}
+
+	void HandlePulling () {
+		pullDir = transform.position - harp.transform.position;
+		pullDir.Normalize ();
+		float pullMag = CalculatePullMag ();
+		if (pullMag > 0) {
+			if (harp.harpooned != null) {
+				float totalMass = rb.mass + harp.harpooned.GetComponent<Player> ().GetComponent<Rigidbody2D> ().mass;
+				rb.AddForce (pullDir * pullMag / totalMass);
+				harp.harpooned.GetComponent<Player> ().GetComponent<Rigidbody2D> ().AddForce (pullDir * pullMag / totalMass);
+			} else {
+				rb.AddForce (pullDir * pullMag);
+				harp.GetComponent<Rigidbody2D> ().AddForce (pullDir * pullMag);
+			}
+		} 
+		//at max tether, but heading towards harpoon, do don't get other mass or apply a force to other's rb
+		else {
+			rb.AddForce (pullDir * pullMag);
+		}
+
+
+		float orthoPullMag = CalculateOrthoPullMag ();
+		print ("orthopullmag, dir: " + orthoPullMag + ", " + orthoPullDir);
+		rb.AddForce (orthoPullDir * orthoPullMag);
+	} 
+
+	//For when this player's ship is harpooned and that harpoon's tether is at max length
+	void HandleHarpoonedPulling () {
+		pullDir = transform.position - otherHarp.harpooner.transform.position;
+		pullDir.Normalize ();
+		float pullMag = CalculatePullMag ();
+		if (pullMag > 0) {
+			float totalMass = rb.mass + otherHarp.harpooner.GetComponent<Player> ().GetComponent<Rigidbody2D> ().mass;
+			rb.AddForce (pullDir * pullMag / totalMass);
+			otherHarp.harpooner.GetComponent<Player> ().GetComponent<Rigidbody2D> ().AddForce (pullDir * pullMag / totalMass);
+		} 
+		//at max tether, but heading towards harpoon, do don't get other mass or apply a force to other's rb
+		else {
+			rb.AddForce (pullDir * pullMag);
+		}
+		float orthoPullMag = CalculateOrthoPullMag ();
+		print ("orthopullmag, dir: " + orthoPullMag + ", " + orthoPullDir);
+		rb.AddForce (orthoPullDir * orthoPullMag);
+	} 
 
 	/// <summary>
 	/// flag gap increases linearly
@@ -89,7 +143,7 @@ public class Player : MonoBehaviour {
 	/// <param name="dam">Dam.</param> testing this
 	void TakeDamage( int dam) {
 		if (damaged) {
-			//explodeee
+			//#TODO explodeee
 			Die();
 		} else {
 			damaged = true;
@@ -117,7 +171,9 @@ public class Player : MonoBehaviour {
 			damaged = false;
 			invincible = false;
 			docked = true;
-			//hasHarpoon = true;
+			if (harp) {
+				harp.Recall (false);
+			}
 			return true;
 		} else return false;
 	}
@@ -130,7 +186,7 @@ public class Player : MonoBehaviour {
 		Vector3 releaseDirection = transform.position - bigBird.transform.position;
 		releaseDirection.Normalize ();
 		rb.AddForce (releaseDirection * releaseBoost);
-		Invoke( "EnableCollider", .5f);
+		Invoke ("EnableCollider", .5f);
 	}
 
 	void EnableCollider () {
@@ -172,9 +228,8 @@ public class Player : MonoBehaviour {
 		}
 	}
 
-	public void FireHarpoon () {
+	public void HarpoonAction () {
 		if (hasHarpoon) {
-			
 			//Offset harp so it doesn't immediately collide with ship
 			Vector3 aim3 = new Vector3 (aim.x, aim.y, 0);
 			aim3.Normalize ();
@@ -183,12 +238,15 @@ public class Player : MonoBehaviour {
 			float d = Mathf.Sqrt (x * x + y * y);
 			Vector3 startPosition = transform.position + aim3 * d;
 
-			GameObject harp = Instantiate (harpoonPrefab, transform.position, transform.rotation) as GameObject;
-			harp.transform.position = startPosition;
-			harp.name = "Harpoon";
-			harp.GetComponent<Harpoon>().SetHarpooner (gameObject);
-			harp.GetComponent<Harpoon>().Fire (harp.transform, aim);
+			GameObject harpoon = Instantiate (harpoonPrefab, transform.position, transform.rotation) as GameObject;
+			harpoon.transform.position = startPosition;
+			harpoon.name = "Harpoon";
+			harp = harpoon.GetComponent<Harpoon> ();
+			harp.SetHarpooner (gameObject);
+			harp.Fire (harp.transform, aim);
 			hasHarpoon = false;
+		} else {
+			harp.Recall ();
 		}
 	}
 
@@ -212,6 +270,18 @@ public class Player : MonoBehaviour {
 	IEnumerator Reload () {
 		yield return new WaitForSeconds (reloadSpeed);
 		roundsLeftInClip = clipSize;
+	}
+
+	float CalculatePullMag () {
+		float pullMagnitude = Vector3.Dot (direction * moveForceMagnitude, pullDir);
+		return pullMagnitude;
+	}
+
+	float CalculateOrthoPullMag () {
+		orthoPullDir = new Vector3 (-pullDir.y, pullDir.x, 0);
+		orthoPullDir.Normalize ();
+		float orthoPullMagnitude = Vector3.Dot (direction * moveForceMagnitude, orthoPullDir);
+		return orthoPullMagnitude;
 	}
 
 }
