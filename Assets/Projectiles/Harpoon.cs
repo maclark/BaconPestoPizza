@@ -12,6 +12,7 @@ public class Harpoon : MonoBehaviour {
 	public bool atMaxTether = false;
 	public float detachForceMag	= 100f;
 	public float detachDelay = .3f;
+	public float recallVelocity = 10f;
 	public GameObject harpooner = null;
 	public GameObject harpooned = null;
 
@@ -23,8 +24,15 @@ public class Harpoon : MonoBehaviour {
 		rb = GetComponent<Rigidbody2D> ();
 	}
 
+	void Start () {
+		//#TODO make tehter appear over ships?
+		//GetComponent<LineRenderer> ().sortingLayerID = GetComponentInChildren<SpriteRenderer> ().sortingLayerID;
+		//GetComponent<LineRenderer> ().sortingOrder = GetComponentInChildren<SpriteRenderer> ().sortingOrder;
+
+	}
 	void Update () {
 		DrawTether ();
+		CheckTetherCollision ();
 	}
 
 	void FixedUpdate () {
@@ -112,17 +120,18 @@ public class Harpoon : MonoBehaviour {
 		GetComponent<Rigidbody2D> ().Sleep ();
 		GetComponent<BoxCollider2D> ().enabled = false;
 		//after turning off rb and collider, move harp if on player
+		//#TODO maybe leave sprites on and don't move harpoon? could be cool. plus, when harpooning bigbird or random things, don't want to move anchor...?
 		if (harpoonRecipient.tag == "Player") {
 			transform.position = harpooned.transform.position;
 		}
 		transform.parent = harpooned.transform;
 		SpriteRenderer[] harpoonSprites = GetComponentsInChildren<SpriteRenderer> ();
 		foreach (SpriteRenderer r in harpoonSprites) {
-			r.enabled = false;
+			//r.enabled = false;
 		}
 	}
 
-	public void Recall (bool overrideToggle=false) {
+	public void DetachAndRecall (bool overrideToggle=false) {
 		if (harpooned != null) {
 			harpooned = null;
 			GetComponent<Rigidbody2D> ().WakeUp ();
@@ -135,6 +144,7 @@ public class Harpoon : MonoBehaviour {
 			}
 			Invoke ("TurnOn", detachDelay);
 		}
+
 		if (overrideToggle) {
 			recalling = true;
 		} else {
@@ -147,6 +157,33 @@ public class Harpoon : MonoBehaviour {
 		SpriteRenderer[] renderers = GetComponentsInChildren<SpriteRenderer> ();
 		foreach (SpriteRenderer r in renderers) {
 			r.color = new Color (r.color.r, r.color.g, r.color.b, 1f);
+		}
+	}
+
+	//#TODO what happens when objects cross a tether?
+	void CheckTetherCollision () {
+		RaycastHit2D[] hits = Physics2D.LinecastAll (transform.position, harpooner.transform.position);
+		for (int i = 0; i < hits.Length; i++) {
+			Transform t = hits [i].transform;
+			if (t.name != name && t.name != harpooner.name && t.name != harpooned.name) {
+				if (t.tag == "Player") {
+				} else if (t.tag == "Enemy") {
+				} else if (t.tag == "BigBird") {
+				}
+			}
+		}
+
+		if (hits.Length == 0) {
+			print ("hitting nothing");
+		}
+		else if (hits.Length == 1) {
+			print (hits [0].transform.name);
+		}
+		else if (hits.Length == 2) {
+			print (hits [0].transform.name + " " + hits[1].transform.name);
+		}
+		else if (hits.Length == 3) {
+			print (hits [0].transform.name + " " + hits[1].transform.name + " " + hits[2].transform.name);
 		}
 	}
 }

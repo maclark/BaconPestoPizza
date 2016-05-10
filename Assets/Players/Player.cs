@@ -111,13 +111,12 @@ public class Player : MonoBehaviour {
 			rb.AddForce (pullDir * pullMag);
 		}
 
-
 		float orthoPullMag = CalculateOrthoPullMag ();
-		print ("orthopullmag, dir: " + orthoPullMag + ", " + orthoPullDir);
 		rb.AddForce (orthoPullDir * orthoPullMag);
 	} 
 
-	//For when this player's ship is harpooned and that harpoon's tether is at max length
+	//#TODO what happens when both ships have harpooned each other? should ignore one harpoon
+	//Very similar to HandlePulling(), but for when this player's ship is harpooned and that harpoon's tether is at max length
 	void HandleHarpoonedPulling () {
 		pullDir = transform.position - otherHarp.harpooner.transform.position;
 		pullDir.Normalize ();
@@ -132,7 +131,6 @@ public class Player : MonoBehaviour {
 			rb.AddForce (pullDir * pullMag);
 		}
 		float orthoPullMag = CalculateOrthoPullMag ();
-		print ("orthopullmag, dir: " + orthoPullMag + ", " + orthoPullDir);
 		rb.AddForce (orthoPullDir * orthoPullMag);
 	} 
 
@@ -171,9 +169,6 @@ public class Player : MonoBehaviour {
 			damaged = false;
 			invincible = false;
 			docked = true;
-			if (harp) {
-				harp.Recall (false);
-			}
 			return true;
 		} else return false;
 	}
@@ -245,8 +240,12 @@ public class Player : MonoBehaviour {
 			harp.SetHarpooner (gameObject);
 			harp.Fire (harp.transform, aim);
 			hasHarpoon = false;
-		} else {
-			harp.Recall ();
+		}
+	}
+
+	public void DetachHarpoon () {
+		if (harp) {
+			harp.DetachAndRecall ();
 		}
 	}
 

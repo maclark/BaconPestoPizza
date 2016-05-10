@@ -3,6 +3,8 @@ using System.Collections;
 
 public class PlayerInput : MonoBehaviour {
 
+	public float doubleTapThreshold = .5f;
+
 	public string LSHorizontal = "LS_Horizontal_P1";
 	public string LSVertical = "LS_Vertical_P1";
 	public string RSHorizontal = "RS_Horizontal_P1";
@@ -18,6 +20,8 @@ public class PlayerInput : MonoBehaviour {
 	private GameManager gm;
 	private BigBird bigBird;
 	private Player p;
+	private int rightClickCount = 0;
+	private float rightClickCooler = .5f;
 
 	void Awake () {
 		gm = GameObject.FindGameObjectWithTag ("GameManager").GetComponent<GameManager> ();
@@ -61,7 +65,19 @@ public class PlayerInput : MonoBehaviour {
 		}
 
 		if (Input.GetButtonDown (rightClick)) {
-			p.HarpoonAction ();
+			if (rightClickCooler > 0 && rightClickCount == 1) {
+				p.DetachHarpoon ();
+			} else {
+				rightClickCooler = doubleTapThreshold;
+				rightClickCount += 1;
+				p.HarpoonAction ();
+			}
+		}
+
+		if (rightClickCooler > 0) {
+			rightClickCooler -= Time.deltaTime;
+		} else {
+			rightClickCount = 0;
 		}
 
 		if (Input.GetButton (LBumper)) {
