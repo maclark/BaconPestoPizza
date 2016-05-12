@@ -4,24 +4,27 @@ using System.Collections;
 public class PlayerInput : MonoBehaviour {
 
 	public float doubleTapThreshold = .5f;
+	public string joystick = "unset";
+	public bool started = false;
 
-	public string LSHorizontal = "LS_Horizontal_P1";
-	public string LSVertical = "LS_Vertical_P1";
-	public string RSHorizontal = "RS_Horizontal_P1";
-	public string RSVertical = "RS_Vertical_P1";
-	public string rightTrigger = "RT_P1";
-	public string leftTrigger = "LT_P1";
-	public string rightClick = "R_Click_P1";
-	public string menuButton = "Menu_P1";
-	public string aButton = "A_P1";
-	public string interactButton = "B_P1";
-	public string LBumper = "LB_P1";
+	public string LSHorizontal = "LS_Horizontal";
+	public string LSVertical = "LS_Vertical";
+	public string RSHorizontal = "RS_Horizontal";
+	public string RSVertical = "RS_Vertical";
+	public string rightTrigger = "RT";
+	public string leftTrigger = "LT";
+	public string rightClick = "R_Click";
+	public string menuButton = "Menu";
+	public string aButton = "A";
+	public string interactButton = "B";
+	public string LB = "LB";
+	public string RB = "RB";
 
 	private GameManager gm;
 	private BigBird bigBird;
 	private Player p;
-	private int rightClickCount = 0;
-	private float rightClickCooler = .5f;
+	private int harpButtonCount = 0;
+	private float harpButtonCooler = .5f;
 
 	void Awake () {
 		gm = GameObject.FindGameObjectWithTag ("GameManager").GetComponent<GameManager> ();
@@ -31,6 +34,26 @@ public class PlayerInput : MonoBehaviour {
 
 	void Update () {
 
+		if (!started) {
+			if (Input.GetButtonDown (menuButton)) {
+				if (menuButton == "Menu_P1") {
+					joystick = "_P1";
+				} else if (menuButton == "Menu_P2") {
+					joystick = "_P2";
+				} else if (menuButton == "Menu_P3") {
+					joystick = "_P3";
+				}
+			}
+				
+			if (joystick == "unset") {
+			} else {
+				SetButtonNames ();
+				p.StartPlayer ();
+				started = true;
+			}
+			return;
+		}
+		
 		if (Input.GetButtonDown (menuButton)) {
 			gm.TogglePause();
 		}
@@ -45,7 +68,6 @@ public class PlayerInput : MonoBehaviour {
 	void HandleFlyingInput () {
 		p.direction = new Vector2( Input.GetAxis(LSHorizontal), Input.GetAxis(LSVertical));
 		Vector2 rightStick = new Vector2( Input.GetAxis(RSHorizontal), Input.GetAxis(RSVertical));
-
 		if (rightStick != Vector2.zero) {
 			p.aim = rightStick;
 		} 
@@ -56,58 +78,73 @@ public class PlayerInput : MonoBehaviour {
 		}
 
 		if (!p.firing && Input.GetAxis (rightTrigger) > 0) {
+			//print ("!firing, and RT down: " + rightTrigger);
 			p.firing = true;
 			InvokeRepeating ("FireBullet", p.fireRate, p.fireRate);
 		} else if (p.firing && Input.GetAxis (rightTrigger) <= 0) {
+			//print ("firing, and RT up: " + rightTrigger);
 			p.firing = false;
 			p.CancelInvoke ();
 			CancelInvoke ();
 		}
 
 		if (Input.GetButtonDown (rightClick)) {
-			if (rightClickCooler > 0 && rightClickCount == 1) {
+			if (harpButtonCooler > 0 && harpButtonCount == 1) {
 				p.DetachHarpoon ();
 			} else {
-				rightClickCooler = doubleTapThreshold;
-				rightClickCount += 1;
+				harpButtonCooler = doubleTapThreshold;
+				harpButtonCount += 1;
 				p.HarpoonAction ();
 			}
 		}
 
-		if (rightClickCooler > 0) {
-			rightClickCooler -= Time.deltaTime;
+		if (harpButtonCooler > 0) {
+			harpButtonCooler -= Time.deltaTime;
 		} else {
-			rightClickCount = 0;
+			harpButtonCount = 0;
 		}
 
-		if (Input.GetButton (LBumper)) {
+		if (Input.GetButton (LB)) {
 			if (p.canBoost) {
 				StartCoroutine( p.Boost ());
 			}
 		}
 		#region
-		else if (Input.GetButton ("10_P1")) {
-			print ("10_P1");
+		////For mapping game pad
+		/*
+		for (int i = 0; i < 20; i++) {
+			if (Input.GetKeyDown("joystick 2 button "+i)) {
+				// do something
+				print("pressed a joystick 2 button: " + i);
+			}
 		}
-		else if (Input.GetButton ("11_P1")) {
-			print ("11_P1");
+
+		for (int i = 0; i < 20; i++) {
+			if (Input.GetKeyDown("joystick 1 button "+i)) {
+				// do something
+				print("pressed a joystick 1 button: " + i);
+			}
 		}
-		else if (Input.GetButton ("12_P1")) {
-			print ("12_P1");
+
+		for (int i = 0; i < 20; i++) {
+			if (Input.GetKeyDown("joystick 3 button "+i)) {
+				// do something
+				print("pressed a joystick 3 button: " + i);
+			}
 		}
-		else if (Input.GetButton ("13_P1")) {
-			print ("13_P1");
-		}
-		else if (Input.GetButton ("14_P1")) {
-			print ("14_P1");
-		}
-		else if (Input.GetButton ("15_P1")) {
-			print ("15_P1");
-		}
+		*/
+
 		#endregion
 	}
 
 	void HandleDockedInput () {
+
+		for (int i = 0; i < 20; i++) {
+			if (Input.GetKeyDown("joystick 2 button "+i)) {
+				// do something
+				print("pressed a joystick 2 button: " + i);
+			}
+		}
 
 		if (Input.GetButtonDown (interactButton)) {
 			if (!p.navigating) {
@@ -128,7 +165,7 @@ public class PlayerInput : MonoBehaviour {
 				bigBird.turning = false;
 		}
 
-		if (Input.GetButtonDown (LBumper)) {
+		if (Input.GetButtonDown (LB)) {
 			if (bigBird.GetEngineOn ()) {
 				bigBird.TurnEngineOff ();
 			} else {
@@ -147,4 +184,19 @@ public class PlayerInput : MonoBehaviour {
 		p.FireBullet ();
 	}
 		
+
+	void SetButtonNames () {
+		LSHorizontal = "LS_Horizontal" + joystick;
+		LSVertical = "LS_Vertical" + joystick;
+		RSHorizontal = "RS_Horizontal" + joystick;
+		RSVertical = "RS_Vertical" + joystick;
+		rightTrigger = "RT" + joystick;
+		leftTrigger = "LT" + joystick;
+		rightClick = "R_Click" + joystick;
+		menuButton = "Menu" + joystick;
+		aButton = "A" + joystick;
+		interactButton = "B" + joystick;
+		LB = "LB" + joystick;
+		RB = "RB" + joystick;
+	}
 }

@@ -54,4 +54,12 @@ public class ObjectPooler : MonoBehaviour
 		return null;
 	}
 
+	public void SetPooledObjectsColor (Color color) {
+		pooledObject.GetComponent<SpriteRenderer> ().color = color;
+		foreach (GameObject go in pooledObjects) {
+			go.GetComponent<SpriteRenderer> ().color = color;
+		}
+	}
+
+	//#TODO could set other properties, like tags
 }

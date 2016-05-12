@@ -37,15 +37,22 @@ public class BigBird : MonoBehaviour {
 		}
 	}
 
-	public Vector3 GetNearestOpenDock (Vector3 dockingShipPos) {
+	/// <summary>
+	/// MAKE SURE TO CHEK IF RETURED NULL DOCK. Probably should use bool return type with an out dock variable.
+	/// </summary>
+	/// <returns>The nearest open dock.</returns>
+	/// <param name="dockingShipPos">Docking ship position.</param>
+	public Dock GetNearestOpenDock (Vector3 dockingShipPos) {
 		dockTransforms = GetComponentsInChildren<Dock> ();
 		float closestDockDistance = 10000f;
-		Vector3 closestDock = Vector3.zero;
+		Dock closestDock = null;
 		foreach (Dock k in dockTransforms) {
-			float d = Vector3.Distance( k.transform.position, dockingShipPos);
-			if (d < closestDockDistance) {
-				closestDock = k.transform.position;
-				closestDockDistance = d;
+			if (!k.occupied) {
+				float d = Vector3.Distance (k.transform.position, dockingShipPos);
+				if (d < closestDockDistance) {
+					closestDock = k;
+					closestDockDistance = d;
+				}
 			}
 		}
 		return closestDock;
@@ -56,9 +63,14 @@ public class BigBird : MonoBehaviour {
 			if (Random.Range (0, 1f) > .5) {
 				other.GetComponent<Bullet>().Die();
 			}
-		} else if (other.tag == "Enemy") {
+		} 
+		else if (other.tag == "Enemy") {
 			TakeDamage (other.GetComponent<Enemy> ().kamikazeDamage);
 			Destroy (other.gameObject);
+		}
+		else if (other.name == "Web") {
+			TurnEngineOn ();
+			moveForceMagnitude = 10 * moveForceMagnitude;
 		}
 	}
 

@@ -18,10 +18,12 @@ public class Harpoon : MonoBehaviour {
 	public GameObject harpooned = null;
 
 	private Rigidbody2D rb;
+	private GameManager gm;
 	private Vector3[] tetherPositions = new Vector3[2];
 
 	void Awake () {
 		rb = GetComponent<Rigidbody2D> ();
+		gm = GetComponent<GameManager> ();
 	}
 
 	void Start () {
@@ -81,12 +83,12 @@ public class Harpoon : MonoBehaviour {
 		//for determining when to stop thinning the line renderered
 		if (distance < minWidthTetherLength) {
 			atMaxTether = false;
-			lr.material.color = Color.gray;
+			lr.material.color = harpooner.GetComponent<Player> ().color;
 			//lr.material.color = Color.blue;
 		} 
 		else if (distance < tetherMaxLength + minWidthTetherLength) {
 			atMaxTether = false;
-			lr.material.color = Color.gray;
+			lr.material.color = harpooner.GetComponent<Player> ().color;
 		}
 		else {
 			lr.material.color = Color.red;
@@ -106,26 +108,27 @@ public class Harpoon : MonoBehaviour {
 		//#TODO maybe leave sprites on and don't move harpoon? could be cool. plus, when harpooning bigbird or random things, don't want to move anchor...?
 		if (harpoonRecipient.tag == "Player") {
 			transform.position = harpooned.transform.position;
+			gm.Link (harpooner.GetComponent<Player>(), harpooned.GetComponent<Player>());
 		}
 		transform.parent = harpooned.transform;
-		SpriteRenderer[] harpoonSprites = GetComponentsInChildren<SpriteRenderer> ();
+		/*SpriteRenderer[] harpoonSprites = GetComponentsInChildren<SpriteRenderer> ();
 		foreach (SpriteRenderer r in harpoonSprites) {
-			//r.enabled = false;
-		}
+			r.enabled = false;
+		}*/
 	}
 
 	public void DetachAndRecall (bool overrideToggle=false) {
 		SpriteRenderer[] renderers = GetComponentsInChildren<SpriteRenderer> ();
+		foreach (SpriteRenderer r in renderers) {
+			//r.enabled = true;
+			r.color = new Color (r.color.r, r.color.g, r.color.b, .5f);
+		}
 
 		if (harpooned != null) {
 			harpooned = null;
 			transform.parent = null;
 			GetComponent<Rigidbody2D> ().WakeUp ();
 			GetComponent<BoxCollider2D> ().enabled = true;
-			foreach (SpriteRenderer r in renderers) {
-				r.enabled = true;
-				r.color = new Color (r.color.r, r.color.g, r.color.b, .5f);
-			}
 		}
 
 		if (overrideToggle) {

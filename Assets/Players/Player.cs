@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using UnityEditor;
 using System.Collections;
+using System.Collections.Generic;
 
 public class Player : MonoBehaviour {
 
@@ -21,7 +22,7 @@ public class Player : MonoBehaviour {
 	public GameObject harpoonPrefab;
 
 	[HideInInspector]
-	public Color originalColor;
+	public Color color;
 	[HideInInspector]
 	public int roundsLeftInClip;
 	[HideInInspector]
@@ -32,35 +33,47 @@ public class Player : MonoBehaviour {
 	private Rigidbody2D rb;
 	private GameManager gm;
 	private BigBird bigBird;
-	private ObjectPooler objectPooler;
 	private Harpoon harp;
-	private Harpoon otherHarp;
+	private List<Harpoon> otherHarps;
+	private Dock dock = null;
 	private float startForceMag;
 
 	void Awake() {
 		rb = GetComponent<Rigidbody2D> ();
 		gm = GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager> ();
 		bigBird = GameObject.FindObjectOfType<BigBird>() as BigBird;
-		objectPooler = GetComponent<ObjectPooler> ();
-		originalColor = GetComponent<SpriteRenderer> ().color;
+		color = GetComponent<SpriteRenderer> ().color;
 	}
 
 	void Start () {
+		otherHarps = new List<Harpoon> ();
+
+		GetComponent<SpriteRenderer> ().enabled = false;
+		GetComponent<BoxCollider2D> ().enabled = false;
+		rb.Sleep ();
+	}
+
+	public void StartPlayer () {
 		roundsLeftInClip = clipSize;
 		startForceMag = moveForceMagnitude;
+		gm.AddAlliedTransform (transform);
+		color = GetComponent<SpriteRenderer> ().color;
+		GetComponent<ObjectPooler> ().SetPooledObjectsColor (color);
+		GetComponent<SpriteRenderer> ().enabled = true;
+		GetComponent<BoxCollider2D> ().enabled = true;
+		rb.WakeUp ();	
 	}
 
 	void FixedUpdate () {
-		//print (rb.velocity);
-
 		if (!docked) {
-
-
-
 			if (harp != null && harp.atMaxTether) {
 				HandlePulling ();
-			} else if (otherHarp != null && otherHarp.atMaxTether) {
-				HandleHarpoonedPulling ();
+			} else if (otherHarps.Count > 0) {
+				foreach (Harpoon h in otherHarps) {
+					if (h.atMaxTether) {
+						HandleHarpoonedPulling (h);
+					}
+				}
 			}
 			else {
 				rb.AddForce (direction * moveForceMagnitude);
@@ -97,7 +110,8 @@ public class Player : MonoBehaviour {
 				Destroy (other.gameObject);
 			} else {
 				//implement linking
-				otherHarp = other.GetComponent<Harpoon> ();
+				Harpoon otherHarp = other.GetComponent<Harpoon> ();
+				otherHarps.Add (otherHarp);
 				if (!otherHarp.recalling) {
 					otherHarp.HarpoonObject (gameObject);
 				}
@@ -161,7 +175,7 @@ public class Player : MonoBehaviour {
 
 	//#TODO what happens when both ships have harpooned each other? should ignore one harpoon
 	//Very similar to HandlePulling(), but for when this player's ship is harpooned and that harpoon's tether is at max length
-	void HandleHarpoonedPulling () {
+	void HandleHarpoonedPulling (Harpoon otherHarp) {
 		pullDir = transform.position - otherHarp.harpooner.transform.position;
 		pullDir.Normalize ();
 		float pullMag = CalculatePullMag (direction, moveForceMagnitude);
@@ -200,12 +214,18 @@ public class Player : MonoBehaviour {
 	}
 			
 	public bool Dock () {
-		Vector3 dockPosition = bigBird.GetNearestOpenDock(transform.position);
+		dock = bigBird.GetNearestOpenDock (transform.position);
+		if (dock) {
+			dock.occupied = true;
+		} else {
+			return false;
+		}
+		Vector3 dockPosition = dock.transform.position;
 		if (dockPosition != Vector3.zero) {
 			transform.Translate (dockPosition - transform.position);
 			transform.parent = bigBird.transform;
 			GetComponent<BoxCollider2D> ().enabled = false;
-			GetComponent<SpriteRenderer> ().color = originalColor;
+			GetComponent<SpriteRenderer> ().color = color;
 			rb.Sleep ();
 			CancelInvoke ();
 			GetComponent<PlayerInput> ().CancelInvoke ();
@@ -224,6 +244,8 @@ public class Player : MonoBehaviour {
 
 	public void Undock () {
 		docked = false;
+		dock.occupied = false;
+		dock = null;
 		transform.parent = null;
 		transform.rotation = Quaternion.identity;
 		rb.WakeUp ();
@@ -261,7 +283,7 @@ public class Player : MonoBehaviour {
 
 	public void FireBullet () {
 		if (roundsLeftInClip > 0) {
-			Bullet bullet = objectPooler.GetPooledObject ().GetComponent<Bullet> ();
+			Bullet bullet = GetComponent<ObjectPooler>().GetPooledObject ().GetComponent<Bullet> ();
 			bullet.gameObject.SetActive (true);
 			bullet.Fire (transform, aim);
 			roundsLeftInClip--;
