@@ -2,5 +2,5 @@
 using System.Collections;
 
 public class Dock : MonoBehaviour {
-	public bool occupied = false;
+	public Bird bird = null;
 }

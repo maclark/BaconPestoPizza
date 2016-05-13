@@ -5,12 +5,12 @@ using System.Collections.Generic;
 
 public class Bird : MonoBehaviour {
 
+	public Player p;
 	public int hp = 100;
 	public float moveForceMagnitude = 60f;
 	public float fireRate = .1f;
 	public float releaseBoost = 60f;
 	public bool docked = false;
-	public float thresholdToTurnBigBird = .2f;
 	public float flashGap = 1f;
 	public float flashDuration = .15f;
 	public float flashDampener = .1f;
@@ -20,7 +20,7 @@ public class Bird : MonoBehaviour {
 	public float reloadSpeed = .5f;
 	public int gas = 100;
 	public GameObject harpoonPrefab;
-	public List<Bird> linkedPlayers;
+	public List<Bird> linkedBirds;
 
 
 	[HideInInspector]
@@ -28,7 +28,7 @@ public class Bird : MonoBehaviour {
 	[HideInInspector]
 	public int roundsLeftInClip;
 	[HideInInspector]
-	public bool firing = false, navigating = false, damaged = false, invincible = false, canBoost = true, hasHarpoon = true;
+	public bool firing = false, damaged = false, invincible = false, canBoost = true, hasHarpoon = true;
 	[HideInInspector]
 	public Vector2 direction = Vector2.zero, pullDir = Vector2.zero, orthoPullDir = Vector2.zero, aim = Vector2.zero;
 	[HideInInspector]
@@ -47,27 +47,20 @@ public class Bird : MonoBehaviour {
 		rb = GetComponent<Rigidbody2D> ();
 		gm = GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager> ();
 		bigBird = GameObject.FindObjectOfType<BigBird>() as BigBird;
-		color = GetComponent<SpriteRenderer> ().color;
 	}
 
 	void Start () {
-		otherHarps = new List<Harpoon> ();
-		linkedPlayers = new List<Bird> ();
-
-		GetComponent<SpriteRenderer> ().enabled = false;
-		GetComponent<BoxCollider2D> ().enabled = false;
-		rb.Sleep ();
-	}
-
-	public void StartPlayer () {
-		roundsLeftInClip = clipSize;
-		startForceMag = moveForceMagnitude;
-		gm.AddAlliedTransform (transform);
 		color = GetComponent<SpriteRenderer> ().color;
 		GetComponent<ObjectPooler> ().SetPooledObjectsColor (color);
-		GetComponent<SpriteRenderer> ().enabled = true;
-		GetComponent<BoxCollider2D> ().enabled = true;
-		rb.WakeUp ();	
+
+		otherHarps = new List<Harpoon> ();
+		linkedBirds = new List<Bird> ();
+
+		roundsLeftInClip = clipSize;
+		startForceMag = moveForceMagnitude;
+
+		Dock ();
+		gm.AddAlliedTransform (transform);
 	}
 
 	void FixedUpdate () {
@@ -230,7 +223,7 @@ public class Bird : MonoBehaviour {
 	public bool Dock () {
 		dock = bigBird.GetNearestOpenDock (transform.position);
 		if (dock) {
-			dock.occupied = true;
+			dock.bird = this;
 		} else {
 			return false;
 		}
@@ -241,12 +234,14 @@ public class Bird : MonoBehaviour {
 			GetComponent<BoxCollider2D> ().enabled = false;
 			GetComponent<SpriteRenderer> ().color = color;
 			rb.Sleep ();
-			CancelInvoke ();
-			GetComponent<PlayerInput> ().CancelInvoke ();
 			firing = false;
 			damaged = false;
 			invincible = false;
 			docked = true;
+			CancelInvoke ();
+			if (p) {
+				p.GetComponent<PlayerInput> ().CancelInvoke ();
+			}
 			if (harp) {
 				harp.DetachAndRecall ();
 				Destroy (harp.gameObject);
@@ -258,7 +253,7 @@ public class Bird : MonoBehaviour {
 
 	public void Undock () {
 		docked = false;
-		dock.occupied = false;
+		dock.bird = null;
 		dock = null;
 		transform.parent = null;
 		transform.rotation = Quaternion.identity;

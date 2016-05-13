@@ -22,14 +22,14 @@ public class PlayerInput : MonoBehaviour {
 
 	private GameManager gm;
 	private BigBird bigBird;
-	private Bird p;
+	private Player p;
 	private int harpButtonCount = 0;
 	private float harpButtonCooler = .5f;
 
 	void Awake () {
 		gm = GameObject.FindGameObjectWithTag ("GameManager").GetComponent<GameManager> ();
 		bigBird = GameObject.FindObjectOfType<BigBird>() as BigBird;
-		p = GetComponent<Bird> ();
+		p = GetComponent<Player> ();
 	}
 
 	void Update () {
@@ -49,6 +49,7 @@ public class PlayerInput : MonoBehaviour {
 			} else {
 				SetButtonNames ();
 				p.StartPlayer ();
+				//p.StartBird ();
 				started = true;
 			}
 			return;
@@ -58,7 +59,7 @@ public class PlayerInput : MonoBehaviour {
 			gm.TogglePause();
 		}
 
-		if (p.docked) {
+		if (p.b.docked) {
 			HandleDockedInput ();
 		} else {
 			HandleFlyingInput ();
@@ -66,35 +67,35 @@ public class PlayerInput : MonoBehaviour {
 	}
 
 	void HandleFlyingInput () {
-		p.direction = new Vector2( Input.GetAxis(LSHorizontal), Input.GetAxis(LSVertical));
+		p.b.direction = new Vector2( Input.GetAxis(LSHorizontal), Input.GetAxis(LSVertical));
 		Vector2 rightStick = new Vector2( Input.GetAxis(RSHorizontal), Input.GetAxis(RSVertical));
 		if (rightStick != Vector2.zero) {
-			p.aim = rightStick;
+			p.b.aim = rightStick;
 		} 
-		else if (p.aim == Vector2.zero) {
-			if (p.direction != Vector2.zero) {
-				p.aim = p.direction;
+		else if (p.b.aim == Vector2.zero) {
+			if (p.b.direction != Vector2.zero) {
+				p.b.aim = p.b.direction;
 			}
 		}
 
-		if (!p.firing && Input.GetAxis (rightTrigger) > 0) {
+		if (!p.b.firing && Input.GetAxis (rightTrigger) > 0) {
 			//print ("!firing, and RT down: " + rightTrigger);
-			p.firing = true;
-			InvokeRepeating ("FireBullet", p.fireRate, p.fireRate);
-		} else if (p.firing && Input.GetAxis (rightTrigger) <= 0) {
+			p.b.firing = true;
+			InvokeRepeating ("FireBullet", p.b.fireRate, p.b.fireRate);
+		} else if (p.b.firing && Input.GetAxis (rightTrigger) <= 0) {
 			//print ("firing, and RT up: " + rightTrigger);
-			p.firing = false;
+			p.b.firing = false;
 			p.CancelInvoke ();
 			CancelInvoke ();
 		}
 
 		if (Input.GetButtonDown (rightClick)) {
 			if (harpButtonCooler > 0 && harpButtonCount == 1) {
-				p.DetachHarpoon ();
+				p.b.DetachHarpoon ();
 			} else {
 				harpButtonCooler = doubleTapThreshold;
 				harpButtonCount += 1;
-				p.HarpoonAction ();
+				p.b.HarpoonAction ();
 			}
 		}
 
@@ -105,8 +106,8 @@ public class PlayerInput : MonoBehaviour {
 		}
 
 		if (Input.GetButton (LB)) {
-			if (p.canBoost) {
-				StartCoroutine( p.Boost ());
+			if (p.b.canBoost) {
+				StartCoroutine( p.b.Boost ());
 			}
 		}
 		#region
@@ -139,8 +140,8 @@ public class PlayerInput : MonoBehaviour {
 
 	void HandleDockedInput () {
 		if (Input.GetButtonDown (interactButton)) {
-			if (!p.navigating) {
-				p.Undock ();
+			if (p.b) {
+				p.b.Undock ();
 			} else {
 				//navigating = false;
 				//gm.CloseNavPanel ();
@@ -149,7 +150,7 @@ public class PlayerInput : MonoBehaviour {
 			float x = Input.GetAxis (LSHorizontal);
 			float y = Input.GetAxis(LSVertical); 
 
-			if (Mathf.Sqrt (x * x + y * y) > p.thresholdToTurnBigBird) {
+			if (Mathf.Sqrt (x * x + y * y) > bigBird.thresholdToTurnBigBird) {
 				float angle = Mathf.Atan2 (Input.GetAxis (LSHorizontal), Input.GetAxis (LSVertical)) * Mathf.Rad2Deg;
 				bigBird.turning = true;
 				bigBird.SetTargetRotationZAngle (-angle);
@@ -173,7 +174,7 @@ public class PlayerInput : MonoBehaviour {
 	}
 
 	void FireBullet () {
-		p.FireBullet ();
+		p.b.FireBullet ();
 	}
 		
 

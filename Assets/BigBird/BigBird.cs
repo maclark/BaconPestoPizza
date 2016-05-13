@@ -7,6 +7,7 @@ public class BigBird : MonoBehaviour {
 	public int hp = 1000;
 	public float engineOnRotateSpeed = .2f;
 	public float engineOffRotateSpeed = .1f;
+	public float thresholdToTurnBigBird = .2f;
 	public bool turning { get; set; }
 	public float rotateSpeed { get; set; }
 
@@ -37,27 +38,6 @@ public class BigBird : MonoBehaviour {
 		}
 	}
 
-	/// <summary>
-	/// MAKE SURE TO CHEK IF RETURED NULL DOCK. Probably should use bool return type with an out dock variable.
-	/// </summary>
-	/// <returns>The nearest open dock.</returns>
-	/// <param name="dockingShipPos">Docking ship position.</param>
-	public Dock GetNearestOpenDock (Vector3 dockingShipPos) {
-		dockTransforms = GetComponentsInChildren<Dock> ();
-		float closestDockDistance = 10000f;
-		Dock closestDock = null;
-		foreach (Dock k in dockTransforms) {
-			if (!k.occupied) {
-				float d = Vector3.Distance (k.transform.position, dockingShipPos);
-				if (d < closestDockDistance) {
-					closestDock = k;
-					closestDockDistance = d;
-				}
-			}
-		}
-		return closestDock;
-	}
-
 	void OnTriggerEnter2D (Collider2D other) {
 		if (other.tag == "EnemyBullet") {
 			if (Random.Range (0, 1f) > .5) {
@@ -72,6 +52,48 @@ public class BigBird : MonoBehaviour {
 			TurnEngineOn ();
 			moveForceMagnitude = 10 * moveForceMagnitude;
 		}
+	}
+
+	/// <summary>
+	/// MAKE SURE TO CHEK IF RETURED NULL DOCK. Probably should use bool return type with an out dock variable.
+	/// </summary>
+	/// <returns>The nearest open dock.</returns>
+	/// <param name="dockingShipPos">Docking ship position.</param>
+	public Dock GetNearestOpenDock (Vector3 dockingShipPos) {
+		dockTransforms = GetComponentsInChildren<Dock> ();
+		float closestDockDistance = 10000f;
+		Dock closestDock = null;
+		foreach (Dock k in dockTransforms) {
+			if (!k.bird) {
+				float d = Vector3.Distance (k.transform.position, dockingShipPos);
+				if (d < closestDockDistance) {
+					closestDock = k;
+					closestDockDistance = d;
+				}
+			}
+		}
+		return closestDock;
+	}
+
+	/// <summary>
+	/// Gets the nearest docked bird. CHECK IF NULL.
+	/// </summary>
+	/// <returns>The nearest docked bird.</returns>
+	/// <param name="playerPos">Player position.</param>
+	public Bird GetNearestDockedBird (Vector3 playerPos) {
+		dockTransforms = GetComponentsInChildren<Dock> ();
+		float closestDockDistance = 10000f;
+		Dock closestDock = null;
+		foreach (Dock k in dockTransforms) {
+			if (k.bird) {
+				float d = Vector3.Distance (k.transform.position, playerPos);
+				if (d < closestDockDistance) {
+					closestDock = k;
+					closestDockDistance = d;
+				}
+			}
+		}
+		return closestDock.bird;
 	}
 
 	void TakeDamage( int dam) {
