@@ -22,14 +22,14 @@ public class PlayerInput : MonoBehaviour {
 
 	private GameManager gm;
 	private BigBird bigBird;
-	private Player p;
+	private Bird p;
 	private int harpButtonCount = 0;
 	private float harpButtonCooler = .5f;
 
 	void Awake () {
 		gm = GameObject.FindGameObjectWithTag ("GameManager").GetComponent<GameManager> ();
 		bigBird = GameObject.FindObjectOfType<BigBird>() as BigBird;
-		p = GetComponent<Player> ();
+		p = GetComponent<Bird> ();
 	}
 
 	void Update () {
@@ -138,14 +138,6 @@ public class PlayerInput : MonoBehaviour {
 	}
 
 	void HandleDockedInput () {
-
-		for (int i = 0; i < 20; i++) {
-			if (Input.GetKeyDown("joystick 2 button "+i)) {
-				// do something
-				print("pressed a joystick 2 button: " + i);
-			}
-		}
-
 		if (Input.GetButtonDown (interactButton)) {
 			if (!p.navigating) {
 				p.Undock ();

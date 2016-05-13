@@ -1,24 +1,22 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class TriangleDrawer : MonoBehaviour {
+public class Web : MonoBehaviour {
 
 	public Transform[] ships = new Transform[3];
 
 	private Vector3[] shipVertices = new Vector3[3];
-	private Vector2[] shipVertices2D = new Vector2[3];
+	private Vector2[] shipVertices2D = new Vector2[4];
 	private Mesh mesh;
 	private EdgeCollider2D ec;
 
 	void Start() {
-		gameObject.AddComponent<MeshFilter>();
-		gameObject.AddComponent<MeshRenderer>();
 		ec = GetComponent<EdgeCollider2D>();
 		mesh = GetComponent<MeshFilter>().mesh;
 		mesh.Clear();
 
 		OrderShipsClockwise ();
-	 	shipVertices[0] = ships[0].position; 
+		shipVertices[0] = ships[0].position; 
 		shipVertices[1] = ships[1].position; 
 		shipVertices[2] = ships[2].position; 
 
@@ -38,7 +36,14 @@ public class TriangleDrawer : MonoBehaviour {
 		shipVertices2D[0] = new Vector2 (shipVertices[0].x, shipVertices[0].y); 
 		shipVertices2D[1] = new Vector2 (shipVertices[1].x, shipVertices[1].y); 
 		shipVertices2D[2] = new Vector2 (shipVertices[2].x, shipVertices[2].y); 
+		shipVertices2D[3] = new Vector2 (shipVertices[0].x, shipVertices[0].y); 
 		ec.points = shipVertices2D;
+	}
+
+	public void Add (Transform ship1, Transform ship2, Transform ship3) {
+		ships [0] = ship1;
+		ships [1] = ship2;
+		ships [2] = ship3;
 	}
 
 	/// <summary>
@@ -46,7 +51,7 @@ public class TriangleDrawer : MonoBehaviour {
 	/// The ship with a larger angle vector is made the next triangle vertex and the remaining ship is the last vertex.
 	/// </summary>
 	void OrderShipsClockwise () {
-		
+
 		//start with highest point
 		int highestIndex = -1;
 		int nextIndex = -1;

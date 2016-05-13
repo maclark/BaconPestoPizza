@@ -14,16 +14,15 @@ public class Harpoon : MonoBehaviour {
 	public float detachDelay = .3f;
 	public float recallVelocity = 10f;
 	public bool recalling = false;
+	public GameObject webPrefab;
 	public GameObject harpooner = null;
 	public GameObject harpooned = null;
 
 	private Rigidbody2D rb;
-	private GameManager gm;
 	private Vector3[] tetherPositions = new Vector3[2];
 
 	void Awake () {
 		rb = GetComponent<Rigidbody2D> ();
-		gm = GetComponent<GameManager> ();
 	}
 
 	void Start () {
@@ -83,12 +82,12 @@ public class Harpoon : MonoBehaviour {
 		//for determining when to stop thinning the line renderered
 		if (distance < minWidthTetherLength) {
 			atMaxTether = false;
-			lr.material.color = harpooner.GetComponent<Player> ().color;
+			lr.material.color = harpooner.GetComponent<Bird> ().color;
 			//lr.material.color = Color.blue;
 		} 
 		else if (distance < tetherMaxLength + minWidthTetherLength) {
 			atMaxTether = false;
-			lr.material.color = harpooner.GetComponent<Player> ().color;
+			lr.material.color = harpooner.GetComponent<Bird> ().color;
 		}
 		else {
 			lr.material.color = Color.red;
@@ -108,7 +107,7 @@ public class Harpoon : MonoBehaviour {
 		//#TODO maybe leave sprites on and don't move harpoon? could be cool. plus, when harpooning bigbird or random things, don't want to move anchor...?
 		if (harpoonRecipient.tag == "Player") {
 			transform.position = harpooned.transform.position;
-			gm.Link (harpooner.GetComponent<Player>(), harpooned.GetComponent<Player>());
+			AttemptWeb ();
 		}
 		transform.parent = harpooned.transform;
 		/*SpriteRenderer[] harpoonSprites = GetComponentsInChildren<SpriteRenderer> ();
@@ -125,6 +124,9 @@ public class Harpoon : MonoBehaviour {
 		}
 
 		if (harpooned != null) {
+			if (harpooned.tag == "Player") {
+				print ("BreakWeb ();");
+			}
 			harpooned = null;
 			transform.parent = null;
 			GetComponent<Rigidbody2D> ().WakeUp ();
@@ -169,5 +171,24 @@ public class Harpoon : MonoBehaviour {
 		else if (hits.Length == 3) {
 			//print (hits [0].transform.name + " " + hits[1].transform.name + " " + hits[2].transform.name);
 		}
+	}
+
+	void AttemptWeb () {
+		if (harpooned.GetComponent<Bird> ().harp) {
+			if (harpooned.GetComponent<Bird> ().harp.harpooned.GetComponent<Bird> ().harp) {
+				if (harpooned.GetComponent<Bird> ().harp.harpooned.GetComponent<Bird> ().harp.harpooned == harpooner) {
+					ThrowWeb (harpooner.GetComponent<Bird> (), harpooned.GetComponent<Bird> (), harpooned.GetComponent<Bird> ().harp.harpooned.GetComponent<Bird> ());
+				}
+			}
+		}
+	}
+
+	void ThrowWeb (Bird b1, Bird b2, Bird b3) {
+		GameObject webObject = Instantiate (webPrefab, Vector3.zero, Quaternion.identity) as GameObject;
+		Web web = webObject.GetComponent<Web> ();
+		web.Add (b1.transform, b2.transform, b3.transform);
+		b1.web = web;
+		b2.web = web;
+		b3.web = web;
 	}
 }
