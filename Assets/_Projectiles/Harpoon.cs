@@ -4,22 +4,22 @@ using System.Collections.Generic;
 public class Harpoon : MonoBehaviour {
 
 	public Vector2 direction = Vector2.zero;
-	public float moveForceMagnitude = 500f;
+	public float accelerationMagnitude = 500f;
 	public float minWidth = .05f;
 	public float maxWidth = .2f;
 	public float minWidthTetherLength = 3;
 	public float tetherMaxLength = 10f;
 	public bool atMaxTether = false;
-	public float recallForceMag	= 100f;
+	public float recallAccelerationMag	= 100f;
 	public float detachDelay = .3f;
 	public float recallVelocity = 10f;
 	public bool recalling = false;
 	public GameObject webPrefab;
-	public GameObject harpooner = null;
-	public GameObject harpooned = null;
 
 	private Rigidbody2D rb;
 	private Vector3[] tetherPositions = new Vector3[2];
+	private GameObject harpooner = null;
+	private GameObject harpooned = null;
 
 	void Awake () {
 		rb = GetComponent<Rigidbody2D> ();
@@ -29,8 +29,8 @@ public class Harpoon : MonoBehaviour {
 		//#TODO make tehter appear over ships?
 		//GetComponent<LineRenderer> ().sortingLayerID = GetComponentInChildren<SpriteRenderer> ().sortingLayerID;
 		//GetComponent<LineRenderer> ().sortingOrder = GetComponentInChildren<SpriteRenderer> ().sortingOrder;
-
 	}
+
 	void Update () {
 		DrawTether ();
 		if (harpooned != null) {
@@ -42,10 +42,9 @@ public class Harpoon : MonoBehaviour {
 		if (recalling) {
 			Vector3 detachDir = harpooner.transform.position - transform.position;
 			detachDir.Normalize ();
-			rb.AddForce (detachDir * recallForceMag);
+			rb.AddForce (detachDir * recallAccelerationMag * rb.mass);
 		}
 	}
-
 
 	public void SetDirection (Vector2 dir) {
 		direction = dir;
@@ -56,7 +55,7 @@ public class Harpoon : MonoBehaviour {
 		transform.position = start.position;
 		transform.rotation = start.rotation;
 		SetDirection (aim);
-		rb.AddForce (direction * moveForceMagnitude);
+		rb.AddForce (direction * accelerationMagnitude * rb.mass);
 	}
 
 	public void Die () {
@@ -64,10 +63,9 @@ public class Harpoon : MonoBehaviour {
 	}
 
 	void DrawTether () {
-
 		LineRenderer lr = GetComponent<LineRenderer> ();
-
 		tetherPositions [0] = harpooner.transform.position;
+
 		if (harpooned != null) {
 			tetherPositions [1] = harpooned.transform.position;
 		} else {
@@ -190,5 +188,13 @@ public class Harpoon : MonoBehaviour {
 		b1.web = web;
 		b2.web = web;
 		b3.web = web;
+	}
+
+	public GameObject GetHarpooner () {
+		return harpooner;
+	}
+
+	public GameObject GetHarpooned () {
+		return harpooned;
 	}
 }

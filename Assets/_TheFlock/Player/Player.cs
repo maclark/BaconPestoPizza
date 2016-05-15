@@ -12,14 +12,6 @@ public class Player : MonoBehaviour {
 		bigBird = GameObject.FindObjectOfType<BigBird>() as BigBird;
 	}
 
-	void Start () {
-	}
-	
-	// Update is called once per frame
-	void Update () {
-	
-	}
-
 	public void StartPlayer () {
 		Bird nearestBird = bigBird.GetNearestFreeBird (transform.position);
 		if (nearestBird) {

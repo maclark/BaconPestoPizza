@@ -7,6 +7,7 @@ public class PlayerInput : MonoBehaviour {
 	public string joystick = "unset";
 	public bool started = false;
 
+	public bool checkingInput = false;
 	public string LSHorizontal = "LS_Horizontal";
 	public string LSVertical = "LS_Vertical";
 	public string RSHorizontal = "RS_Horizontal";
@@ -33,6 +34,46 @@ public class PlayerInput : MonoBehaviour {
 	}
 
 	void Update () {
+		#region
+		////For mapping game pad
+		if (checkingInput) {
+			for (int i = 0; i < 20; i++) {
+				if (Input.GetKeyDown("joystick 1 button "+i)) {
+					// do something
+					print("pressed a joystick 1 button: " + i);
+				}
+
+				if (Input.GetKeyDown("joystick 2 button "+i)) {
+					// do something
+					print("pressed a joystick 2 button: " + i);
+				}
+
+				if (Input.GetKeyDown("joystick 3 button "+i)) {
+					// do something
+					print("pressed a joystick 3 button: " + i);
+				}
+
+				if (Input.GetKeyDown("joystick 4 button "+i)) {
+					// do something
+					print("pressed a joystick 4 button: " + i);
+				}
+
+				if (Input.GetKeyDown("joystick 5 button "+i)) {
+					// do something
+					print("pressed a joystick 5 button: " + i);
+				}
+
+				if (Input.GetKeyDown("joystick 6 button "+i)) {
+					// do something
+					print("pressed a joystick 6 button: " + i);
+				}
+			}
+		}
+
+		#endregion
+
+
+
 
 		if (!started) {
 			if (Input.GetButtonDown (menuButton)) {
@@ -42,6 +83,16 @@ public class PlayerInput : MonoBehaviour {
 					joystick = "_P2";
 				} else if (menuButton == "Menu_P3") {
 					joystick = "_P3";
+				} else if (menuButton == "Menu_P4") {
+					joystick = "_P4";
+				} else if (menuButton == "Menu_P5") {
+					joystick = "_P5";
+				} else if (menuButton == "Menu_P6") {
+					joystick = "_P6";
+				} else if (menuButton == "Menu_P7") {
+					joystick = "_P7";
+				} else if (menuButton == "Menu_P8") {
+					joystick = "_P8";
 				}
 			}
 				
@@ -68,6 +119,10 @@ public class PlayerInput : MonoBehaviour {
 
 	void HandleFlyingInput () {
 		p.b.direction = new Vector2( Input.GetAxis(LSHorizontal), Input.GetAxis(LSVertical));
+		if (p.b.gas <= 0) {
+			p.b.direction = Vector2.zero;
+		}
+
 		Vector2 rightStick = new Vector2( Input.GetAxis(RSHorizontal), Input.GetAxis(RSVertical));
 		if (rightStick != Vector2.zero) {
 			p.b.aim = rightStick;
@@ -110,32 +165,6 @@ public class PlayerInput : MonoBehaviour {
 				StartCoroutine( p.b.Boost ());
 			}
 		}
-		#region
-		////For mapping game pad
-		/*
-		for (int i = 0; i < 20; i++) {
-			if (Input.GetKeyDown("joystick 2 button "+i)) {
-				// do something
-				print("pressed a joystick 2 button: " + i);
-			}
-		}
-
-		for (int i = 0; i < 20; i++) {
-			if (Input.GetKeyDown("joystick 1 button "+i)) {
-				// do something
-				print("pressed a joystick 1 button: " + i);
-			}
-		}
-
-		for (int i = 0; i < 20; i++) {
-			if (Input.GetKeyDown("joystick 3 button "+i)) {
-				// do something
-				print("pressed a joystick 3 button: " + i);
-			}
-		}
-		*/
-
-		#endregion
 	}
 
 	void HandleDockedInput () {

@@ -4,9 +4,8 @@ using System.Collections;
 public class Bullet : MonoBehaviour {
 
 	public Vector2 direction = Vector2.zero;
-	public float moveForce = 100f;
+	public float accelerationMagnitude = 100f;
 	public int damage = 100;
-	public float bulletDuration = 1f;
 
 	private Rigidbody2D rb;
 
@@ -23,7 +22,7 @@ public class Bullet : MonoBehaviour {
 		transform.position = start.position;
 		transform.rotation = start.rotation;
 		SetDirection (aim);
-		rb.AddForce (direction * moveForce);
+		rb.AddForce (direction * accelerationMagnitude * rb.mass);
 	}
 
 	public void Die () {

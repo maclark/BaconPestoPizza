@@ -3,19 +3,18 @@ using System.Collections;
 
 public class BigBird : MonoBehaviour {
 
-	public float moveForceMagnitude = 75f;
+	public float accelerationMagnitude = 75f;
 	public int hp = 1000;
-	public float engineOnRotateSpeed = .2f;
-	public float engineOffRotateSpeed = .1f;
 	public float thresholdToTurnBigBird = .2f;
 	public bool turning { get; set; }
-	public float rotateSpeed { get; set; }
+	public float rotateSpeed = .3f;
 
 	private GameManager gm;
 	private Rigidbody2D rb;
 	private Component[] dockTransforms;
 	private Quaternion targetRotation = Quaternion.identity;
 	private bool engineOn = false;
+	private Thruster[] thrusters;
 
 	void Awake() {
 		gm = GameObject.FindGameObjectWithTag ("GameManager").GetComponent<GameManager> ();
@@ -24,12 +23,13 @@ public class BigBird : MonoBehaviour {
 	}
 
 	void Start () {
-		GetComponent<SpriteRenderer> ().color = Color.gray;
+		//GetComponent<SpriteRenderer> ().color = Color.gray;
+		thrusters = GetComponentsInChildren<Thruster> ();
 	}
 
 	void FixedUpdate () {
 		if (engineOn) {
-			rb.AddForce (transform.up * moveForceMagnitude);
+			rb.AddForce (transform.up * accelerationMagnitude * rb.mass);
 		}
 
 		if (turning) {
@@ -49,7 +49,7 @@ public class BigBird : MonoBehaviour {
 		}
 		else if (other.name == "Web") {
 			TurnEngineOn ();
-			moveForceMagnitude = 10 * moveForceMagnitude;
+			accelerationMagnitude = 10 * accelerationMagnitude;
 		}
 	}
 
@@ -114,17 +114,23 @@ public class BigBird : MonoBehaviour {
 
 	public void TurnEngineOn () {
 		engineOn = true;
-		GetComponent<SpriteRenderer> ().color = Color.white;
-		rotateSpeed = engineOnRotateSpeed;
+		foreach (Thruster thrust in thrusters) {
+			thrust.GetComponent<SpriteRenderer> ().enabled = true;
+		}
 	}
 
 	public void TurnEngineOff () {
 		engineOn = false;
-		GetComponent<SpriteRenderer> ().color = Color.gray;
-		rotateSpeed = engineOffRotateSpeed;
+		foreach (Thruster thrust in thrusters) {
+			thrust.GetComponent<SpriteRenderer> ().enabled = false;
+		}
 	}
 
 	public bool GetEngineOn () {
 		return engineOn;
+	}
+
+	public void FillBirdTank (Bird b) {
+		b.gas = b.fullTank;
 	}
 }

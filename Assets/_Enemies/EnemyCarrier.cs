@@ -8,16 +8,7 @@ public class EnemyCarrier : MonoBehaviour {
 	public float spawnRate = .5f;
 	public GameObject enemyPrefab;
 
-	private GameManager gm;
-	private Rigidbody2D rb;
 	private Component[] dockTransforms;
-
-
-	void Awake() {
-		gm = GameObject.FindGameObjectWithTag ("GameManager").GetComponent<GameManager> ();
-		rb = GetComponent<Rigidbody2D> ();
-
-	}
 
 	void Start () {
 		InvokeRepeating ("SpawnEnemy", 0f, spawnRate);
