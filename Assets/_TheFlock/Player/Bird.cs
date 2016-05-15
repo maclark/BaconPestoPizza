@@ -6,7 +6,8 @@ using System.Collections.Generic;
 public class Bird : MonoBehaviour {
 
 	public Player p;
-	public int hp = 100;
+	public int health = 100;
+	public int maxHealth = 100;
 	public float accelerationMagnitude = 60f;
 	public float fireRate = .1f;
 	public float releaseBoost = 60f;
@@ -76,6 +77,7 @@ public class Bird : MonoBehaviour {
 			if (!ranOutOfGas) {
 				gas -= gasPerSecond * Time.deltaTime;
 				if (gas <= lowGasWarning) {
+					print ("gas <= lawGasWarn: " + gas + " <= " + lowGasWarning);
 					if (!gasLightFlashing) {
 						LowOnGas ();
 					} else if (gas <= 0) {
@@ -108,6 +110,7 @@ public class Bird : MonoBehaviour {
 		}
 		else if (other.tag == "EnemyBullet") {
 			if (!invincible) {
+				print ("hit enemy bullet");
 				TakeDamage (other.GetComponent<Bullet> ().damage);
 				other.GetComponent<Bullet> ().Die ();
 			}
@@ -254,6 +257,10 @@ public class Bird : MonoBehaviour {
 			//#TODO explodeee
 			Die();
 		} else {
+			health -= dam;
+			if (health < 0) {
+				health = 0;
+			}
 			damaged = true;
 			StartCoroutine (Invincibility (hitInvincibilityDuration));
 			StartCoroutine (FlashDamage (Time.time));
@@ -269,6 +276,9 @@ public class Bird : MonoBehaviour {
 		dock = bigBird.GetNearestOpenDock (transform.position);
 		if (dock) {
 			dock.bird = this;
+			if (dock.transform.parent == bigBird.transform) {
+				bigBird.DockBird (this);
+			}
 		} else {
 			return false;
 		}
@@ -287,7 +297,6 @@ public class Bird : MonoBehaviour {
 		gasLightFlashing = false;
 		ranOutOfGas = false;
 		Destroy (gasLight);
-		bigBird.FillBirdTank (this);
 
 		firing = false;
 		CancelInvoke ();
@@ -310,6 +319,13 @@ public class Bird : MonoBehaviour {
 	}
 
 	public void Undock () {
+		if (health < maxHealth) {
+			Debug.Log ("Can't undock unhealthy bird.");
+			return;
+		}
+		if (dock.transform.parent == bigBird.transform) {
+			bigBird.UndockBird (this);
+		}
 		docked = false;
 		dock.bird = null;
 		dock = null;

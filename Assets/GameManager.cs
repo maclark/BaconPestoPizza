@@ -16,16 +16,11 @@ public class GameManager : MonoBehaviour {
 	private bool paused = false;
 	private GameObject navPointer;
 
-
 	// Use this for initialization
 	void Awake () {
 		bigBird = GameObject.FindGameObjectWithTag ("BigBird").GetComponent<BigBird> ();
 		alliedTransforms = new List<Transform> ();
 		AddAlliedTransform (bigBird.transform);
-	}
-
-	void Start () {
-
 	}
 
 	// Update is called once per frame

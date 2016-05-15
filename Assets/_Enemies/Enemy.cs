@@ -12,7 +12,6 @@ public class Enemy : MonoBehaviour {
 
 	private Rigidbody2D rb;
 	private GameManager gm;
-	private ObjectPooler objectPooler;
 	private Transform target;
 	private bool startFiring = false;
 	private bool stopFiring = false;
@@ -21,7 +20,6 @@ public class Enemy : MonoBehaviour {
 	void Awake(){
 		gm = GameObject.FindGameObjectWithTag ("GameManager").GetComponent<GameManager> ();
 		rb = GetComponent<Rigidbody2D> ();
-		objectPooler = GetComponent<ObjectPooler> ();
 	}
 
 	void Start () {
@@ -103,7 +101,7 @@ public class Enemy : MonoBehaviour {
 				return;
 			}
 		}
-		Bullet bullet = objectPooler.GetPooledObject().GetComponent<Bullet>();
+		Bullet bullet = gm.GetComponent<ObjectPooler> ().GetPooledObject ().GetComponent<Bullet> ();
 		bullet.gameObject.SetActive (true);
 		bullet.Fire (transform, target.position - transform.position);	
 	}

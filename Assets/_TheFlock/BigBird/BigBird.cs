@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 public class BigBird : MonoBehaviour {
 
@@ -8,22 +9,26 @@ public class BigBird : MonoBehaviour {
 	public float thresholdToTurnBigBird = .2f;
 	public bool turning { get; set; }
 	public float rotateSpeed = .3f;
+	public float halfSecFill = 5f;
+	public int halfSecRepair = 5;
 
-	private GameManager gm;
 	private Rigidbody2D rb;
 	private Component[] dockTransforms;
 	private Quaternion targetRotation = Quaternion.identity;
 	private bool engineOn = false;
+	private Bird birdGettingRepairs = null;
+	private Bird birdGettingGas = null;
 	private Thruster[] thrusters;
+	private List<Bird> dockedBirds = new List<Bird> ();
+	private List<Bird> gasLine = new List<Bird> ();
+	private List<Bird> repairLine = new List<Bird> ();
+
 
 	void Awake() {
-		gm = GameObject.FindGameObjectWithTag ("GameManager").GetComponent<GameManager> ();
 		rb = GetComponent<Rigidbody2D> ();
-
 	}
 
 	void Start () {
-		//GetComponent<SpriteRenderer> ().color = Color.gray;
 		thrusters = GetComponentsInChildren<Thruster> ();
 	}
 
@@ -103,7 +108,7 @@ public class BigBird : MonoBehaviour {
 	}
 
 	void Die() {
-		gm.RemoveAlliedTransform (transform);
+		//gm.RemoveAlliedTransform (transform);
 		GetComponent<SpriteRenderer> ().color = Color.red;
 		print ("big bird dead, need to recursively call children's Die()");
 	}
@@ -130,7 +135,80 @@ public class BigBird : MonoBehaviour {
 		return engineOn;
 	}
 
-	public void FillBirdTank (Bird b) {
-		b.gas = b.fullTank;
+
+	public void DockBird (Bird b) {
+		dockedBirds.Add (b);
+
+		if (birdGettingGas == null) {
+			StartCoroutine (FillBirdTank (b));
+		} else {
+			gasLine.Add (b);
+		}
+
+		if (birdGettingRepairs == null) {
+			if (b.health < b.maxHealth) {
+				StartCoroutine (RepairBird (b));
+			}
+		} else {
+			repairLine.Add (b);
+		}
+	}
+
+	public void UndockBird (Bird b) {
+		dockedBirds.Remove (b);
+		if (birdGettingGas == b) {
+			birdGettingGas = null;
+		}
+		if (gasLine.Contains (b)) {
+			gasLine.Remove (b);
+		}
+
+		if (repairLine.Contains (b)) {
+			//TODO can't undock;
+		}
+	}
+
+	IEnumerator RepairBird (Bird b) {
+		if (b == null) {
+			return false;
+		}
+		birdGettingRepairs = b;
+		b.health += halfSecRepair;
+		yield return new WaitForSeconds (.5f);
+		if (b.health > b.maxHealth) {
+			print ("b.health: " + b.health);
+			b.health = b.maxHealth;
+			print ("b.health: " + b.health);
+			if (repairLine.Count > 0) {
+				Bird nextInLine = repairLine [repairLine.Count - 1];
+				gasLine.Remove (repairLine [repairLine.Count - 1]);
+				StartCoroutine (RepairBird (nextInLine));
+			} else {
+				birdGettingRepairs = null;
+			}
+		} else {
+			StartCoroutine (RepairBird (birdGettingRepairs));
+		}
+	}
+
+	IEnumerator FillBirdTank (Bird b) {
+		if (b == null) {
+			return false;
+		}
+		birdGettingGas = b;
+		b.gas += halfSecFill;
+		yield return new WaitForSeconds (.5f);
+		if (b.gas > b.fullTank) {
+			b.gas = b.fullTank;
+			if (gasLine.Count > 0) {
+				Bird nextInLine = gasLine [gasLine.Count - 1];
+				gasLine.Remove (gasLine [gasLine.Count - 1]);
+				StartCoroutine (FillBirdTank (nextInLine));
+			} else {
+				birdGettingGas = null;
+			}
+		} else {
+			StartCoroutine (FillBirdTank (birdGettingGas));
+		}
 	}
 }

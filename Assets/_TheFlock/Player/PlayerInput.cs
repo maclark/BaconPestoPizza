@@ -171,9 +171,6 @@ public class PlayerInput : MonoBehaviour {
 		if (Input.GetButtonDown (interactButton)) {
 			if (p.b) {
 				p.b.Undock ();
-			} else {
-				//navigating = false;
-				//gm.CloseNavPanel ();
 			}
 		} else {
 			float x = Input.GetAxis (LSHorizontal);
