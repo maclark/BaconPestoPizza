@@ -5,7 +5,7 @@ public class PlayerInput : MonoBehaviour {
 
 	public float doubleTapThreshold = .5f;
 	public string joystick = "unset";
-	public bool started = false;
+	public bool playerStarted = false;
 
 	public bool checkingInput = false;
 	public string LSHorizontal = "LS_Horizontal";
@@ -24,8 +24,6 @@ public class PlayerInput : MonoBehaviour {
 	private GameManager gm;
 	private BigBird bigBird;
 	private Player p;
-	private int harpButtonCount = 0;
-	private float harpButtonCooler = .5f;
 
 	void Awake () {
 		gm = GameObject.FindGameObjectWithTag ("GameManager").GetComponent<GameManager> ();
@@ -72,10 +70,7 @@ public class PlayerInput : MonoBehaviour {
 
 		#endregion
 
-
-
-
-		if (!started) {
+		if (!playerStarted) {
 			if (Input.GetButtonDown (menuButton)) {
 				if (menuButton == "Menu_P1") {
 					joystick = "_P1";
@@ -100,8 +95,8 @@ public class PlayerInput : MonoBehaviour {
 			} else {
 				SetButtonNames ();
 				p.StartPlayer ();
-				//p.StartBird ();
-				started = true;
+				playerStarted = true;
+				joystick = "set";
 			}
 			return;
 		}
@@ -145,19 +140,11 @@ public class PlayerInput : MonoBehaviour {
 		}
 
 		if (Input.GetButtonDown (rightClick)) {
-			if (harpButtonCooler > 0 && harpButtonCount == 1) {
+			if (!p.b.hasHarpoon) {
 				p.b.DetachHarpoon ();
 			} else {
-				harpButtonCooler = doubleTapThreshold;
-				harpButtonCount += 1;
-				p.b.HarpoonAction ();
+				p.b.HurlHarpoon ();
 			}
-		}
-
-		if (harpButtonCooler > 0) {
-			harpButtonCooler -= Time.deltaTime;
-		} else {
-			harpButtonCount = 0;
 		}
 
 		if (Input.GetButton (LB)) {

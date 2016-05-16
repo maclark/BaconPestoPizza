@@ -81,7 +81,6 @@ public class Harpoon : MonoBehaviour {
 		if (distance < minWidthTetherLength) {
 			atMaxTether = false;
 			lr.material.color = harpooner.GetComponent<Bird> ().color;
-			//lr.material.color = Color.blue;
 		} 
 		else if (distance < tetherMaxLength + minWidthTetherLength) {
 			atMaxTether = false;
@@ -101,29 +100,19 @@ public class Harpoon : MonoBehaviour {
 		harpooned = harpoonRecipient;
 		GetComponent<Rigidbody2D> ().Sleep ();
 		GetComponent<BoxCollider2D> ().enabled = false;
-		//after turning off rb and collider, move harp if on player
-		//#TODO maybe leave sprites on and don't move harpoon? could be cool. plus, when harpooning bigbird or random things, don't want to move anchor...?
+
 		if (harpoonRecipient.tag == "Player") {
 			transform.position = harpooned.transform.position;
 			AttemptWeb ();
 		}
 		transform.parent = harpooned.transform;
-		/*SpriteRenderer[] harpoonSprites = GetComponentsInChildren<SpriteRenderer> ();
-		foreach (SpriteRenderer r in harpoonSprites) {
-			r.enabled = false;
-		}*/
 	}
 
 	public void DetachAndRecall (bool overrideToggle=false) {
-		SpriteRenderer[] renderers = GetComponentsInChildren<SpriteRenderer> ();
-		foreach (SpriteRenderer r in renderers) {
-			//r.enabled = true;
-			r.color = new Color (r.color.r, r.color.g, r.color.b, .5f);
-		}
 
 		if (harpooned != null) {
 			if (harpooned.tag == "Player") {
-				print ("BreakWeb ();");
+				harpooned.GetComponent<Bird> ().RemoveHarp (this);
 			}
 			harpooned = null;
 			transform.parent = null;
@@ -131,6 +120,8 @@ public class Harpoon : MonoBehaviour {
 			GetComponent<BoxCollider2D> ().enabled = true;
 		}
 
+
+		SpriteRenderer[] renderers = GetComponentsInChildren<SpriteRenderer> ();
 		if (overrideToggle) {
 			recalling = true;
 		} else {
@@ -138,6 +129,10 @@ public class Harpoon : MonoBehaviour {
 			if (!recalling) {
 				foreach (SpriteRenderer r in renderers) {
 					r.color = new Color (r.color.r, r.color.g, r.color.b, 1f);
+				}
+			} else {
+				foreach (SpriteRenderer r in renderers) {
+					r.color = new Color (r.color.r, r.color.g, r.color.b, .5f);
 				}
 			}
 		}
@@ -173,9 +168,11 @@ public class Harpoon : MonoBehaviour {
 
 	void AttemptWeb () {
 		if (harpooned.GetComponent<Bird> ().harp) {
-			if (harpooned.GetComponent<Bird> ().harp.harpooned.GetComponent<Bird> ().harp) {
-				if (harpooned.GetComponent<Bird> ().harp.harpooned.GetComponent<Bird> ().harp.harpooned == harpooner) {
-					ThrowWeb (harpooner.GetComponent<Bird> (), harpooned.GetComponent<Bird> (), harpooned.GetComponent<Bird> ().harp.harpooned.GetComponent<Bird> ());
+			if (harpooned.GetComponent<Bird> ().harp.harpooned) {
+				if (harpooned.GetComponent<Bird> ().harp.harpooned.GetComponent<Bird> ().harp) {
+					if (harpooned.GetComponent<Bird> ().harp.harpooned.GetComponent<Bird> ().harp.harpooned == harpooner) {
+						ThrowWeb (harpooner.GetComponent<Bird> (), harpooned.GetComponent<Bird> (), harpooned.GetComponent<Bird> ().harp.harpooned.GetComponent<Bird> ());
+					}
 				}
 			}
 		}

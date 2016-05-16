@@ -162,23 +162,22 @@ public class BigBird : MonoBehaviour {
 		if (gasLine.Contains (b)) {
 			gasLine.Remove (b);
 		}
-
-		if (repairLine.Contains (b)) {
-			//TODO can't undock;
-		}
 	}
 
 	IEnumerator RepairBird (Bird b) {
 		if (b == null) {
-			return false;
+			if (repairLine.Count > 0) {
+				Bird nextInLine = repairLine [repairLine.Count - 1];
+				gasLine.Remove (repairLine [repairLine.Count - 1]);
+				StartCoroutine (RepairBird (nextInLine));
+			} else yield break;
 		}
+
 		birdGettingRepairs = b;
 		b.health += halfSecRepair;
 		yield return new WaitForSeconds (.5f);
 		if (b.health > b.maxHealth) {
-			print ("b.health: " + b.health);
 			b.health = b.maxHealth;
-			print ("b.health: " + b.health);
 			if (repairLine.Count > 0) {
 				Bird nextInLine = repairLine [repairLine.Count - 1];
 				gasLine.Remove (repairLine [repairLine.Count - 1]);
@@ -193,7 +192,7 @@ public class BigBird : MonoBehaviour {
 
 	IEnumerator FillBirdTank (Bird b) {
 		if (b == null) {
-			return false;
+			yield break;
 		}
 		birdGettingGas = b;
 		b.gas += halfSecFill;

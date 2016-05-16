@@ -77,7 +77,6 @@ public class Bird : MonoBehaviour {
 			if (!ranOutOfGas) {
 				gas -= gasPerSecond * Time.deltaTime;
 				if (gas <= lowGasWarning) {
-					print ("gas <= lawGasWarn: " + gas + " <= " + lowGasWarning);
 					if (!gasLightFlashing) {
 						LowOnGas ();
 					} else if (gas <= 0) {
@@ -128,15 +127,20 @@ public class Bird : MonoBehaviour {
 			} else {
 				//implement linking
 				Harpoon otherHarp = other.GetComponent<Harpoon> ();
-				otherHarps.Add (otherHarp);
 				if (!otherHarp.recalling) {
 					otherHarp.HarpoonObject (gameObject);
+					otherHarps.Add (otherHarp);
 				}
 			}
 		}
 	}
 
 	void HandleFlying () {
+		if (direction == Vector2.zero) {
+			return;
+		}
+
+
 		if (otherHarps.Count > 0) {
 			HandleFlyingWhileHarpooned ();
 		}
@@ -278,13 +282,21 @@ public class Bird : MonoBehaviour {
 			dock.bird = this;
 			if (dock.transform.parent == bigBird.transform) {
 				bigBird.DockBird (this);
+				docked = true;
 			}
 		} else {
-			return false;
+			docked = false;
+			return docked;
 		}
 
-
-		docked = true;
+		if (otherHarps.Count > 0) {
+			print ("otherHarps.Count : " + otherHarps.Count);
+			foreach (Harpoon h in otherHarps) {
+				//#TODO maybe make harpooner/harpooned not public, bc every time you change those, you need to do other shit 
+				h.DetachAndRecall (true);
+			}
+			otherHarps.Clear ();
+		}
 
 		transform.Translate (dock.transform.position - transform.position);
 		transform.parent = bigBird.transform;
@@ -307,12 +319,6 @@ public class Bird : MonoBehaviour {
 			harp.DetachAndRecall ();
 			Destroy (harp.gameObject);
 			hasHarpoon = true;
-		}
-		if (otherHarps.Count > 0) {
-			foreach (Harpoon h in otherHarps) {
-				//#TODO maybe make harpooner/harpooned not public, bc every time you change those, you need to do other shit 
-				h.DetachAndRecall (true);
-			}
 		}
 
 		return docked;
@@ -377,7 +383,10 @@ public class Bird : MonoBehaviour {
 		}
 	}
 
-	public void HarpoonAction () {
+	/// <summary>
+	/// Hurls the harpoon.
+	/// </summary>
+	public void HurlHarpoon () {
 		if (hasHarpoon) {
 			//Offset harp so it doesn't immediately collide with ship
 			Vector3 aim3 = new Vector3 (aim.x, aim.y, 0);
@@ -465,106 +474,7 @@ public class Bird : MonoBehaviour {
 		}
 	}
 
-	/*void OldFixedUpdate () {
-		if (!docked) {
-			if (harp != null && harp.atMaxTether) {
-				HandlePulling ();
-			} else if (otherHarps.Count > 0) {
-				bool pulledHarpooner = false;
-				//TODO will need to actually calulate various tensions distributed...maybe
-				foreach (Harpoon h in otherHarps) {
-					if (h.atMaxTether) {
-						HandlePullingHarpooner (h);
-						pulledHarpooner = true;
-					}
-				}
-
-				if (!pulledHarpooner) {
-					rb.AddForce (direction * moveForceMagnitude);
-				}
-
-			}
-			else {
-				rb.AddForce (direction * moveForceMagnitude);
-			}
-
-			//check if just boosted
-			if (!canBoost) {
-				moveForceMagnitude = startForceMag;
-			}
-		}
+	public void RemoveHarp (Harpoon harpy) {
+		otherHarps.Remove (harpy);
 	}
-
-
-	void HandlePulling () {
-		pullDir = transform.position - harp.transform.position;
-		pullDir.Normalize ();
-		float pullMag = CalculatePullMag (direction, moveForceMagnitude);
-		//ship is moving away from harpoon and harpoon is at max tether
-		if (pullMag > 0) {
-			//calculate pulling axis force
-			//if pulling harpoonobject
-			if (harp.GetHarpooned () != null) {
-				float totalMass = rb.mass + harp.GetHarpooned ().GetComponent<Bird> ().GetComponent<Rigidbody2D> ().mass;
-				rb.AddForce (pullDir * pullMag / totalMass);
-				harp.GetHarpooned ().GetComponent<Bird> ().GetComponent<Rigidbody2D> ().AddForce (pullDir * pullMag / totalMass);
-			} 
-			//if no object attached to harp
-			else {
-				float shipAndHarpMass = rb.mass + harp.GetComponent<Rigidbody2D> ().mass;
-				rb.AddForce (pullDir * pullMag / shipAndHarpMass);
-				harp.GetComponent<Rigidbody2D> ().AddForce (pullDir * pullMag / shipAndHarpMass);
-			}
-			float orthoPullMag = CalculateOrthoPullMag (direction, moveForceMagnitude);
-			rb.AddForce (orthoPullDir * orthoPullMag);
-		}
-		//ship is not moving away from harpoon, check for harpoon velocity
-		else if (harp.GetComponent<Rigidbody2D> ().velocity != Vector2.zero) {
-
-			//determine direction of tether and orthogonal axis to that
-			Vector2 directionOfTether = harp.transform.position - transform.position;
-			directionOfTether.Normalize ();
-			Vector2 orthoDirectionOfTether = new Vector2 (directionOfTether.y, -directionOfTether.x);
-
-			//find components of velocity along new axes
-			Vector2 harpVel = harp.GetComponent<Rigidbody2D> ().velocity;
-			float harpVelTetherComponent = Vector2.Dot (harpVel, directionOfTether);
-			float harpVelOrthoComponent = Vector2.Dot (harpVel, orthoDirectionOfTether);
-
-			//if harpoon still moving away from harpooner, stop it
-			if (harpVelTetherComponent > 0) {
-				harpVelTetherComponent = 0;
-			}
-
-			//Add components of velocity to find resultant velocity vector of harpoon
-			Vector2 resultantHarpVel = (directionOfTether * harpVelTetherComponent) + (orthoDirectionOfTether * harpVelOrthoComponent);
-			harp.GetComponent<Rigidbody2D> ().velocity = resultantHarpVel;
-
-			//don't forget to move player
-			rb.AddForce (direction * moveForceMagnitude);
-		} 
-
-		else {
-			rb.AddForce (direction * moveForceMagnitude);
-		}
-	}
-
-		//#TODO what happens when both ships have harpooned each other? should ignore one harpoon
-	//Very similar to HandlePulling(), but for when this player's ship is harpooned and that harpoon's tether is at max length
-	void HandlePullingHarpooner (Harpoon otherHarp) {
-		pullDir = transform.position - otherHarp.GetHarpooner ().transform.position;
-		pullDir.Normalize ();
-		float pullMag = CalculatePullMag (direction, accelerationMagnitude);
-		if (pullMag > 0) {
-			float totalMass = rb.mass + otherHarp.GetHarpooner ().GetComponent<Bird> ().GetComponent<Rigidbody2D> ().mass;
-			rb.AddForce (pullDir * pullMag / totalMass);
-			otherHarp.GetHarpooner ().GetComponent<Bird> ().GetComponent<Rigidbody2D> ().AddForce (pullDir * pullMag / totalMass);
-		} 
-		//at max tether, but heading towards harpoon, do don't get other mass or apply a force to other's rb
-		else {
-			rb.AddForce (pullDir * pullMag * rb.mass);
-		}
-		float orthoPullMag = CalculateOrthoPullMag (direction, accelerationMagnitude);
-			rb.AddForce (orthoPullDir * orthoPullMag * rb.mass);
-	}*/
 }
