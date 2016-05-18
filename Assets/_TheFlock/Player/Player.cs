@@ -20,7 +20,7 @@ public class Player : MonoBehaviour {
 		}
 	}
 
-	void BoardBird (Bird bird) {
+	public void BoardBird (Bird bird) {
 		b = bird;
 		b.p = this;
 		b.color = GetComponent<SpriteRenderer> ().color;

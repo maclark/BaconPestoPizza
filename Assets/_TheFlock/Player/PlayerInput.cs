@@ -3,9 +3,11 @@ using System.Collections;
 
 public class PlayerInput : MonoBehaviour {
 
+	public Turret turret;
 	public float doubleTapThreshold = .5f;
 	public string joystick = "unset";
 	public bool playerStarted = false;
+	public LayerMask mask;
 
 	public bool checkingInput = false;
 	public string LSHorizontal = "LS_Horizontal";
@@ -17,16 +19,23 @@ public class PlayerInput : MonoBehaviour {
 	public string rightClick = "R_Click";
 	public string menuButton = "Menu";
 	public string aButton = "A";
-	public string interactButton = "B";
+	public string xButton = "X";
+	public string bButton = "B";
 	public string LB = "LB";
 	public string RB = "RB";
 
+	public enum State {flying, changingStations, docked, onTurret, inCockpit}
+	public State state = State.docked;
+	public State selectedState = State.docked;
 	private GameManager gm;
+	private SpriteRenderer sr;
 	private BigBird bigBird;
 	private Player p;
+	private Transform station;
 
 	void Awake () {
 		gm = GameObject.FindGameObjectWithTag ("GameManager").GetComponent<GameManager> ();
+		sr = GetComponent<SpriteRenderer> ();
 		bigBird = GameObject.FindObjectOfType<BigBird>() as BigBird;
 		p = GetComponent<Player> ();
 	}
@@ -89,12 +98,14 @@ public class PlayerInput : MonoBehaviour {
 				} else if (menuButton == "Menu_P8") {
 					joystick = "_P8";
 				}
-			}
+			} 
 				
 			if (joystick == "unset") {
 			} else {
 				SetButtonNames ();
 				p.StartPlayer ();
+				state = State.docked;
+				station = p.b.GetDock ().transform;
 				playerStarted = true;
 				joystick = "set";
 			}
@@ -105,10 +116,22 @@ public class PlayerInput : MonoBehaviour {
 			gm.TogglePause();
 		}
 
-		if (p.b.docked) {
-			HandleDockedInput ();
-		} else {
+		if (state == State.flying) {
 			HandleFlyingInput ();
+		}
+
+		if (Input.GetButtonDown (bButton)) {
+			state = State.changingStations;
+		}
+
+		if (state == State.changingStations) {
+			HandleChangingStations ();
+		} else if (state == State.onTurret) {
+			HandleTurretInput ();
+		} else if (state == State.docked) {
+			HandleDockedInput ();
+		} else if (state == State.inCockpit) {
+			HandlePilotingInput ();
 		}
 	}
 
@@ -153,23 +176,76 @@ public class PlayerInput : MonoBehaviour {
 			}
 		}
 	}
+		
+	void FireBullet () {
+		p.b.FireBullet ();
+	}
+
+	void HandleChangingStations () {
+		if (Input.GetButtonUp(bButton)) {
+			state = selectedState;
+			sr.enabled = false;
+			return;
+		} 
+
+		sr.enabled = true;
+		int stationsMask = LayerMask.NameToLayer ("Stations");
+		int nonStationsMask = ~stationsMask;
+		RaycastHit2D hit = Physics2D.Raycast (transform.position, new Vector2 (Input.GetAxis(LSHorizontal), Input.GetAxis(LSVertical)), Mathf.Infinity, mask);
+		if (hit) {
+			if (hit.collider.name == "Cockpit") {
+				station.GetComponent<BoxCollider2D> ().enabled = true;
+				station = hit.collider.transform;
+				station.GetComponent<BoxCollider2D> ().enabled = false;
+				transform.position = station.position;
+				selectedState = State.inCockpit;
+			} else if (hit.collider.name == "Dock") {
+				station.GetComponent<BoxCollider2D> ().enabled = true;
+				station = hit.collider.transform;
+				station.GetComponent<BoxCollider2D> ().enabled = false;
+				//p.BoardBird (station.GetComponent<Bird> ());
+				transform.position = station.position;
+				selectedState = State.docked;
+			} else if (hit.collider.name == "Turret") {
+				station.GetComponent<BoxCollider2D> ().enabled = true;
+				station = hit.collider.transform;
+				station.GetComponent<BoxCollider2D> ().enabled = false;
+				transform.position = station.position;
+				selectedState = State.onTurret;
+			}
+		}
+	}
 
 	void HandleDockedInput () {
-		if (Input.GetButtonDown (interactButton)) {
+		if (Input.GetButtonDown (aButton)) {
 			if (p.b) {
 				p.b.Undock ();
+				state = State.flying;
 			}
-		} else {
-			float x = Input.GetAxis (LSHorizontal);
-			float y = Input.GetAxis(LSVertical); 
-
-			if (Mathf.Sqrt (x * x + y * y) > bigBird.thresholdToTurnBigBird) {
-				float angle = Mathf.Atan2 (Input.GetAxis (LSHorizontal), Input.GetAxis (LSVertical)) * Mathf.Rad2Deg;
-				bigBird.turning = true;
-				bigBird.SetTargetRotationZAngle (-angle);
-			} else
-				bigBird.turning = false;
 		}
+	}
+
+	void HandleTurretInput () {
+		turret.Rotate (new Vector3( Input.GetAxis(LSHorizontal), Input.GetAxis(LSVertical), 0f));
+		if (Input.GetButtonDown (aButton)) {
+			turret.PressedA ();
+		}
+
+		if (Input.GetButtonDown (xButton)) {
+			turret.PressedX ();
+		}
+	}
+
+	void HandlePilotingInput () {
+		float x = Input.GetAxis (LSHorizontal);
+		float y = Input.GetAxis(LSVertical); 
+
+		if (Mathf.Sqrt (x * x + y * y) > bigBird.thresholdToTurnBigBird) {
+			float angle = Mathf.Atan2 (Input.GetAxis (LSHorizontal), Input.GetAxis (LSVertical)) * Mathf.Rad2Deg;
+			bigBird.turning = true;
+			bigBird.SetTargetRotationZAngle (-angle);
+		} else
+			bigBird.turning = false;
 
 		if (Input.GetButtonDown (LB)) {
 			if (bigBird.GetEngineOn ()) {
@@ -185,10 +261,6 @@ public class PlayerInput : MonoBehaviour {
 			gm.ToggleNavPanel (LSHorizontal, LSVertical);
 		}
 	}
-
-	void FireBullet () {
-		p.b.FireBullet ();
-	}
 		
 
 	void SetButtonNames () {
@@ -201,7 +273,8 @@ public class PlayerInput : MonoBehaviour {
 		rightClick = "R_Click" + joystick;
 		menuButton = "Menu" + joystick;
 		aButton = "A" + joystick;
-		interactButton = "B" + joystick;
+		xButton = "X" + joystick;
+		bButton = "B" + joystick;
 		LB = "LB" + joystick;
 		RB = "RB" + joystick;
 	}

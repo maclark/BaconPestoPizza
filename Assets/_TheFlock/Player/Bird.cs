@@ -282,6 +282,7 @@ public class Bird : MonoBehaviour {
 			dock.bird = this;
 			if (dock.transform.parent == bigBird.transform) {
 				bigBird.DockBird (this);
+				dock.GetComponent<BoxCollider2D> ().enabled = false;
 				docked = true;
 			}
 		} else {
@@ -331,6 +332,7 @@ public class Bird : MonoBehaviour {
 		}
 		if (dock.transform.parent == bigBird.transform) {
 			bigBird.UndockBird (this);
+			dock.GetComponent<BoxCollider2D> ().enabled = true;
 		}
 		docked = false;
 		dock.bird = null;
@@ -476,5 +478,9 @@ public class Bird : MonoBehaviour {
 
 	public void RemoveHarp (Harpoon harpy) {
 		otherHarps.Remove (harpy);
+	}
+
+	public Dock GetDock () {
+		return dock;
 	}
 }
