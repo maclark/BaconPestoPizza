@@ -5,7 +5,6 @@ public class Player : MonoBehaviour {
 
 	public Bird b = null;
 	public bool navigating = false;
-	public Station station;
 
 	private PlayerInput pi;
 

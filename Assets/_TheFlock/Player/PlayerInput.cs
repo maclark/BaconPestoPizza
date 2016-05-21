@@ -7,6 +7,7 @@ public class PlayerInput : MonoBehaviour {
 	public float doubleTapThreshold = .5f;
 	public string joystick = "unset";
 	public LayerMask mask;
+	public Transform station;
 
 	public bool checkingInput = false;
 	public string LSHorizontal = "LS_Horizontal";
@@ -30,7 +31,6 @@ public class PlayerInput : MonoBehaviour {
 	private SpriteRenderer sr;
 	private BigBird bigBird;
 	private Player p;
-	private Transform station;
 
 	void Awake () {
 		gm = GameObject.FindGameObjectWithTag ("GameManager").GetComponent<GameManager> ();
@@ -178,7 +178,9 @@ public class PlayerInput : MonoBehaviour {
 
 	void PrepareToChangeStations () {
 		if (state == State.docked) {
-			p.UnboardBird (bigBird.transform);
+			if (p.b) {
+				p.UnboardBird (bigBird.transform);
+			}
 		}
 		p.navigating = false;
 		state = State.changingStations;
@@ -213,7 +215,7 @@ public class PlayerInput : MonoBehaviour {
 	}
 
 	void HandleDockedInput () {
-		if (p.b == null) {
+		if (p.b == null && station.GetComponent<Dock> ().bird) {
 			p.BoardBird (station.GetComponent<Dock> ().bird);
 		}
 

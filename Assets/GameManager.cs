@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.UI;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -11,6 +12,7 @@ public class GameManager : MonoBehaviour {
 	//private Player player4;
 	public bool inNavigation = false;
 	public GameObject navPointerPrefab;
+	public Text goldText;
 
 	private List<Transform> alliedTransforms; 
 	private bool paused = false;

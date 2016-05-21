@@ -11,8 +11,10 @@ public class BigBird : MonoBehaviour {
 	public float rotateSpeed = .3f;
 	public float halfSecFill = 5f;
 	public int halfSecRepair = 5;
+	public int gold = 0;
 	public LandingPad nearestPad = null;
 
+	private GameManager gm;
 	private Rigidbody2D rb;
 	private Component[] dockTransforms;
 	private Quaternion targetRotation = Quaternion.identity;
@@ -29,6 +31,7 @@ public class BigBird : MonoBehaviour {
 
 
 	void Awake() {
+		gm = GameObject.FindObjectOfType<GameManager> ();
 		rb = GetComponent<Rigidbody2D> ();
 		pump = GetComponentInChildren<Pump> ();
 		medkit = GetComponentInChildren<Medkit> ();
@@ -64,6 +67,15 @@ public class BigBird : MonoBehaviour {
 		}
 		else if (other.name == "LandingPad") {
 			nearestPad = other.GetComponent<LandingPad> ();
+		}
+	}
+
+	void OnCollisionEnter2D (Collision2D coll) {
+		print (coll.gameObject.name);
+		if (coll.gameObject.name == "Gold") {
+			gold++;
+			gm.goldText.text = gold.ToString ();
+			Destroy (coll.gameObject);
 		}
 	}
 
@@ -153,7 +165,7 @@ public class BigBird : MonoBehaviour {
 	}
 
 
-	public void DockBird (Bird b) {
+	public void AddToDockedBirds (Bird b) {
 		dockedBirds.Add (b);
 
 		if (birdGettingGas == null) {
@@ -171,7 +183,7 @@ public class BigBird : MonoBehaviour {
 		}
 	}
 
-	public void UndockBird (Bird b) {
+	public void RemoveFromDockedBirds (Bird b) {
 		dockedBirds.Remove (b);
 		if (birdGettingGas == b) {
 			birdGettingGas = null;

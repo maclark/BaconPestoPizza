@@ -47,8 +47,25 @@ public class Harpoon : MonoBehaviour {
 	}
 
 	void OnTriggerEnter2D (Collider2D other) {
-		if (other.tag == "Harpoonable") {
-			HarpoonObject (other.gameObject);
+		if (other.tag == "Player") {
+			Bird pBird = other.gameObject.GetComponent<Bird> ();
+			if (harpooner.name == pBird.name) {
+				pBird.hasHarpoon = true;
+				Destroy (gameObject);
+			} else {
+				//implement linking
+				if (!recalling) {
+					HarpoonObject (pBird.gameObject);
+					pBird.otherHarps.Add (this);
+				}
+			}
+		}
+
+		else if (other.tag == "Harpoonable") {
+			if (!recalling) {
+				HarpoonObject (other.gameObject);
+				other.GetComponent<SpriteRenderer> ().sortingLayerName = "Birds";
+			}
 		}
 	}
 
@@ -103,11 +120,12 @@ public class Harpoon : MonoBehaviour {
 
 	public void HarpoonObject (GameObject harpoonRecipient) {
 		harpooned = harpoonRecipient;
+		//GetComponent<Rigidbody2D> ().isKinematic = false;
 		GetComponent<Rigidbody2D> ().Sleep ();
 		GetComponent<BoxCollider2D> ().enabled = false;
+		transform.position = harpooned.transform.position;
 
 		if (harpoonRecipient.tag == "Player") {
-			transform.position = harpooned.transform.position;
 			AttemptWeb ();
 		}
 		transform.parent = harpooned.transform;
@@ -121,6 +139,7 @@ public class Harpoon : MonoBehaviour {
 			}
 			harpooned = null;
 			transform.parent = null;
+			//GetComponent<Rigidbody2D> ().isKinematic = true;
 			GetComponent<Rigidbody2D> ().WakeUp ();
 			GetComponent<BoxCollider2D> ().enabled = true;
 		}

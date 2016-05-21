@@ -10,7 +10,7 @@ public class Bird : MonoBehaviour {
 	public int maxHealth = 100;
 	public float accelerationMagnitude = 60f;
 	public float fireRate = .1f;
-	public float releaseBoost = 60f;
+	public float boostAccel = 60f;
 	public bool docked = false;
 	public float flashGap = 1f;
 	public float flashDuration = .15f;
@@ -28,6 +28,7 @@ public class Bird : MonoBehaviour {
 	public GameObject harpoonPrefab;
 	public GameObject gasLightPrefab;
 	public List<Bird> linkedBirds;
+	public List<Harpoon> otherHarps;
 
 
 	[HideInInspector]
@@ -46,7 +47,6 @@ public class Bird : MonoBehaviour {
 	private Rigidbody2D rb;
 	private GameManager gm;
 	private BigBird bigBird;
-	private List<Harpoon> otherHarps;
 	private Dock dock = null;
 	private GameObject gasLight;
 	private float startAccelerationgMagnitude;
@@ -120,17 +120,12 @@ public class Bird : MonoBehaviour {
 				Destroy (other.gameObject);
 			}
 		}
-		else if (other.name == "Harpoon") {
-			if (other.GetComponent<Harpoon> ().GetHarpooner ().name == gameObject.name) {
-				hasHarpoon = true;
-				Destroy (other.gameObject);
-			} else {
-				//implement linking
-				Harpoon otherHarp = other.GetComponent<Harpoon> ();
-				if (!otherHarp.recalling) {
-					otherHarp.HarpoonObject (gameObject);
-					otherHarps.Add (otherHarp);
-				}
+	}
+
+	void OnCollisionEnter2D (Collision2D coll) {
+		if (coll.gameObject.name == "BigBird") {
+			if (!docked) {
+				Dock ();
 			}
 		}
 	}
@@ -278,16 +273,19 @@ public class Bird : MonoBehaviour {
 			
 	public bool Dock () {
 		dock = bigBird.GetNearestOpenDock (transform.position);
-		if (dock) {
-			dock.bird = this;
-			if (dock.transform.parent == bigBird.transform) {
-				transform.position = dock.transform.position;
-				bigBird.DockBird (this);
-				docked = true;
-			}
-		} else {
+		if (!dock) {
 			docked = false;
 			return docked;
+		}
+
+		transform.position = dock.transform.position;
+		transform.parent = dock.transform;
+		dock.bird = this;
+		docked = true;
+		dock.gameObject.layer = LayerMask.NameToLayer ("Stations");
+
+		if (dock.transform.parent == bigBird.transform) {
+			bigBird.AddToDockedBirds (this);
 		}
 
 		if (otherHarps.Count > 0) {
@@ -299,7 +297,12 @@ public class Bird : MonoBehaviour {
 			otherHarps.Clear ();
 		}
 
-		transform.parent = bigBird.transform;
+		if (harp) {
+			harp.DetachAndRecall ();
+			Destroy (harp.gameObject);
+			hasHarpoon = true;
+		}
+
 		GetComponent<BoxCollider2D> ().enabled = false;
 		GetComponent<SpriteRenderer> ().color = color;
 		GetComponent<SpriteRenderer> ().sortingLayerName = "BigBird";
@@ -311,18 +314,14 @@ public class Bird : MonoBehaviour {
 		gasLightFlashing = false;
 		ranOutOfGas = false;
 		Destroy (gasLight);
-
 		firing = false;
 		CancelInvoke ();
+
 		if (p) {
 			dock.GetComponent<BoxCollider2D> ().enabled = false;
+			p.GetComponent<PlayerInput> ().station = dock.transform;
 			p.GetComponent<PlayerInput> ().state = PlayerInput.State.docked;
 			p.GetComponent<PlayerInput> ().CancelInvoke ();
-		}
-		if (harp) {
-			harp.DetachAndRecall ();
-			Destroy (harp.gameObject);
-			hasHarpoon = true;
 		}
 
 		return docked;
@@ -334,9 +333,11 @@ public class Bird : MonoBehaviour {
 			return;
 		}
 		if (dock.transform.parent == bigBird.transform) {
-			bigBird.UndockBird (this);
-			dock.GetComponent<BoxCollider2D> ().enabled = true;
+			bigBird.RemoveFromDockedBirds (this);
 		}
+
+		dock.GetComponent<BoxCollider2D> ().enabled = true;
+		dock.gameObject.layer = LayerMask.NameToLayer ("Default");
 		docked = false;
 		dock.bird = null;
 		dock = null;
@@ -345,7 +346,7 @@ public class Bird : MonoBehaviour {
 		rb.WakeUp ();
 		Vector3 releaseDirection = transform.position - bigBird.transform.position;
 		releaseDirection.Normalize ();
-		rb.AddForce (releaseDirection * releaseBoost * rb.mass);
+		rb.AddForce (releaseDirection * boostAccel * rb.mass);
 		Invoke ("EnableCollider", .5f);
 		GetComponent<SpriteRenderer> ().sortingLayerName = "Birds";
 		GetComponent<SpriteRenderer> ().sortingOrder = 0;
@@ -432,7 +433,7 @@ public class Bird : MonoBehaviour {
 	public IEnumerator Boost () {
 		canBoost = false;
 		gas -= gasPerBoost;
-		accelerationMagnitude = releaseBoost;
+		accelerationMagnitude = boostAccel;
 		yield return new WaitForSeconds (boostCooldown);
 		canBoost = true;
 	}
