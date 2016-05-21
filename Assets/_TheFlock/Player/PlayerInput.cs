@@ -6,7 +6,6 @@ public class PlayerInput : MonoBehaviour {
 	public Turret turret;
 	public float doubleTapThreshold = .5f;
 	public string joystick = "unset";
-	public bool playerStarted = false;
 	public LayerMask mask;
 
 	public bool checkingInput = false;
@@ -24,9 +23,9 @@ public class PlayerInput : MonoBehaviour {
 	public string LB = "LB";
 	public string RB = "RB";
 
-	public enum State {flying, changingStations, docked, onTurret, inCockpit}
+	public enum State {neutral, flying, changingStations, docked, onTurret, inCockpit}
 	public State state = State.docked;
-	public State selectedState = State.docked;
+	public State selectedState = State.neutral;
 	private GameManager gm;
 	private SpriteRenderer sr;
 	private BigBird bigBird;
@@ -79,7 +78,7 @@ public class PlayerInput : MonoBehaviour {
 
 		#endregion
 
-		if (!playerStarted) {
+		if (joystick == "unset") {
 			if (Input.GetButtonDown (menuButton)) {
 				if (menuButton == "Menu_P1") {
 					joystick = "_P1";
@@ -104,10 +103,6 @@ public class PlayerInput : MonoBehaviour {
 			} else {
 				SetButtonNames ();
 				p.StartPlayer ();
-				state = State.docked;
-				station = p.b.GetDock ().transform;
-				playerStarted = true;
-				joystick = "set";
 			}
 			return;
 		}
@@ -120,8 +115,8 @@ public class PlayerInput : MonoBehaviour {
 			HandleFlyingInput ();
 		}
 
-		if (Input.GetButtonDown (bButton)) {
-			state = State.changingStations;
+		if (state != State.flying && Input.GetButtonDown (bButton)) {
+			PrepareToChangeStations ();
 		}
 
 		if (state == State.changingStations) {
@@ -181,6 +176,14 @@ public class PlayerInput : MonoBehaviour {
 		p.b.FireBullet ();
 	}
 
+	void PrepareToChangeStations () {
+		if (state == State.docked) {
+			p.UnboardBird (bigBird.transform);
+		}
+		p.navigating = false;
+		state = State.changingStations;
+	}
+
 	void HandleChangingStations () {
 		if (Input.GetButtonUp(bButton)) {
 			state = selectedState;
@@ -189,37 +192,34 @@ public class PlayerInput : MonoBehaviour {
 		} 
 
 		sr.enabled = true;
-		int stationsMask = LayerMask.NameToLayer ("Stations");
-		int nonStationsMask = ~stationsMask;
 		RaycastHit2D hit = Physics2D.Raycast (transform.position, new Vector2 (Input.GetAxis(LSHorizontal), Input.GetAxis(LSVertical)), Mathf.Infinity, mask);
 		if (hit) {
-			if (hit.collider.name == "Cockpit") {
+			if (station) {
 				station.GetComponent<BoxCollider2D> ().enabled = true;
-				station = hit.collider.transform;
-				station.GetComponent<BoxCollider2D> ().enabled = false;
-				transform.position = station.position;
+			}
+			station = hit.collider.transform;
+			station.GetComponent<BoxCollider2D> ().enabled = false;
+			transform.position = station.position;
+
+			if (hit.collider.name == "Cockpit") {
 				selectedState = State.inCockpit;
 			} else if (hit.collider.name == "Dock") {
-				station.GetComponent<BoxCollider2D> ().enabled = true;
-				station = hit.collider.transform;
-				station.GetComponent<BoxCollider2D> ().enabled = false;
-				//p.BoardBird (station.GetComponent<Bird> ());
-				transform.position = station.position;
 				selectedState = State.docked;
 			} else if (hit.collider.name == "Turret") {
-				station.GetComponent<BoxCollider2D> ().enabled = true;
-				station = hit.collider.transform;
-				station.GetComponent<BoxCollider2D> ().enabled = false;
-				transform.position = station.position;
+				turret = station.GetComponent<Turret> ();
 				selectedState = State.onTurret;
 			}
 		}
 	}
 
 	void HandleDockedInput () {
+		if (p.b == null) {
+			p.BoardBird (station.GetComponent<Dock> ().bird);
+		}
+
 		if (Input.GetButtonDown (aButton)) {
-			if (p.b) {
-				p.b.Undock ();
+			p.b.Undock ();
+			if (!p.b.docked) {
 				state = State.flying;
 			}
 		}
@@ -237,6 +237,20 @@ public class PlayerInput : MonoBehaviour {
 	}
 
 	void HandlePilotingInput () {
+		if (bigBird.Landed) {
+			if (Input.GetButtonDown (aButton)) {
+				bigBird.LiftOff ();
+			}
+			return;
+		}
+
+		if (Input.GetButtonDown (aButton)) {
+			if (bigBird.nearestPad) {
+				bigBird.SetDown (bigBird.nearestPad);
+				return;
+			}
+		}
+
 		float x = Input.GetAxis (LSHorizontal);
 		float y = Input.GetAxis(LSVertical); 
 
@@ -254,14 +268,7 @@ public class PlayerInput : MonoBehaviour {
 				bigBird.TurnEngineOn ();
 			}
 		}
-
-		if (Input.GetButtonDown (aButton)) {
-			p.navigating = !p.navigating;
-			gm.TogglePause ();
-			gm.ToggleNavPanel (LSHorizontal, LSVertical);
-		}
 	}
-		
 
 	void SetButtonNames () {
 		LSHorizontal = "LS_Horizontal" + joystick;

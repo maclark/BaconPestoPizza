@@ -11,13 +11,17 @@ public class BigBird : MonoBehaviour {
 	public float rotateSpeed = .3f;
 	public float halfSecFill = 5f;
 	public int halfSecRepair = 5;
+	public LandingPad nearestPad = null;
 
 	private Rigidbody2D rb;
 	private Component[] dockTransforms;
 	private Quaternion targetRotation = Quaternion.identity;
 	private bool engineOn = false;
+	private bool landed = false;
 	private Bird birdGettingRepairs = null;
 	private Bird birdGettingGas = null;
+	private Pump pump;
+	private Medkit medkit;
 	private Thruster[] thrusters;
 	private List<Bird> dockedBirds = new List<Bird> ();
 	private List<Bird> gasLine = new List<Bird> ();
@@ -26,10 +30,12 @@ public class BigBird : MonoBehaviour {
 
 	void Awake() {
 		rb = GetComponent<Rigidbody2D> ();
+		pump = GetComponentInChildren<Pump> ();
+		medkit = GetComponentInChildren<Medkit> ();
+		thrusters = GetComponentsInChildren<Thruster> ();
 	}
 
 	void Start () {
-		thrusters = GetComponentsInChildren<Thruster> ();
 	}
 
 	void FixedUpdate () {
@@ -37,7 +43,7 @@ public class BigBird : MonoBehaviour {
 			rb.AddForce (transform.up * accelerationMagnitude * rb.mass);
 		}
 
-		if (turning) {
+		if (turning && !landed) {
 			transform.rotation = Quaternion.Lerp (transform.rotation, targetRotation, Time.deltaTime * rotateSpeed);
 		}
 	}
@@ -55,6 +61,17 @@ public class BigBird : MonoBehaviour {
 		else if (other.name == "Web") {
 			TurnEngineOn ();
 			accelerationMagnitude = 10 * accelerationMagnitude;
+		}
+		else if (other.name == "LandingPad") {
+			nearestPad = other.GetComponent<LandingPad> ();
+		}
+	}
+
+	void OnTriggerExit2D (Collider2D other) {
+		if (other.name == "LandingPad") {
+			if (nearestPad == other.GetComponent<LandingPad> ()) {
+				nearestPad = null;
+			}
 		}
 	}
 
@@ -110,7 +127,7 @@ public class BigBird : MonoBehaviour {
 	void Die() {
 		//gm.RemoveAlliedTransform (transform);
 		GetComponent<SpriteRenderer> ().color = Color.red;
-		print ("big bird dead, need to recursively call children's Die()");
+		//TODO print ("big bird dead, need to recursively call children's Die()");
 	}
 
 	public void SetTargetRotationZAngle (float zAngle) {
@@ -168,12 +185,16 @@ public class BigBird : MonoBehaviour {
 		if (b == null) {
 			if (repairLine.Count > 0) {
 				Bird nextInLine = repairLine [repairLine.Count - 1];
-				gasLine.Remove (repairLine [repairLine.Count - 1]);
+				repairLine.Remove (repairLine [repairLine.Count - 1]);
 				StartCoroutine (RepairBird (nextInLine));
-			} else yield break;
+			} else {
+				medkit.transform.position = transform.position;
+				yield break;
+			}
 		}
 
 		birdGettingRepairs = b;
+		medkit.transform.position = b.transform.position;
 		b.health += halfSecRepair;
 		yield return new WaitForSeconds (.5f);
 		if (b.health > b.maxHealth) {
@@ -184,6 +205,7 @@ public class BigBird : MonoBehaviour {
 				StartCoroutine (RepairBird (nextInLine));
 			} else {
 				birdGettingRepairs = null;
+				medkit.transform.position = transform.position;
 			}
 		} else {
 			StartCoroutine (RepairBird (birdGettingRepairs));
@@ -192,8 +214,10 @@ public class BigBird : MonoBehaviour {
 
 	IEnumerator FillBirdTank (Bird b) {
 		if (b == null) {
+			pump.ResetHose ();
 			yield break;
 		}
+		pump.MoveToBirdPos (b.transform.position);
 		birdGettingGas = b;
 		b.gas += halfSecFill;
 		yield return new WaitForSeconds (.5f);
@@ -205,9 +229,41 @@ public class BigBird : MonoBehaviour {
 				StartCoroutine (FillBirdTank (nextInLine));
 			} else {
 				birdGettingGas = null;
+				pump.ResetHose ();
 			}
 		} else {
 			StartCoroutine (FillBirdTank (birdGettingGas));
+		}
+	}
+
+	public void SetDown (LandingPad pad) {
+		landed = true;
+		TurnEngineOff ();
+
+		StartCoroutine (LandingApproach (pad));
+
+		transform.parent = pad.transform;
+		rb.velocity = Vector3.zero;
+		rb.angularVelocity = 0f;
+		rb.Sleep ();
+	}
+
+	public void LiftOff () {
+		TurnEngineOn ();
+		rb.WakeUp ();
+		transform.parent = null;
+		landed = false;
+	}
+
+	IEnumerator LandingApproach (LandingPad pad) {
+		yield return new WaitForSeconds (1f);
+		transform.position = pad.transform.position + pad.landingMarkOffset;
+		transform.rotation = pad.transform.rotation;
+	}
+
+	public bool Landed {
+		get {
+			return landed;
 		}
 	}
 }

@@ -3,12 +3,16 @@ using System.Collections;
 
 public class Bullet : Projectile {
 
+	public int bulletDamage = 100;
 	public Vector2 direction = Vector2.zero;
 	public float accelerationMagnitude = 100f;
-	public int damage = 100;
 
 	void Awake () {
 		base.OnAwake ();
+	}
+
+	void Start () {
+		damage = bulletDamage;
 	}
 
 	public void SetDirection (Vector2 dir) {

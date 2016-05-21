@@ -214,7 +214,7 @@ public class Bird : MonoBehaviour {
 		Rigidbody2D rbOther;
 		float totalMass = rb.mass;
 		if (harp.GetHarpooned () != null) {
-			rbOther = harp.GetHarpooned ().GetComponent<Bird> ().GetComponent<Rigidbody2D> ();
+			rbOther = harp.GetHarpooned ().GetComponent<Rigidbody2D> ();
 			totalMass += rbOther.mass;
 		} else {
 			rbOther = harp.GetComponent<Rigidbody2D> ();
@@ -281,8 +281,8 @@ public class Bird : MonoBehaviour {
 		if (dock) {
 			dock.bird = this;
 			if (dock.transform.parent == bigBird.transform) {
+				transform.position = dock.transform.position;
 				bigBird.DockBird (this);
-				dock.GetComponent<BoxCollider2D> ().enabled = false;
 				docked = true;
 			}
 		} else {
@@ -299,10 +299,11 @@ public class Bird : MonoBehaviour {
 			otherHarps.Clear ();
 		}
 
-		transform.Translate (dock.transform.position - transform.position);
 		transform.parent = bigBird.transform;
 		GetComponent<BoxCollider2D> ().enabled = false;
 		GetComponent<SpriteRenderer> ().color = color;
+		GetComponent<SpriteRenderer> ().sortingLayerName = "BigBird";
+		GetComponent<SpriteRenderer> ().sortingOrder = 1;
 		rb.Sleep ();
 
 		damaged = false;
@@ -314,6 +315,8 @@ public class Bird : MonoBehaviour {
 		firing = false;
 		CancelInvoke ();
 		if (p) {
+			dock.GetComponent<BoxCollider2D> ().enabled = false;
+			p.GetComponent<PlayerInput> ().state = PlayerInput.State.docked;
 			p.GetComponent<PlayerInput> ().CancelInvoke ();
 		}
 		if (harp) {
@@ -344,6 +347,8 @@ public class Bird : MonoBehaviour {
 		releaseDirection.Normalize ();
 		rb.AddForce (releaseDirection * releaseBoost * rb.mass);
 		Invoke ("EnableCollider", .5f);
+		GetComponent<SpriteRenderer> ().sortingLayerName = "Birds";
+		GetComponent<SpriteRenderer> ().sortingOrder = 0;
 	}
 
 	void EnableCollider () {
@@ -435,18 +440,6 @@ public class Bird : MonoBehaviour {
 	IEnumerator Reload () {
 		yield return new WaitForSeconds (reloadSpeed);
 		roundsLeftInClip = clipSize;
-	}
-
-	float CalculatePullMag (Vector3 dir, float forceMag) {
-		float pullMagnitude = Vector3.Dot (dir * forceMag, pullDir);
-		return pullMagnitude;
-	}
-
-	float CalculateOrthoPullMag (Vector3 dir, float forceMag) {
-		orthoPullDir = new Vector3 (-pullDir.y, pullDir.x, 0);
-		orthoPullDir.Normalize ();
-		float orthoPullMagnitude = Vector3.Dot (dir * forceMag, orthoPullDir);
-		return orthoPullMagnitude;
 	}
 
 	void LowOnGas () {

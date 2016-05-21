@@ -3,6 +3,7 @@ using System.Collections;
 
 public class Projectile : MonoBehaviour {
 
+	public int damage;
 	protected float accel;
 	protected Rigidbody2D rb;
 
@@ -11,7 +12,6 @@ public class Projectile : MonoBehaviour {
 	}
 
 	protected virtual void OnStart () {
-
 	}
 	
 	protected virtual void OnUpdate () {

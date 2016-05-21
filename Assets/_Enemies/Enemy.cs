@@ -46,8 +46,11 @@ public class Enemy : MonoBehaviour {
 
 	void OnTriggerEnter2D ( Collider2D other) {
 		if (other.tag == "PlayerBullet") {
-			TakeDamage (other.GetComponent<Bullet> ().damage);
+			TakeDamage (other.GetComponent<Projectile> ().damage);
 			other.GetComponent<Bullet> ().Die ();
+		}
+		else if (other.tag == "Explosion") {
+			TakeDamage (other.GetComponent<Projectile> ().damage);
 		}
 	}
 

@@ -5,19 +5,17 @@ public class Player : MonoBehaviour {
 
 	public Bird b = null;
 	public bool navigating = false;
+	public Station station;
 
-	private BigBird bigBird;
+	private PlayerInput pi;
 
 	void Awake () {
-		bigBird = GameObject.FindObjectOfType<BigBird>() as BigBird;
+		pi = GetComponent<PlayerInput> ();
 	}
 
 	public void StartPlayer () {
-		Bird nearestBird = bigBird.GetNearestFreeBird (transform.position);
-		if (nearestBird) {
-			BoardBird (nearestBird);
-			GetComponent<SpriteRenderer> ().enabled = false;
-		}
+		GetComponent<SpriteRenderer> ().enabled = true;
+		pi.state = PlayerInput.State.neutral;
 	}
 
 	public void BoardBird (Bird bird) {
@@ -30,5 +28,14 @@ public class Player : MonoBehaviour {
 		transform.position = b.transform.position;
 		transform.parent = b.transform;
 		GetComponent<SpriteRenderer> ().enabled = false;
+	}
+
+	public void UnboardBird (Transform newParent) {
+		GetComponent<SpriteRenderer> ().enabled = true;
+		transform.parent = newParent;
+		b.p = null;
+		b.color = Color.black;
+		b.GetComponent<SpriteRenderer>().color = Color.black;
+		b = null;
 	}
 }

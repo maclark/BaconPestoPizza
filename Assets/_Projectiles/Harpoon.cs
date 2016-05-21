@@ -17,6 +17,7 @@ public class Harpoon : MonoBehaviour {
 	public GameObject webPrefab;
 
 	private Rigidbody2D rb;
+	private LineRenderer lr;
 	private Vector3[] tetherPositions = new Vector3[2];
 	private GameObject harpooner = null;
 	private GameObject harpooned = null;
@@ -26,9 +27,8 @@ public class Harpoon : MonoBehaviour {
 	}
 
 	void Start () {
-		//#TODO make tehter appear over ships?
-		//GetComponent<LineRenderer> ().sortingLayerID = GetComponentInChildren<SpriteRenderer> ().sortingLayerID;
-		//GetComponent<LineRenderer> ().sortingOrder = GetComponentInChildren<SpriteRenderer> ().sortingOrder;
+		lr = GetComponent<LineRenderer> ();
+		lr.sortingLayerName = GetComponentInChildren<SpriteRenderer>().sortingLayerName;
 	}
 
 	void Update () {
@@ -43,6 +43,12 @@ public class Harpoon : MonoBehaviour {
 			Vector3 detachDir = harpooner.transform.position - transform.position;
 			detachDir.Normalize ();
 			rb.AddForce (detachDir * recallAccelerationMag * rb.mass);
+		}
+	}
+
+	void OnTriggerEnter2D (Collider2D other) {
+		if (other.tag == "Harpoonable") {
+			HarpoonObject (other.gameObject);
 		}
 	}
 
@@ -63,7 +69,6 @@ public class Harpoon : MonoBehaviour {
 	}
 
 	void DrawTether () {
-		LineRenderer lr = GetComponent<LineRenderer> ();
 		tetherPositions [0] = harpooner.transform.position;
 
 		if (harpooned != null) {

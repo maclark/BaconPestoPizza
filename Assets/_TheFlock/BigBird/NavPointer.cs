@@ -5,12 +5,12 @@ public class NavPointer : MonoBehaviour {
 
 	public float navPointSpeed;
 
-
 	private string LSHorizontal;
 	private string LSVertical;
 	private Vector2 direction = Vector2.zero;
 	private float realTimeOfLastUpdate = 0f;
 	private GameManager gm;
+	private Vector3[] positions = new Vector3[2];
 
 	void Awake () {
 		gm = GameObject.FindGameObjectWithTag ("GameManager").GetComponent<GameManager> ();
@@ -38,7 +38,6 @@ public class NavPointer : MonoBehaviour {
 	}
 
 	void DrawNavLine () {
-		Vector3[] positions = new Vector3[2];
 		positions [0] = gm.bigBird.transform.position;
 		positions [1] = transform.position;
 		GetComponent<LineRenderer> ().SetPositions (positions);
