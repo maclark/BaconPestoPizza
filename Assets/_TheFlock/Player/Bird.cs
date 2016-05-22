@@ -25,11 +25,12 @@ public class Bird : MonoBehaviour {
 	public float gasPerSecond = 1f;
 	public float gasPerBoost = 2f;
 	public float gasLightDelay = .2f;
+	public float dockedScaleFactor = .75f;
+	public float harpHurlOffset = 1f;
 	public GameObject harpoonPrefab;
 	public GameObject gasLightPrefab;
 	public List<Bird> linkedBirds;
 	public List<Harpoon> otherHarps;
-
 
 	[HideInInspector]
 	public Color color;
@@ -49,6 +50,7 @@ public class Bird : MonoBehaviour {
 	private BigBird bigBird;
 	private Dock dock = null;
 	private GameObject gasLight;
+	private float startScaleFactor;
 	private float startAccelerationgMagnitude;
 	private bool ranOutOfGas = false;
 	private bool gasLightFlashing = false;
@@ -57,6 +59,7 @@ public class Bird : MonoBehaviour {
 		rb = GetComponent<Rigidbody2D> ();
 		gm = GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager> ();
 		bigBird = GameObject.FindObjectOfType<BigBird>() as BigBird;
+		startScaleFactor = transform.localScale.x;
 	}
 
 	void Start () {
@@ -102,12 +105,7 @@ public class Bird : MonoBehaviour {
 
 
 	void OnTriggerEnter2D (Collider2D other) {
-		if (other.name == "BigBird") {
-			if (!docked) {
-				Dock ();
-			}
-		}
-		else if (other.tag == "EnemyBullet") {
+		if (other.tag == "EnemyBullet") {
 			if (!invincible) {
 				print ("hit enemy bullet");
 				TakeDamage (other.GetComponent<Bullet> ().damage);
@@ -124,9 +122,12 @@ public class Bird : MonoBehaviour {
 
 	void OnCollisionEnter2D (Collision2D coll) {
 		if (coll.gameObject.name == "BigBird") {
-			if (!docked) {
-				Dock ();
-			}
+			Dock ();
+		}
+	}
+
+	void OnCollisionExit2D (Collision2D coll) {
+		if (coll.gameObject.name == "BigBird") {
 		}
 	}
 
@@ -278,36 +279,19 @@ public class Bird : MonoBehaviour {
 			return docked;
 		}
 
-		transform.position = dock.transform.position;
-		transform.parent = dock.transform;
 		dock.bird = this;
 		docked = true;
 		dock.gameObject.layer = LayerMask.NameToLayer ("Stations");
 
-		if (dock.transform.parent == bigBird.transform) {
-			bigBird.AddToDockedBirds (this);
-		}
-
-		if (otherHarps.Count > 0) {
-			print ("otherHarps.Count : " + otherHarps.Count);
-			foreach (Harpoon h in otherHarps) {
-				//#TODO maybe make harpooner/harpooned not public, bc every time you change those, you need to do other shit 
-				h.DetachAndRecall (true);
-			}
-			otherHarps.Clear ();
-		}
-
-		if (harp) {
-			harp.DetachAndRecall ();
-			Destroy (harp.gameObject);
-			hasHarpoon = true;
-		}
-
-		GetComponent<BoxCollider2D> ().enabled = false;
+		DisableColliders ();
 		GetComponent<SpriteRenderer> ().color = color;
 		GetComponent<SpriteRenderer> ().sortingLayerName = "BigBird";
 		GetComponent<SpriteRenderer> ().sortingOrder = 1;
 		rb.Sleep ();
+
+		transform.localScale = new Vector3 (dockedScaleFactor, dockedScaleFactor, 1);
+		transform.position = dock.transform.position;
+		transform.parent = dock.transform;
 
 		damaged = false;
 		invincible = false;
@@ -322,6 +306,24 @@ public class Bird : MonoBehaviour {
 			p.GetComponent<PlayerInput> ().station = dock.transform;
 			p.GetComponent<PlayerInput> ().state = PlayerInput.State.docked;
 			p.GetComponent<PlayerInput> ().CancelInvoke ();
+		}
+
+		if (dock.transform.parent == bigBird.transform) {
+			bigBird.AddToDockedBirds (this);
+			//close
+		}
+
+		if (otherHarps.Count > 0) {
+			foreach (Harpoon h in otherHarps) {
+				h.DetachAndRecall (true);
+			}
+			otherHarps.Clear ();
+		}
+
+		if (harp) {
+			harp.DetachAndRecall ();
+			Destroy (harp.gameObject);
+			hasHarpoon = true;
 		}
 
 		return docked;
@@ -341,19 +343,31 @@ public class Bird : MonoBehaviour {
 		docked = false;
 		dock.bird = null;
 		dock = null;
+
 		transform.parent = null;
+		transform.localScale = new Vector3 (startScaleFactor, startScaleFactor, 1);
 		transform.rotation = Quaternion.identity;
 		rb.WakeUp ();
 		Vector3 releaseDirection = transform.position - bigBird.transform.position;
 		releaseDirection.Normalize ();
 		rb.AddForce (releaseDirection * boostAccel * rb.mass);
-		Invoke ("EnableCollider", .5f);
+		Invoke ("EnableColliders", .5f);
 		GetComponent<SpriteRenderer> ().sortingLayerName = "Birds";
 		GetComponent<SpriteRenderer> ().sortingOrder = 0;
 	}
 
-	void EnableCollider () {
-		GetComponent<BoxCollider2D> ().enabled = true;
+	void EnableColliders () {
+		Collider2D[] colls = GetComponentsInChildren<Collider2D> (true);
+		foreach (Collider2D coll in colls) {
+			coll.enabled = true;
+		}
+	}
+
+	void DisableColliders () {
+		Collider2D[] colls = GetComponentsInChildren<Collider2D> ();
+		foreach (Collider2D coll in colls) {
+			coll.enabled = false;
+		}
 	}
 
 	IEnumerator FlashDamage (float timeAtDamage) {
@@ -399,13 +413,7 @@ public class Bird : MonoBehaviour {
 			//Offset harp so it doesn't immediately collide with ship
 			Vector3 aim3 = new Vector3 (aim.x, aim.y, 0);
 			aim3.Normalize ();
-			float x = GetComponent<BoxCollider2D> ().size.x;
-			float y = GetComponent<BoxCollider2D> ().size.y;
-			float d = Mathf.Sqrt (x * x + y * y);
-			Vector3 startPosition = transform.position + aim3 * d;
-
-			GameObject harpoon = Instantiate (harpoonPrefab, transform.position, transform.rotation) as GameObject;
-			harpoon.transform.position = startPosition;
+			GameObject harpoon = Instantiate (harpoonPrefab, transform.position + aim3 * harpHurlOffset, transform.rotation) as GameObject;
 			harpoon.name = "Harpoon";
 			harp = harpoon.GetComponent<Harpoon> ();
 			harp.SetHarpooner (gameObject);

@@ -131,6 +131,7 @@ public class PlayerInput : MonoBehaviour {
 	}
 
 	void HandleFlyingInput () {
+
 		p.b.direction = new Vector2( Input.GetAxis(LSHorizontal), Input.GetAxis(LSVertical));
 		if (p.b.gas <= 0) {
 			p.b.direction = Vector2.zero;

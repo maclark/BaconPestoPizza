@@ -13,11 +13,13 @@ public class BigBird : MonoBehaviour {
 	public int halfSecRepair = 5;
 	public int gold = 0;
 	public LandingPad nearestPad = null;
+	public float landedScale = 15f;
 
 	private GameManager gm;
 	private Rigidbody2D rb;
 	private Component[] dockTransforms;
 	private Quaternion targetRotation = Quaternion.identity;
+	private float startScale;
 	private bool engineOn = false;
 	private bool landed = false;
 	private Bird birdGettingRepairs = null;
@@ -36,6 +38,7 @@ public class BigBird : MonoBehaviour {
 		pump = GetComponentInChildren<Pump> ();
 		medkit = GetComponentInChildren<Medkit> ();
 		thrusters = GetComponentsInChildren<Thruster> ();
+		startScale = transform.localScale.x;
 	}
 
 	void Start () {
@@ -48,6 +51,7 @@ public class BigBird : MonoBehaviour {
 
 		if (turning && !landed) {
 			transform.rotation = Quaternion.Lerp (transform.rotation, targetRotation, Time.deltaTime * rotateSpeed);
+			rb.angularVelocity = 0f;
 		}
 	}
 
@@ -71,11 +75,12 @@ public class BigBird : MonoBehaviour {
 	}
 
 	void OnCollisionEnter2D (Collision2D coll) {
-		print (coll.gameObject.name);
-		if (coll.gameObject.name == "Gold") {
-			gold++;
-			gm.goldText.text = gold.ToString ();
-			Destroy (coll.gameObject);
+		if (coll.gameObject.tag == "Harpoonable") {
+			if (coll.gameObject.GetComponent<Harpoonable> ().isGold) {
+				gold++;
+				gm.goldText.text = gold.ToString ();
+				coll.transform.GetComponent<Harpoonable> ().Die ();
+			}
 		}
 	}
 
@@ -254,7 +259,6 @@ public class BigBird : MonoBehaviour {
 
 		StartCoroutine (LandingApproach (pad));
 
-		transform.parent = pad.transform;
 		rb.velocity = Vector3.zero;
 		rb.angularVelocity = 0f;
 		rb.Sleep ();
@@ -262,15 +266,18 @@ public class BigBird : MonoBehaviour {
 
 	public void LiftOff () {
 		TurnEngineOn ();
-		rb.WakeUp ();
 		transform.parent = null;
+		transform.localScale = new Vector3 (startScale, startScale, 1);
+		rb.WakeUp ();
 		landed = false;
 	}
 
 	IEnumerator LandingApproach (LandingPad pad) {
 		yield return new WaitForSeconds (1f);
+		transform.localScale = new Vector3 (landedScale, landedScale, 1);
 		transform.position = pad.transform.position + pad.landingMarkOffset;
 		transform.rotation = pad.transform.rotation;
+		transform.parent = pad.transform;
 	}
 
 	public bool Landed {
