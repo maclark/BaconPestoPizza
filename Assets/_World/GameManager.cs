@@ -7,6 +7,7 @@ public class GameManager : MonoBehaviour {
 
 	public GameObject bubblePrefab;
 	public BigBird bigBird;
+	public Vector3 birdScale = new Vector3 (1.25f, 1.25f, 1);
 	//public Player player1;
 	//private Player player2;
 	//private Player player3;

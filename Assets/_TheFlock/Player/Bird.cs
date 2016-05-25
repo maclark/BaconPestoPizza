@@ -9,7 +9,7 @@ public class Bird : MonoBehaviour {
 	public int health = 100;
 	public int maxHealth = 100;
 	public float accelerationMagnitude = 60f;
-	public float fireRate = .1f;
+
 	public float boostAccel = 60f;
 	public bool docked = false;
 	public float flashGap = 1f;
@@ -17,15 +17,13 @@ public class Bird : MonoBehaviour {
 	public float flashDampener = .1f;
 	public float hitInvincibilityDuration = .25f;
 	public float boostCooldown = 2f;
-	public int clipSize = 100;
-	public float reloadSpeed = .5f;
+
 	public float fullTank = 60f;
 	public float lowGasWarning = 10f;
 	public float gas = 60f;
 	public float gasPerSecond = 1f;
 	public float gasPerBoost = 2f;
 	public float gasLightDelay = .2f;
-	public float dockedScaleFactor = .75f;
 	public float harpHurlOffset = 1f;
 	public GameObject harpoonPrefab;
 	public GameObject gasLightPrefab;
@@ -34,12 +32,9 @@ public class Bird : MonoBehaviour {
 
 	[HideInInspector]
 	public Color color;
+	public bool damaged = false, invincible = false, canBoost = true, hasHarpoon = true;
 	[HideInInspector]
-	public int roundsLeftInClip;
-	[HideInInspector]
-	public bool firing = false, damaged = false, invincible = false, canBoost = true, hasHarpoon = true;
-	[HideInInspector]
-	public Vector2 direction = Vector2.zero, pullDir = Vector2.zero, orthoPullDir = Vector2.zero, aim = Vector2.zero;
+	public Vector2 direction = Vector2.zero, pullDir = Vector2.zero, orthoPullDir = Vector2.zero;
 	[HideInInspector]
 	public Harpoon harp;
 	[HideInInspector]
@@ -70,7 +65,6 @@ public class Bird : MonoBehaviour {
 		otherHarps = new List<Harpoon> ();
 		linkedBirds = new List<Bird> ();
 
-		roundsLeftInClip = clipSize;
 		startAccelerationgMagnitude = accelerationMagnitude;
 
 		Dock ();
@@ -109,7 +103,6 @@ public class Bird : MonoBehaviour {
 	void OnTriggerEnter2D (Collider2D other) {
 		if (other.tag == "EnemyBullet") {
 			if (!invincible) {
-				print ("hit enemy bullet");
 				TakeDamage (other.GetComponent<Bullet> ().damage);
 				other.GetComponent<Bullet> ().Die ();
 			}
@@ -295,7 +288,6 @@ public class Bird : MonoBehaviour {
 		sr.sortingOrder = 1;
 		rb.Sleep ();
 
-		transform.localScale = new Vector3 (dockedScaleFactor, dockedScaleFactor, 1);
 		transform.position = dock.transform.position;
 		transform.parent = dock.transform;
 
@@ -304,14 +296,14 @@ public class Bird : MonoBehaviour {
 		gasLightFlashing = false;
 		ranOutOfGas = false;
 		Destroy (gasLight);
-		firing = false;
 		CancelInvoke ();
 
 		if (p) {
 			dock.GetComponent<BoxCollider2D> ().enabled = false;
 			p.GetComponent<PlayerInput> ().station = dock.transform;
-			p.GetComponent<PlayerInput> ().state = PlayerInput.State.docked;
+			p.GetComponent<PlayerInput> ().state = PlayerInput.State.DOCKED;
 			p.GetComponent<PlayerInput> ().CancelInvoke ();
+			p.w.firing = false;
 		}
 
 		if (dock.transform.parent == bigBird.transform) {
@@ -377,13 +369,13 @@ public class Bird : MonoBehaviour {
 	}
 
 	IEnumerator FlashDamage (float timeAtDamage) {
-		if (docked)
-			yield break;
-		
+
 		Color startColor = sr.color;
 		sr.color = new Color (1, 0, 0, Mathf.Max(startColor.a, .5f));
-		//EditorApplication.Beep ();
 		yield return new WaitForSeconds (flashDuration);
+		if (docked) {
+			yield break;
+		}
 		sr.color = startColor;
 
 		if (damaged) {
@@ -394,22 +386,14 @@ public class Bird : MonoBehaviour {
 				yield break;
 			}
 			yield return new WaitForSeconds (Mathf.Max (0f, flashGap - flashGapModifier));
+			if (docked) {
+				yield break;
+			}
 			StartCoroutine (FlashDamage (timeAtDamage));
 		}
 	}
 
-	public void FireBullet () {
-		if (roundsLeftInClip > 0) {
-			Bullet bullet = GetComponent<ObjectPooler>().GetPooledObject ().GetComponent<Bullet> ();
-			bullet.gameObject.SetActive (true);
-			bullet.Fire (p.transform, aim);
-			roundsLeftInClip--;
-		}
 
-		if (roundsLeftInClip <= 0) {
-			StartCoroutine (Reload ());
-		}
-	}
 
 	/// <summary>
 	/// Hurls the harpoon.
@@ -417,13 +401,12 @@ public class Bird : MonoBehaviour {
 	public void HurlHarpoon () {
 		if (hasHarpoon) {
 			//Offset harp so it doesn't immediately collide with ship
-			Vector3 aim3 = new Vector3 (aim.x, aim.y, 0);
-			aim3.Normalize ();
-			GameObject harpoon = Instantiate (harpoonPrefab, transform.position + aim3 * harpHurlOffset, transform.rotation) as GameObject;
+			p.aim.Normalize ();
+			GameObject harpoon = Instantiate (harpoonPrefab, p.transform.position + p.aim * harpHurlOffset, transform.rotation) as GameObject;
 			harpoon.name = "Harpoon";
 			harp = harpoon.GetComponent<Harpoon> ();
 			harp.SetHarpooner (gameObject);
-			harp.Fire (harp.transform, aim);
+			harp.Fire (harp.transform, p.aim);
 			hasHarpoon = false;
 		}
 	}
@@ -434,15 +417,18 @@ public class Bird : MonoBehaviour {
 		}
 	}
 
-	IEnumerator Invincibility (float duration) {		
+	IEnumerator Invincibility (float duration) {	
 		invincible = true;
 		Color startColor = sr.color;
 		sr.color = new Color (startColor.r, startColor.g, startColor.b, .1f);
 		p.GetComponent<SpriteRenderer> ().color = sr.color;
 		yield return new WaitForSeconds (duration);
-		sr.color = new Color (startColor.r, startColor.g, startColor.b, 1f);
-		if(p) { 
-			p.GetComponent<SpriteRenderer> ().color = sr.color;
+		if (p) { 
+			p.GetComponent<SpriteRenderer> ().color = startColor;
+			sr.color = startColor;
+
+		} else {
+			sr.color = Color.black;
 		}
 		invincible = false;
 	}
@@ -453,11 +439,6 @@ public class Bird : MonoBehaviour {
 		accelerationMagnitude = boostAccel;
 		yield return new WaitForSeconds (boostCooldown);
 		canBoost = true;
-	}
-
-	IEnumerator Reload () {
-		yield return new WaitForSeconds (reloadSpeed);
-		roundsLeftInClip = clipSize;
 	}
 
 	void LowOnGas () {

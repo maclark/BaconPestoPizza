@@ -212,8 +212,8 @@ public class BigBird : MonoBehaviour {
 
 		birdGettingRepairs = b;
 		medkit.transform.position = b.transform.position;
-		b.health += halfSecRepair;
 		yield return new WaitForSeconds (.5f);
+		b.health += halfSecRepair;
 		if (b.health > b.maxHealth) {
 			b.health = b.maxHealth;
 			if (repairLine.Count > 0) {

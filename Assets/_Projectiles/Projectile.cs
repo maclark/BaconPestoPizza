@@ -17,9 +17,8 @@ public class Projectile : MonoBehaviour {
 	protected virtual void OnUpdate () {
 	}
 
-	public virtual void Fire (Transform start, Vector2 aim) {
-		transform.position = start.position;
-		transform.rotation = start.rotation;
+	public virtual void Fire (Vector3 start, Vector2 aim) {
+		transform.position = start;
 		aim.Normalize ();
 		rb.AddForce (aim * accel * rb.mass);
 	}

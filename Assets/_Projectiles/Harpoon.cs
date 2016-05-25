@@ -40,7 +40,7 @@ public class Harpoon : MonoBehaviour {
 
 	void FixedUpdate () {
 		if (recalling) {
-			Vector3 detachDir = harpooner.transform.position - transform.position;
+			Vector3 detachDir = harpooner.GetComponent<Bird> ().p.transform.position - transform.position;
 			detachDir.Normalize ();
 			rb.AddForce (detachDir * recallAccelerationMag * rb.mass);
 		}
@@ -86,7 +86,7 @@ public class Harpoon : MonoBehaviour {
 	}
 
 	void DrawTether () {
-		tetherPositions [0] = harpooner.transform.position;
+		tetherPositions [0] = harpooner.GetComponent<Bird> ().p.transform.position;
 
 		if (harpooned != null) {
 			tetherPositions [1] = harpooned.transform.position;
@@ -169,7 +169,7 @@ public class Harpoon : MonoBehaviour {
 
 	//#TODO what happens when objects cross a tether?
 	void CheckTetherCollision () {
-		RaycastHit2D[] hits = Physics2D.LinecastAll (transform.position, harpooner.transform.position);
+		RaycastHit2D[] hits = Physics2D.LinecastAll (transform.position, harpooner.GetComponent<Bird> ().p.transform.position);
 		for (int i = 0; i < hits.Length; i++) {
 			Transform t = hits [i].transform;
 			if (t.name != name && t.name != harpooner.name && t.name != harpooned.name) {

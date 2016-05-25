@@ -10,6 +10,7 @@ public class PlayerInput : MonoBehaviour {
 	public Transform station;
 
 	public bool checkingInput = false;
+	public bool releasedRightTrigger = true;
 	public string LSHorizontal = "LS_Horizontal";
 	public string LSVertical = "LS_Vertical";
 	public string RSHorizontal = "RS_Horizontal";
@@ -19,14 +20,17 @@ public class PlayerInput : MonoBehaviour {
 	public string rightClick = "R_Click";
 	public string menuButton = "Menu";
 	public string aButton = "A";
-	public string xButton = "X";
 	public string bButton = "B";
+	public string xButton = "X";
+	public string yButton = "Y";
 	public string LB = "LB";
 	public string RB = "RB";
 
-	public enum State {neutral, flying, changingStations, docked, onTurret, inCockpit, inBubble}
-	public State state = State.docked;
-	public State selectedState = State.neutral;
+	public enum State {NEUTRAL, FLYING, CHANGING_STATIONS, DOCKED, ON_TURRET, IN_COCKPIT, IN_BUBBLE}
+	public State state = State.DOCKED;
+	public State selectedState = State.NEUTRAL;
+
+
 	private GameManager gm;
 	private SpriteRenderer sr;
 	private BigBird bigBird;
@@ -111,21 +115,21 @@ public class PlayerInput : MonoBehaviour {
 			gm.TogglePause();
 		}
 
-		if (state == State.flying) {
+		if (state == State.FLYING) {
 			HandleFlyingInput ();
 		}
 
-		if (state != State.flying && Input.GetButtonDown (bButton)) {
+		if (state != State.FLYING && Input.GetButtonDown (bButton)) {
 			PrepareToChangeStations ();
 		}
 
-		if (state == State.changingStations) {
+		if (state == State.CHANGING_STATIONS) {
 			HandleChangingStations ();
-		} else if (state == State.onTurret) {
+		} else if (state == State.ON_TURRET) {
 			HandleTurretInput ();
-		} else if (state == State.docked) {
+		} else if (state == State.DOCKED) {
 			HandleDockedInput ();
-		} else if (state == State.inCockpit) {
+		} else if (state == State.IN_COCKPIT) {
 			HandlePilotingInput ();
 		}
 	}
@@ -139,23 +143,40 @@ public class PlayerInput : MonoBehaviour {
 
 		Vector2 rightStick = new Vector2( Input.GetAxis(RSHorizontal), Input.GetAxis(RSVertical));
 		if (rightStick != Vector2.zero) {
-			p.b.aim = rightStick;
+			p.aim = rightStick;
 		} 
-		else if (p.b.aim == Vector2.zero) {
+		else if (p.aim == Vector3.zero) {
 			if (p.b.direction != Vector2.zero) {
-				p.b.aim = p.b.direction;
+				p.aim = new Vector3 (p.b.direction.x, p.b.direction.y, 0);
 			}
 		}
 
-		if (!p.b.firing && Input.GetAxis (rightTrigger) > 0) {
-			//print ("!firing, and RT down: " + rightTrigger);
-			p.b.firing = true;
-			InvokeRepeating ("FireBullet", p.b.fireRate, p.b.fireRate);
-		} else if (p.b.firing && Input.GetAxis (rightTrigger) <= 0) {
-			//print ("firing, and RT up: " + rightTrigger);
-			p.b.firing = false;
-			p.CancelInvoke ();
-			CancelInvoke ();
+		if (p.w.automatic) {
+			if (!p.w.firing && Input.GetAxis (rightTrigger) > 0) {
+				//print ("!firing, and RT down: " + rightTrigger);
+				p.w.firing = true;
+				InvokeRepeating ("FireBullet", p.w.fireRate, p.w.fireRate);
+			} else if (p.w.firing && Input.GetAxis (rightTrigger) <= 0) {
+				//print ("firing, and RT up: " + rightTrigger);
+				p.w.firing = false;
+				p.CancelInvoke ();
+				CancelInvoke ();
+			}
+		} else {
+			if (Input.GetAxis (rightTrigger) > 0 && p.w.readyToFire && releasedRightTrigger && !p.w.reloading) {
+				p.w.Fire (p.aim);
+				releasedRightTrigger = false;
+			} else if (Input.GetAxis (rightTrigger) <= 0) {
+				releasedRightTrigger = true;
+			}
+		}
+
+		if (Input.GetButtonDown (yButton)) {
+			p.CycleWeapons ();
+		}
+
+		if (Input.GetButtonDown (xButton)) {
+			p.StartCoroutine (p.Reload ());
 		}
 
 		if (Input.GetButtonDown (rightClick)) {
@@ -174,17 +195,17 @@ public class PlayerInput : MonoBehaviour {
 	}
 		
 	void FireBullet () {
-		p.b.FireBullet ();
+		p.w.Fire (p.aim);
 	}
 
 	void PrepareToChangeStations () {
-		if (state == State.docked) {
+		if (state == State.DOCKED) {
 			if (p.b) {
 				p.UnboardBird (bigBird.transform);
 			}
 		}
 		p.navigating = false;
-		state = State.changingStations;
+		state = State.CHANGING_STATIONS;
 	}
 
 	void HandleChangingStations () {
@@ -205,12 +226,12 @@ public class PlayerInput : MonoBehaviour {
 			transform.position = station.position;
 
 			if (hit.collider.name == "Cockpit") {
-				selectedState = State.inCockpit;
+				selectedState = State.IN_COCKPIT;
 			} else if (hit.collider.name == "Dock") {
-				selectedState = State.docked;
+				selectedState = State.DOCKED;
 			} else if (hit.collider.name == "Turret") {
 				turret = station.GetComponent<Turret> ();
-				selectedState = State.onTurret;
+				selectedState = State.ON_TURRET;
 			}
 		}
 	}
@@ -223,7 +244,7 @@ public class PlayerInput : MonoBehaviour {
 		if (Input.GetButtonDown (aButton)) {
 			p.b.Undock ();
 			if (!p.b.docked) {
-				state = State.flying;
+				state = State.FLYING;
 			}
 		}
 	}
@@ -282,9 +303,10 @@ public class PlayerInput : MonoBehaviour {
 		leftTrigger = "LT" + joystick;
 		rightClick = "R_Click" + joystick;
 		menuButton = "Menu" + joystick;
+		bButton = "B" + joystick;
 		aButton = "A" + joystick;
 		xButton = "X" + joystick;
-		bButton = "B" + joystick;
+		yButton = "Y" + joystick;
 		LB = "LB" + joystick;
 		RB = "RB" + joystick;
 	}

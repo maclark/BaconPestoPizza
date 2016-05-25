@@ -21,7 +21,7 @@ public class Cannonball : Projectile {
 		base.OnUpdate ();
 	}
 
-	public override void Fire (Transform start, Vector2 aim) {
+	public override void Fire (Vector3 start, Vector2 aim) {
 		accel = cannonballAccel;
 		base.Fire (start, aim);
 	}

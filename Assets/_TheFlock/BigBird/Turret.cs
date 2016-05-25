@@ -43,7 +43,7 @@ public class Turret : MonoBehaviour {
 			//depends on base rotation of object... TODO
 			aim = Vector3.up;
 		}
-		ball.Fire (transform, aim);
+		ball.Fire (transform.position, aim);
 		ready = false;
 		Invoke ("ResetCooldown", cooldown);
 	}

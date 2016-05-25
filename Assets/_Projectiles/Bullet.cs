@@ -20,9 +20,8 @@ public class Bullet : Projectile {
 		direction.Normalize ();
 	}
 
-	public override void Fire (Transform start, Vector2 aim) {
-		transform.position = start.position;
-		transform.rotation = start.rotation;
+	public override void Fire (Vector3 start, Vector2 aim) {
+		transform.position = start;
 		SetDirection (aim);
 		rb.AddForce (direction * accelerationMagnitude * rb.mass);
 	}

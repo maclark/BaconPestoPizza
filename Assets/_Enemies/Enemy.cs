@@ -106,7 +106,7 @@ public class Enemy : MonoBehaviour {
 		}
 		Bullet bullet = gm.GetComponent<ObjectPooler> ().GetPooledObject ().GetComponent<Bullet> ();
 		bullet.gameObject.SetActive (true);
-		bullet.Fire (transform, target.position - transform.position);	
+		bullet.Fire (transform.position, target.position - transform.position);	
 	}
 
 	void Kamikaze() {
