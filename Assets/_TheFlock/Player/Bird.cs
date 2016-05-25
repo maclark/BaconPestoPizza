@@ -47,6 +47,7 @@ public class Bird : MonoBehaviour {
 
 	private Rigidbody2D rb;
 	private GameManager gm;
+	private SpriteRenderer sr;
 	private BigBird bigBird;
 	private Dock dock = null;
 	private GameObject gasLight;
@@ -58,12 +59,13 @@ public class Bird : MonoBehaviour {
 	void Awake() {
 		rb = GetComponent<Rigidbody2D> ();
 		gm = GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager> ();
+		sr = GetComponent<SpriteRenderer> ();
 		bigBird = GameObject.FindObjectOfType<BigBird>() as BigBird;
 		startScaleFactor = transform.localScale.x;
 	}
 
 	void Start () {
-		color = GetComponent<SpriteRenderer> ().color;
+		color = sr.color;
 
 		otherHarps = new List<Harpoon> ();
 		linkedBirds = new List<Bird> ();
@@ -255,7 +257,7 @@ public class Bird : MonoBehaviour {
 	void TakeDamage( int dam) {
 		if (damaged) {
 			//#TODO explodeee
-			Die();
+			Die ();
 		} else {
 			health -= dam;
 			if (health < 0) {
@@ -267,8 +269,12 @@ public class Bird : MonoBehaviour {
 		}
 	}
 
-	void Die() {
+	void Die () {
 		gm.RemoveAlliedTransform (transform);
+		//instantiate bubble
+		if (p != null) {
+			p.Bubble (rb.velocity);
+		}
 		Destroy (gameObject);
 	}
 			
@@ -284,9 +290,9 @@ public class Bird : MonoBehaviour {
 		dock.gameObject.layer = LayerMask.NameToLayer ("Stations");
 
 		DisableColliders ();
-		GetComponent<SpriteRenderer> ().color = color;
-		GetComponent<SpriteRenderer> ().sortingLayerName = "BigBird";
-		GetComponent<SpriteRenderer> ().sortingOrder = 1;
+		sr.color = color;
+		sr.sortingLayerName = "BigBird";
+		sr.sortingOrder = 1;
 		rb.Sleep ();
 
 		transform.localScale = new Vector3 (dockedScaleFactor, dockedScaleFactor, 1);
@@ -352,8 +358,8 @@ public class Bird : MonoBehaviour {
 		releaseDirection.Normalize ();
 		rb.AddForce (releaseDirection * boostAccel * rb.mass);
 		Invoke ("EnableColliders", .5f);
-		GetComponent<SpriteRenderer> ().sortingLayerName = "Birds";
-		GetComponent<SpriteRenderer> ().sortingOrder = 0;
+		sr.sortingLayerName = "Birds";
+		sr.sortingOrder = 0;
 	}
 
 	void EnableColliders () {
@@ -374,17 +380,17 @@ public class Bird : MonoBehaviour {
 		if (docked)
 			yield break;
 		
-		Color startColor = GetComponent<SpriteRenderer> ().color;
-		GetComponent<SpriteRenderer> ().color = new Color (1, 0, 0, Mathf.Max(startColor.a, .5f));
+		Color startColor = sr.color;
+		sr.color = new Color (1, 0, 0, Mathf.Max(startColor.a, .5f));
 		//EditorApplication.Beep ();
 		yield return new WaitForSeconds (flashDuration);
-		GetComponent<SpriteRenderer> ().color = startColor;
+		sr.color = startColor;
 
 		if (damaged) {
 			float flashGapModifier = flashDampener * (Time.time - timeAtDamage);
 			if (flashGapModifier > 1) {
 				//explode
-				Die();
+				Die ();
 				yield break;
 			}
 			yield return new WaitForSeconds (Mathf.Max (0f, flashGap - flashGapModifier));
@@ -396,7 +402,7 @@ public class Bird : MonoBehaviour {
 		if (roundsLeftInClip > 0) {
 			Bullet bullet = GetComponent<ObjectPooler>().GetPooledObject ().GetComponent<Bullet> ();
 			bullet.gameObject.SetActive (true);
-			bullet.Fire (transform, aim);
+			bullet.Fire (p.transform, aim);
 			roundsLeftInClip--;
 		}
 
@@ -428,13 +434,16 @@ public class Bird : MonoBehaviour {
 		}
 	}
 
-	IEnumerator Invincibility (float duration) {
+	IEnumerator Invincibility (float duration) {		
 		invincible = true;
-		SpriteRenderer sr = GetComponent<SpriteRenderer> ();
 		Color startColor = sr.color;
 		sr.color = new Color (startColor.r, startColor.g, startColor.b, .1f);
+		p.GetComponent<SpriteRenderer> ().color = sr.color;
 		yield return new WaitForSeconds (duration);
 		sr.color = new Color (startColor.r, startColor.g, startColor.b, 1f);
+		if(p) { 
+			p.GetComponent<SpriteRenderer> ().color = sr.color;
+		}
 		invincible = false;
 	}
 

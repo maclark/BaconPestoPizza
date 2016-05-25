@@ -5,6 +5,7 @@ using System.Collections.Generic;
 
 public class GameManager : MonoBehaviour {
 
+	public GameObject bubblePrefab;
 	public BigBird bigBird;
 	//public Player player1;
 	//private Player player2;

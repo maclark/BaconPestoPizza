@@ -24,7 +24,7 @@ public class PlayerInput : MonoBehaviour {
 	public string LB = "LB";
 	public string RB = "RB";
 
-	public enum State {neutral, flying, changingStations, docked, onTurret, inCockpit}
+	public enum State {neutral, flying, changingStations, docked, onTurret, inCockpit, inBubble}
 	public State state = State.docked;
 	public State selectedState = State.neutral;
 	private GameManager gm;
