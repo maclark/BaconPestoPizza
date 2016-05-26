@@ -89,7 +89,7 @@ public class Bird : MonoBehaviour {
 			}
 
 			if (rolling) {
-				BarrelRoll ();
+				AileronRoll ();
 			}
 		}
 	}
@@ -458,7 +458,7 @@ public class Bird : MonoBehaviour {
 		canBoost = true;
 	}
 
-	public void BarrelRoll () {
+	public void AileronRoll () {
 		transform.Rotate (rollSpeed * Time.deltaTime, 0, 0);
 	}
 
