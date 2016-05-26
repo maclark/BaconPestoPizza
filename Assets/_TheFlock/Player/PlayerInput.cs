@@ -171,6 +171,12 @@ public class PlayerInput : MonoBehaviour {
 			}
 		}
 
+		if (Input.GetAxis (leftTrigger) > 0) {
+			if (p.b.canBoost) {
+				StartCoroutine( p.b.Boost ());
+			}
+		}
+
 		if (Input.GetButtonDown (yButton)) {
 			p.CycleWeapons ();
 		}
@@ -187,9 +193,11 @@ public class PlayerInput : MonoBehaviour {
 			}
 		}
 
-		if (Input.GetButton (LB)) {
-			if (p.b.canBoost) {
-				StartCoroutine( p.b.Boost ());
+		if (Input.GetButtonDown (LB)) {
+			if (p.b.canRoll) {
+				p.b.rolling = true;
+				p.b.canRoll = false;
+				StartCoroutine (p.b.EndRoll ());
 			}
 		}
 	}

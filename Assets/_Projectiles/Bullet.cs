@@ -4,7 +4,7 @@ using System.Collections;
 public class Bullet : Projectile {
 
 	public int bulletDamage = 100;
-	public Vector2 direction = Vector2.zero;
+	public Vector3 direction = Vector3.zero;
 	public float accelerationMagnitude = 100f;
 
 	void Awake () {
@@ -15,7 +15,7 @@ public class Bullet : Projectile {
 		damage = bulletDamage;
 	}
 
-	public void SetDirection (Vector2 dir) {
+	public void SetDirection (Vector3 dir) {
 		direction = dir;
 		direction.Normalize ();
 	}

@@ -34,6 +34,12 @@ public class Holster {
 	}
 
 	private void EquipCurrentSlot () {
+		if (p.w != null) {
+			p.w.firing = false;
+			p.CancelInvoke ();
+			p.GetComponent<PlayerInput> ().CancelInvoke ();
+		}
+
 		WeaponType weap = slots [currentSlot];
 		switch (weap) 
 		{
@@ -47,6 +53,7 @@ public class Holster {
 			p.w = shotgun;
 			break;
 		default:
+
 			p.w = machineGun;
 			break;
 		}

@@ -25,6 +25,10 @@ public class Bird : MonoBehaviour {
 	public float gasPerBoost = 2f;
 	public float gasLightDelay = .2f;
 	public float harpHurlOffset = 1f;
+	public float rollDuration = 1f;
+	public float rerollDelay = 1f;
+	public float rollSpeed = 1f;
+
 	public GameObject harpoonPrefab;
 	public GameObject gasLightPrefab;
 	public List<Bird> linkedBirds;
@@ -32,7 +36,7 @@ public class Bird : MonoBehaviour {
 
 	[HideInInspector]
 	public Color color;
-	public bool damaged = false, invincible = false, canBoost = true, hasHarpoon = true;
+	public bool damaged = false, invincible = false, canBoost = true, hasHarpoon = true, canRoll = true, rolling = false;
 	[HideInInspector]
 	public Vector2 direction = Vector2.zero, pullDir = Vector2.zero, orthoPullDir = Vector2.zero;
 	[HideInInspector]
@@ -83,6 +87,10 @@ public class Bird : MonoBehaviour {
 					}
 				}
 			}
+
+			if (rolling) {
+				BarrelRoll ();
+			}
 		}
 	}
 
@@ -102,7 +110,10 @@ public class Bird : MonoBehaviour {
 
 	void OnTriggerEnter2D (Collider2D other) {
 		if (other.tag == "EnemyBullet") {
-			if (!invincible) {
+			if (rolling) {
+				BounceBullets (other);
+			}
+			else if (!invincible) {
 				TakeDamage (other.GetComponent<Bullet> ().damage);
 				other.GetComponent<Bullet> ().Die ();
 			}
@@ -257,7 +268,7 @@ public class Bird : MonoBehaviour {
 				health = 0;
 			}
 			damaged = true;
-			StartCoroutine (Invincibility (hitInvincibilityDuration));
+			StartCoroutine (HitInvincibility (hitInvincibilityDuration));
 			StartCoroutine (FlashDamage (Time.time));
 		}
 	}
@@ -297,6 +308,12 @@ public class Bird : MonoBehaviour {
 		ranOutOfGas = false;
 		Destroy (gasLight);
 		CancelInvoke ();
+
+		if (rolling) {
+			transform.rotation = Quaternion.identity;
+			rolling = false;
+			canRoll = true;
+		}
 
 		if (p) {
 			dock.GetComponent<BoxCollider2D> ().enabled = false;
@@ -417,7 +434,7 @@ public class Bird : MonoBehaviour {
 		}
 	}
 
-	IEnumerator Invincibility (float duration) {	
+	IEnumerator HitInvincibility (float duration) {	
 		invincible = true;
 		Color startColor = sr.color;
 		sr.color = new Color (startColor.r, startColor.g, startColor.b, .1f);
@@ -439,6 +456,21 @@ public class Bird : MonoBehaviour {
 		accelerationMagnitude = boostAccel;
 		yield return new WaitForSeconds (boostCooldown);
 		canBoost = true;
+	}
+
+	public void BarrelRoll () {
+		transform.Rotate (rollSpeed * Time.deltaTime, 0, 0);
+	}
+
+	public IEnumerator EndRoll () {
+		yield return new WaitForSeconds (rollDuration);
+		//if about to burn up (die) this invoke can fail
+		if (!docked) {
+			transform.rotation = Quaternion.identity;
+			rolling = false;
+			yield return new WaitForSeconds (rerollDelay);
+			canRoll = true;
+		}
 	}
 
 	void LowOnGas () {
@@ -474,5 +506,17 @@ public class Bird : MonoBehaviour {
 
 	public Dock GetDock () {
 		return dock;
+	}
+
+	private void BounceBullets (Collider2D other) {
+		//Since we hit the bullets twice during the roll, it works if one frame we stop the bullets
+		//and the next frame we Fire them Away. Kinda inelegant.
+		Vector3 away = other.transform.position - transform.position;
+		away.Normalize ();
+		if (other.GetComponent<Rigidbody2D> ().velocity == Vector2.zero) {
+			other.GetComponent<Bullet> ().Fire (other.transform.position, away);
+		} else {
+			other.GetComponent<Rigidbody2D> ().velocity = Vector2.zero;
+		}
 	}
 }
