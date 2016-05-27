@@ -62,7 +62,7 @@ public class BigBird : MonoBehaviour {
 			}
 		} 
 		else if (other.tag == "Enemy") {
-			TakeDamage (other.GetComponent<Enemy> ().kamikazeDamage);
+			TakeDamage (other.GetComponent<Flyer> ().kamikazeDamage);
 			Destroy (other.gameObject);
 		}
 		else if (other.name == "Web") {

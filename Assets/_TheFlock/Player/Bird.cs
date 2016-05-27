@@ -120,7 +120,7 @@ public class Bird : MonoBehaviour {
 		}
 		else if (other.tag == "Enemy") {
 			if (!invincible) {
-				TakeDamage (other.GetComponent<Enemy> ().kamikazeDamage);
+				TakeDamage (other.GetComponent<Flyer> ().kamikazeDamage);
 				Destroy (other.gameObject);
 			}
 		}
@@ -129,6 +129,11 @@ public class Bird : MonoBehaviour {
 	void OnCollisionEnter2D (Collision2D coll) {
 		if (coll.gameObject.name == "BigBird") {
 			Dock ();
+		} else if (coll.transform.tag == "Enemy") {
+			if (!invincible) {
+				TakeDamage (coll.transform.GetComponent<Flyer> ().kamikazeDamage);
+				Destroy (coll.gameObject);
+			}
 		}
 	}
 
@@ -297,6 +302,10 @@ public class Bird : MonoBehaviour {
 		sr.color = color;
 		sr.sortingLayerName = "BigBird";
 		sr.sortingOrder = 1;
+		if (p) {
+			p.GetComponent<SpriteRenderer> ().sortingLayerName = "BigBird";
+			p.GetComponent<SpriteRenderer> ().sortingOrder = 2;
+		}
 		rb.Sleep ();
 
 		transform.position = dock.transform.position;
@@ -369,6 +378,8 @@ public class Bird : MonoBehaviour {
 		Invoke ("EnableColliders", .5f);
 		sr.sortingLayerName = "Birds";
 		sr.sortingOrder = 0;
+		p.GetComponent<SpriteRenderer> ().sortingLayerName = "Birds";
+		p.GetComponent<SpriteRenderer> ().sortingOrder = 1;
 	}
 
 	void EnableColliders () {
@@ -386,7 +397,6 @@ public class Bird : MonoBehaviour {
 	}
 
 	IEnumerator FlashDamage (float timeAtDamage) {
-
 		Color startColor = sr.color;
 		sr.color = new Color (1, 0, 0, Mathf.Max(startColor.a, .5f));
 		yield return new WaitForSeconds (flashDuration);
@@ -409,8 +419,6 @@ public class Bird : MonoBehaviour {
 			StartCoroutine (FlashDamage (timeAtDamage));
 		}
 	}
-
-
 
 	/// <summary>
 	/// Hurls the harpoon.

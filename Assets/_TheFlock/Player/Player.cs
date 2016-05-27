@@ -32,8 +32,6 @@ public class Player : MonoBehaviour {
 	public void BoardBird (Bird bird) {
 		sr.sprite = sprites [1];
 		sr.enabled = true;
-		sr.sortingLayerName = "Birds";
-		sr.sortingOrder = 1;
 
 		b = bird;
 		b.p = this;
@@ -41,6 +39,8 @@ public class Player : MonoBehaviour {
 		b.GetComponent<SpriteRenderer>().color = b.color;
 		GetComponent<ObjectPooler> ().enabled = true;
 		GetComponent<ObjectPooler> ().SetPooledObjectsColor (b.color);
+		b.transform.rotation = Quaternion.identity;
+		transform.rotation = b.transform.rotation;
 		transform.position = b.transform.position + ridingOffset;
 		transform.parent = b.transform;
 	}
@@ -81,16 +81,17 @@ public class Player : MonoBehaviour {
 	}
 
 	public void CycleWeapons () {
-		if (!w.reloading) {
-			hol.CycleWeapons ();
-		}
+		hol.CycleWeapons ();
 	}
 
 	public IEnumerator Reload () {
+		Weapon weaponToReload = w;
 		w.reloading = true;
 		yield return new WaitForSeconds (w.reloadSpeed);
-		w.roundsLeftInClip = w.clipSize;
-		w.reloading = false;
+		if (w == weaponToReload) {
+			w.roundsLeftInClip = w.clipSize;
+		}
+		weaponToReload.reloading = false;
 	}
 
 	public void CockShotgun () {

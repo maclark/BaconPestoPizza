@@ -1,0 +1,933 @@
+fileFormatVersion: 2
+guid: e60839b392ac55649a54ea3af6081e96
+timeCreated: 1464327963
+licenseType: Free
+TextureImporter:
+  fileIDToRecycleName:
+    21300000: angry-birds-sprite_0
+    21300002: angry-birds-sprite_1
+    21300004: angry-birds-sprite_2
+    21300006: angry-birds-sprite_3
+    21300008: angry-birds-sprite_4
+    21300010: angry-birds-sprite_5
+    21300012: angry-birds-sprite_6
+    21300014: angry-birds-sprite_7
+    21300016: angry-birds-sprite_8
+    21300018: angry-birds-sprite_9
+    21300020: angry-birds-sprite_10
+    21300022: angry-birds-sprite_11
+    21300024: angry-birds-sprite_12
+    21300026: angry-birds-sprite_13
+    21300028: angry-birds-sprite_14
+    21300030: angry-birds-sprite_15
+    21300032: angry-birds-sprite_16
+    21300034: angry-birds-sprite_17
+    21300036: angry-birds-sprite_18
+    21300038: angry-birds-sprite_19
+    21300040: angry-birds-sprite_20
+    21300042: angry-birds-sprite_21
+    21300044: angry-birds-sprite_22
+    21300046: angry-birds-sprite_23
+    21300048: angry-birds-sprite_24
+    21300050: angry-birds-sprite_25
+    21300052: angry-birds-sprite_26
+    21300054: angry-birds-sprite_27
+    21300056: angry-birds-sprite_28
+    21300058: angry-birds-sprite_29
+    21300060: angry-birds-sprite_30
+    21300062: angry-birds-sprite_31
+    21300064: angry-birds-sprite_32
+    21300066: angry-birds-sprite_33
+    21300068: angry-birds-sprite_34
+    21300070: angry-birds-sprite_35
+    21300072: angry-birds-sprite_36
+    21300074: angry-birds-sprite_37
+    21300076: angry-birds-sprite_38
+    21300078: angry-birds-sprite_39
+    21300080: angry-birds-sprite_40
+    21300082: angry-birds-sprite_41
+    21300084: angry-birds-sprite_42
+    21300086: angry-birds-sprite_43
+    21300088: angry-birds-sprite_44
+    21300090: angry-birds-sprite_45
+    21300092: angry-birds-sprite_46
+    21300094: angry-birds-sprite_47
+    21300096: angry-birds-sprite_48
+    21300098: angry-birds-sprite_49
+    21300100: angry-birds-sprite_50
+  serializedVersion: 2
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 1
+    linearTexture: 0
+    correctGamma: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+  isReadable: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 0
+  cubemapConvolution: 0
+  cubemapConvolutionSteps: 7
+  cubemapConvolutionExponent: 1.5
+  seamlessCubemap: 0
+  textureFormat: -3
+  maxTextureSize: 2048
+  textureSettings:
+    filterMode: -1
+    aniso: 16
+    mipBias: -1
+    wrapMode: 1
+  nPOTScale: 0
+  lightmap: 0
+  rGBM: 0
+  compressionQuality: 50
+  allowsAlphaSplitting: 0
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spritePixelsToUnits: 25
+  alphaIsTransparency: 1
+  textureType: 8
+  buildTargetSettings: []
+  spriteSheet:
+    sprites:
+    - name: angry-birds-sprite_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 200
+        width: 176
+        height: 158
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: 45, y: 79}
+        - {x: -30, y: 79}
+        - {x: -60, y: 73}
+        - {x: -88, y: 46}
+        - {x: -88, y: -46}
+        - {x: -85, y: -68}
+        - {x: -65, y: -79}
+        - {x: 49, y: -79}
+        - {x: 88, y: -67}
+        - {x: 88, y: 36}
+        - {x: 62, y: 72}
+    - name: angry-birds-sprite_1
+      rect:
+        serializedVersion: 2
+        x: 180
+        y: 301
+        width: 44
+        height: 51
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: -8, y: 25.5}
+        - {x: -22, y: 10.5}
+        - {x: -22, y: -14.5}
+        - {x: -13, y: -25.5}
+        - {x: 22, y: -25.5}
+        - {x: 22, y: 17.5}
+        - {x: 11, y: 25.5}
+    - name: angry-birds-sprite_2
+      rect:
+        serializedVersion: 2
+        x: 228
+        y: 301
+        width: 44
+        height: 50
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: -16, y: 25}
+        - {x: -22, y: 13}
+        - {x: -22, y: -22}
+        - {x: -14, y: -25}
+        - {x: 22, y: -25}
+        - {x: 22, y: 18}
+        - {x: 12, y: 25}
+    - name: angry-birds-sprite_3
+      rect:
+        serializedVersion: 2
+        x: 274
+        y: 301
+        width: 45
+        height: 47
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: -16.5, y: 23.5}
+        - {x: -22.5, y: 4.5}
+        - {x: -22.5, y: -18.5}
+        - {x: -15.5, y: -23.5}
+        - {x: 20.5, y: -23.5}
+        - {x: 22.5, y: -19.5}
+        - {x: 22.5, y: 5.5}
+        - {x: 12.5, y: 23.5}
+    - name: angry-birds-sprite_4
+      rect:
+        serializedVersion: 2
+        x: 323
+        y: 310
+        width: 34
+        height: 45
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: -10, y: 22.5}
+        - {x: -17, y: 6.5}
+        - {x: -17, y: -21.5}
+        - {x: -15, y: -22.5}
+        - {x: 16, y: -22.5}
+        - {x: 17, y: -19.5}
+        - {x: 17, y: 18.5}
+        - {x: 11, y: 22.5}
+    - name: angry-birds-sprite_5
+      rect:
+        serializedVersion: 2
+        x: 181
+        y: 243
+        width: 43
+        height: 50
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: -10.5, y: 25}
+        - {x: -21.5, y: 5}
+        - {x: -21.5, y: -17}
+        - {x: -14.5, y: -25}
+        - {x: 18.5, y: -25}
+        - {x: 21.5, y: -24}
+        - {x: 21.5, y: 18}
+        - {x: 9.5, y: 25}
+    - name: angry-birds-sprite_6
+      rect:
+        serializedVersion: 2
+        x: 226
+        y: 243
+        width: 46
+        height: 47
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: -6, y: 23.5}
+        - {x: -23, y: 0.5}
+        - {x: -23, y: -13.5}
+        - {x: -14, y: -23.5}
+        - {x: 23, y: -23.5}
+        - {x: 23, y: 7.5}
+        - {x: 16, y: 23.5}
+    - name: angry-birds-sprite_7
+      rect:
+        serializedVersion: 2
+        x: 281
+        y: 243
+        width: 35
+        height: 57
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: -5.5, y: 28.5}
+        - {x: -17.5, y: 19.5}
+        - {x: -17.5, y: -28.5}
+        - {x: 5.5, y: -28.5}
+        - {x: 17.5, y: -18.5}
+        - {x: 17.5, y: 15.5}
+        - {x: 9.5, y: 28.5}
+    - name: angry-birds-sprite_8
+      rect:
+        serializedVersion: 2
+        x: 323
+        y: 252
+        width: 34
+        height: 45
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: -2, y: 22.5}
+        - {x: -17, y: 12.5}
+        - {x: -17, y: -18.5}
+        - {x: -13, y: -22.5}
+        - {x: 17, y: -22.5}
+        - {x: 17, y: 14.5}
+        - {x: 12, y: 22.5}
+    - name: angry-birds-sprite_9
+      rect:
+        serializedVersion: 2
+        x: 178
+        y: 203
+        width: 34
+        height: 38
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: 1, y: 19}
+        - {x: -16, y: 9}
+        - {x: -17, y: 3}
+        - {x: -17, y: -19}
+        - {x: 14, y: -19}
+        - {x: 17, y: -12}
+        - {x: 17, y: 12}
+        - {x: 12, y: 19}
+    - name: angry-birds-sprite_10
+      rect:
+        serializedVersion: 2
+        x: 226
+        y: 203
+        width: 34
+        height: 38
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: 11, y: 19}
+        - {x: -4, y: 19}
+        - {x: -13, y: 14}
+        - {x: -17, y: 0}
+        - {x: -17, y: -17}
+        - {x: -11, y: -19}
+        - {x: 13, y: -19}
+        - {x: 17, y: -14}
+        - {x: 17, y: 4}
+    - name: angry-birds-sprite_11
+      rect:
+        serializedVersion: 2
+        x: 273
+        y: 203
+        width: 35
+        height: 38
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: 10.5, y: 5}
+        - {x: 10.5, y: 19}
+        - {x: -3.5, y: 19}
+        - {x: -12.5, y: 14}
+        - {x: -17.5, y: -2}
+        - {x: -17.5, y: -16}
+        - {x: -9.5, y: -19}
+        - {x: 11.5, y: -19}
+        - {x: 17.5, y: -10}
+        - {x: 17.5, y: 1}
+        - {x: 14.5, y: 4}
+    - name: angry-birds-sprite_12
+      rect:
+        serializedVersion: 2
+        x: 316
+        y: 212
+        width: 30
+        height: 29
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+    - name: angry-birds-sprite_13
+      rect:
+        serializedVersion: 2
+        x: 3
+        y: 141
+        width: 43
+        height: 50
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: -10.5, y: 25}
+        - {x: -21.5, y: 10}
+        - {x: -21.5, y: -14}
+        - {x: -15.5, y: -25}
+        - {x: 21.5, y: -25}
+        - {x: 21.5, y: 10}
+        - {x: 10.5, y: 25}
+    - name: angry-birds-sprite_14
+      rect:
+        serializedVersion: 2
+        x: 51
+        y: 146
+        width: 52
+        height: 50
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: 11, y: 25}
+        - {x: -13, y: 25}
+        - {x: -26, y: 10}
+        - {x: -26, y: -18}
+        - {x: -20, y: -25}
+        - {x: 20, y: -25}
+        - {x: 26, y: -21}
+        - {x: 26, y: 11}
+        - {x: 21, y: 24}
+    - name: angry-birds-sprite_15
+      rect:
+        serializedVersion: 2
+        x: 107
+        y: 145
+        width: 52
+        height: 51
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: -17, y: 25.5}
+        - {x: -26, y: 7.5}
+        - {x: -26, y: -14.5}
+        - {x: -20, y: -25.5}
+        - {x: 24, y: -25.5}
+        - {x: 26, y: -23.5}
+        - {x: 26, y: 21.5}
+        - {x: 12, y: 25.5}
+    - name: angry-birds-sprite_16
+      rect:
+        serializedVersion: 2
+        x: 160
+        y: 158
+        width: 52
+        height: 33
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: -26, y: -12.5}
+        - {x: -22, y: -16.5}
+        - {x: 14, y: -16.5}
+        - {x: 26, y: -13.5}
+        - {x: 26, y: 6.5}
+        - {x: 25, y: 8.5}
+        - {x: 11, y: 16.5}
+        - {x: -12, y: 16.5}
+        - {x: -26, y: 9.5}
+    - name: angry-birds-sprite_17
+      rect:
+        serializedVersion: 2
+        x: 217
+        y: 158
+        width: 52
+        height: 33
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: 19, y: -3.5}
+        - {x: 18, y: -2.5}
+        - {x: 20, y: -3.5}
+        - {x: 26, y: -4.5}
+        - {x: 26, y: 7.5}
+        - {x: 19, y: 13.5}
+        - {x: 13, y: 16.5}
+        - {x: -15, y: 16.5}
+        - {x: -26, y: 10.5}
+        - {x: -26, y: -16.5}
+        - {x: 26, y: -16.5}
+        - {x: 26, y: -5.5}
+        - {x: 23, y: -4.5}
+    - name: angry-birds-sprite_18
+      rect:
+        serializedVersion: 2
+        x: 273
+        y: 158
+        width: 55
+        height: 32
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: -18.5, y: 16}
+        - {x: -27.5, y: 5}
+        - {x: -27.5, y: -14}
+        - {x: -21.5, y: -16}
+        - {x: 18.5, y: -16}
+        - {x: 27.5, y: -12}
+        - {x: 27.5, y: 11}
+        - {x: 12.5, y: 16}
+    - name: angry-birds-sprite_19
+      rect:
+        serializedVersion: 2
+        x: 332
+        y: 173
+        width: 24
+        height: 24
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+    - name: angry-birds-sprite_20
+      rect:
+        serializedVersion: 2
+        x: 331
+        y: 154
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+    - name: angry-birds-sprite_21
+      rect:
+        serializedVersion: 2
+        x: 1
+        y: 92
+        width: 35
+        height: 44
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: -2.5, y: 22}
+        - {x: -17.5, y: 14}
+        - {x: -17.5, y: -21}
+        - {x: -13.5, y: -22}
+        - {x: 15.5, y: -22}
+        - {x: 17.5, y: -19}
+        - {x: 17.5, y: 13}
+        - {x: 11.5, y: 22}
+    - name: angry-birds-sprite_22
+      rect:
+        serializedVersion: 2
+        x: 51
+        y: 90
+        width: 52
+        height: 51
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: -12, y: 25.5}
+        - {x: -26, y: -0.5}
+        - {x: -26, y: -14.5}
+        - {x: -13, y: -25.5}
+        - {x: 18, y: -25.5}
+        - {x: 26, y: -18.5}
+        - {x: 26, y: 8.5}
+        - {x: 14, y: 25.5}
+    - name: angry-birds-sprite_23
+      rect:
+        serializedVersion: 2
+        x: 107
+        y: 90
+        width: 52
+        height: 51
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: -14, y: 25.5}
+        - {x: -26, y: 4.5}
+        - {x: -26, y: -19.5}
+        - {x: -20, y: -25.5}
+        - {x: 26, y: -25.5}
+        - {x: 26, y: 13.5}
+        - {x: 7, y: 25.5}
+    - name: angry-birds-sprite_24
+      rect:
+        serializedVersion: 2
+        x: 160
+        y: 108
+        width: 55
+        height: 32
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: 26.5, y: -6}
+        - {x: 23.5, y: -4}
+        - {x: 21.5, y: -4}
+        - {x: 25.5, y: -4}
+        - {x: 27.5, y: -5}
+        - {x: 27.5, y: 11}
+        - {x: 14.5, y: 16}
+        - {x: -12.5, y: 16}
+        - {x: -27.5, y: 7}
+        - {x: -27.5, y: -14}
+        - {x: -26.5, y: -16}
+        - {x: 22.5, y: -16}
+        - {x: 27.5, y: -12}
+        - {x: 27.5, y: -7}
+    - name: angry-birds-sprite_25
+      rect:
+        serializedVersion: 2
+        x: 217
+        y: 99
+        width: 36
+        height: 43
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: -9, y: 21.5}
+        - {x: -11, y: 19.5}
+        - {x: -18, y: 5.5}
+        - {x: -18, y: -19.5}
+        - {x: -13, y: -21.5}
+        - {x: 18, y: -21.5}
+        - {x: 18, y: 14.5}
+        - {x: 0, y: 21.5}
+    - name: angry-birds-sprite_26
+      rect:
+        serializedVersion: 2
+        x: 256
+        y: 100
+        width: 35
+        height: 46
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: -1.5, y: 23}
+        - {x: -17.5, y: 7}
+        - {x: -17.5, y: -19}
+        - {x: -16.5, y: -23}
+        - {x: 15.5, y: -23}
+        - {x: 17.5, y: -21}
+        - {x: 17.5, y: 18}
+        - {x: 16.5, y: 23}
+    - name: angry-birds-sprite_27
+      rect:
+        serializedVersion: 2
+        x: 294
+        y: 100
+        width: 34
+        height: 45
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: -5, y: 22.5}
+        - {x: -17, y: 10.5}
+        - {x: -17, y: -18.5}
+        - {x: -15, y: -22.5}
+        - {x: 14, y: -22.5}
+        - {x: 17, y: -21.5}
+        - {x: 17, y: 22.5}
+    - name: angry-birds-sprite_28
+      rect:
+        serializedVersion: 2
+        x: 332
+        y: 123
+        width: 25
+        height: 24
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+    - name: angry-birds-sprite_29
+      rect:
+        serializedVersion: 2
+        x: 332
+        y: 104
+        width: 15
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+    - name: angry-birds-sprite_30
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 41
+        width: 36
+        height: 43
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: -12, y: 21.5}
+        - {x: -18, y: 15.5}
+        - {x: -18, y: -21.5}
+        - {x: 18, y: -21.5}
+        - {x: 18, y: 15.5}
+        - {x: 11, y: 21.5}
+    - name: angry-birds-sprite_31
+      rect:
+        serializedVersion: 2
+        x: 51
+        y: 36
+        width: 52
+        height: 48
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: -13, y: 24}
+        - {x: -26, y: 2}
+        - {x: -26, y: -15}
+        - {x: -17, y: -24}
+        - {x: 26, y: -24}
+        - {x: 26, y: 11}
+        - {x: 11, y: 24}
+    - name: angry-birds-sprite_32
+      rect:
+        serializedVersion: 2
+        x: 104
+        y: 49
+        width: 52
+        height: 32
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: -26, y: -11}
+        - {x: -22, y: -16}
+        - {x: 21, y: -16}
+        - {x: 26, y: -15}
+        - {x: 26, y: 7}
+        - {x: 25, y: 9}
+        - {x: 13, y: 16}
+        - {x: -14, y: 16}
+        - {x: -26, y: 9}
+    - name: angry-birds-sprite_33
+      rect:
+        serializedVersion: 2
+        x: 160
+        y: 58
+        width: 53
+        height: 33
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: -20.5, y: 16.5}
+        - {x: -26.5, y: 10.5}
+        - {x: -26.5, y: -14.5}
+        - {x: -23.5, y: -16.5}
+        - {x: 22.5, y: -16.5}
+        - {x: 26.5, y: -15.5}
+        - {x: 26.5, y: 11.5}
+        - {x: 11.5, y: 16.5}
+    - name: angry-birds-sprite_34
+      rect:
+        serializedVersion: 2
+        x: 218
+        y: 51
+        width: 35
+        height: 45
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: -2.5, y: 22.5}
+        - {x: -15.5, y: 15.5}
+        - {x: -17.5, y: 8.5}
+        - {x: -17.5, y: -20.5}
+        - {x: -15.5, y: -22.5}
+        - {x: 17.5, y: -22.5}
+        - {x: 17.5, y: 11.5}
+        - {x: 7.5, y: 22.5}
+    - name: angry-birds-sprite_35
+      rect:
+        serializedVersion: 2
+        x: 259
+        y: 69
+        width: 32
+        height: 29
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+    - name: angry-birds-sprite_36
+      rect:
+        serializedVersion: 2
+        x: 294
+        y: 73
+        width: 25
+        height: 23
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+    - name: angry-birds-sprite_37
+      rect:
+        serializedVersion: 2
+        x: 321
+        y: 74
+        width: 26
+        height: 23
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+    - name: angry-birds-sprite_38
+      rect:
+        serializedVersion: 2
+        x: 160
+        y: 0
+        width: 45
+        height: 48
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: -7.5, y: 24}
+        - {x: -18.5, y: 21}
+        - {x: -22.5, y: 8}
+        - {x: -22.5, y: -16}
+        - {x: -14.5, y: -21}
+        - {x: 1.5, y: -24}
+        - {x: 22.5, y: -24}
+        - {x: 22.5, y: 24}
+    - name: angry-birds-sprite_39
+      rect:
+        serializedVersion: 2
+        x: 218
+        y: 1
+        width: 35
+        height: 46
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: -9.5, y: 23}
+        - {x: -17.5, y: 13}
+        - {x: -17.5, y: -23}
+        - {x: 17.5, y: -23}
+        - {x: 17.5, y: 16}
+        - {x: 9.5, y: 23}
+    - name: angry-birds-sprite_40
+      rect:
+        serializedVersion: 2
+        x: 256
+        y: 40
+        width: 35
+        height: 28
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+    - name: angry-birds-sprite_41
+      rect:
+        serializedVersion: 2
+        x: 293
+        y: 46
+        width: 26
+        height: 23
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+    - name: angry-birds-sprite_42
+      rect:
+        serializedVersion: 2
+        x: 323
+        y: 46
+        width: 24
+        height: 24
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+    - name: angry-birds-sprite_43
+      rect:
+        serializedVersion: 2
+        x: 6
+        y: 13
+        width: 30
+        height: 28
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+    - name: angry-birds-sprite_44
+      rect:
+        serializedVersion: 2
+        x: 54
+        y: 6
+        width: 30
+        height: 27
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+    - name: angry-birds-sprite_45
+      rect:
+        serializedVersion: 2
+        x: 109
+        y: 11
+        width: 31
+        height: 27
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+    - name: angry-birds-sprite_46
+      rect:
+        serializedVersion: 2
+        x: 260
+        y: 8
+        width: 31
+        height: 29
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+    - name: angry-birds-sprite_47
+      rect:
+        serializedVersion: 2
+        x: 294
+        y: 28
+        width: 16
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+    - name: angry-birds-sprite_48
+      rect:
+        serializedVersion: 2
+        x: 312
+        y: 28
+        width: 17
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+    - name: angry-birds-sprite_49
+      rect:
+        serializedVersion: 2
+        x: 293
+        y: 9
+        width: 17
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+    - name: angry-birds-sprite_50
+      rect:
+        serializedVersion: 2
+        x: 313
+        y: 9
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+    outline: []
+  spritePackingTag: 
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class EnemyCarrier : MonoBehaviour {
+public class Carrier : Unit {
 
 	public float moveForceMagnitude = 75f;
 	public int hp = 1000;
@@ -10,37 +10,35 @@ public class EnemyCarrier : MonoBehaviour {
 
 	private Component[] dockTransforms;
 
-	void Start () {
+	public void OnStart () {
 		InvokeRepeating ("SpawnEnemy", 0f, spawnRate);
 	}
 
-
-	void OnTriggerEnter2D (Collider2D other) {
+	public void TriggerEnter2D (Collider2D other) {
 		if (other.tag == "PlayerBullet") {
 			TakeDamage (other.GetComponent<Bullet> ().damage);
 			other.GetComponent<Bullet> ().Die ();
 		}
 	}
 
-	void SpawnEnemy () {
+	protected void SpawnEnemy () {
 		GameObject enemyObj = Instantiate (enemyPrefab, GetComponentInChildren<Dock> ().transform.position, Quaternion.identity) as GameObject;
 		enemyObj.transform.parent = this.transform.parent;
 	}
 
-	void TakeDamage( int dam) {
+	protected void TakeDamage( int dam) {
 		hp -= dam;
 		if (hp <= 0) {
 			Die ();
 		}
 	}
 
-	void Die() {
+	protected void Die() {
 		CancelInvoke ();
 		Destroy (gameObject);
 	}
 
-	void Webbed () {
+	protected void Webbed () {
 		print("enemy carrier webbed!!!");
 	}
-
 }

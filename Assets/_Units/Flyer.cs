@@ -2,7 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 
-public class Enemy : MonoBehaviour {
+public class Flyer : Unit {
 
 	public float accelerationMagnitude = 40f;
 	public int hp = 100;
@@ -10,23 +10,23 @@ public class Enemy : MonoBehaviour {
 	public float fireRate = 1f;
 	public float attackRange = 6f;
 
-	private Rigidbody2D rb;
-	private GameManager gm;
-	private Transform target;
-	private bool startFiring = false;
-	private bool stopFiring = false;
+	protected Rigidbody2D rb;
+	protected GameManager gm;
+	protected Transform target;
+	protected bool startFiring = false;
+	protected bool stopFiring = false;
 
 	// Use this for initialization
-	void Awake(){
+	public void OnAwake(){
 		gm = GameObject.FindGameObjectWithTag ("GameManager").GetComponent<GameManager> ();
 		rb = GetComponent<Rigidbody2D> ();
 	}
 
-	void Start () {
+	public void OnStart () {
 		SetNearestTarget ();
 	}
 
-	void FixedUpdate () {
+	public void OnUpdate () {
 		if (target == null) {
 			SetNearestTarget ();
 		}
@@ -35,16 +35,18 @@ public class Enemy : MonoBehaviour {
 			InvokeRepeating ("FireBullet", fireRate, fireRate);
 			startFiring = false;
 		}
-	
+
 		if (stopFiring) {
 			CancelInvoke ();
 			stopFiring = false;
 		}
+	}
 
+	public void OnFixedUpdate () {
 		Chase ();
 	}
 
-	void OnTriggerEnter2D ( Collider2D other) {
+	public void TriggerEnter2D ( Collider2D other) {
 		if (other.tag == "PlayerBullet") {
 			TakeDamage (other.GetComponent<Projectile> ().damage);
 			other.GetComponent<Bullet> ().Die ();
@@ -54,19 +56,27 @@ public class Enemy : MonoBehaviour {
 		}
 	}
 
-	void TakeDamage( int dam) {
+	public void BecameVisible () {
+		startFiring = true;
+	}
+
+	public void BecameInvisible () {
+		stopFiring = true;
+	}
+
+	protected virtual void TakeDamage( int dam) {
 		hp -= dam;
 		if (hp <= 0) {
 			Die ();
 		}
 	}
 
-	void Die() {
+	protected virtual void Die() {
 		CancelInvoke ();
 		Destroy (gameObject);
 	}
 
-	bool SetNearestTarget() {
+	protected bool SetNearestTarget() {
 		bool targetSet = false;
 		float closestTargetDistance = 10000f;
 		Transform closestTarget = null;
@@ -87,7 +97,7 @@ public class Enemy : MonoBehaviour {
 		return targetSet;
 	}
 
-	void Chase () {
+	protected virtual void Chase () {
 		Vector3 direction = target.position - transform.position;
 		if (Vector3.Magnitude (direction) > attackRange) {  
 			direction.Normalize ();
@@ -109,14 +119,8 @@ public class Enemy : MonoBehaviour {
 		bullet.Fire (transform.position, target.position - transform.position);	
 	}
 
-	void Kamikaze() {
+	protected void Kamikaze() {
 	}
 
-	void OnBecameVisible () {
-		startFiring = true;
-	}
 
-	void OnBecameInvisible () {
-		stopFiring = true;
-	}
 }

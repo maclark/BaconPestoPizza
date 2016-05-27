@@ -13,8 +13,8 @@ public class Shotgun : Weapon {
 		automatic = false;
 		bulletSpeed = 1500f;
 		reloadSpeed = 1f;
-		clipSize = 8;
-		roundsLeftInClip = 8;
+		clipSize = 6;
+		roundsLeftInClip = 6;
 	}
 
 	public override void  Fire (Vector3 dir) {

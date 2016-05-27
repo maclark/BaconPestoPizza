@@ -7,7 +7,8 @@ public class WeatherMaker : MonoBehaviour {
 	public GameObject cloudB;
 	public GameObject cloudC;
 
-	public enum WeatherType {CLEAR, RAINY, WINDY, LIGHTNING, CLOUDY, ECLIPSE}
+	public enum WeatherCondition {CLEAR, RAINY, WINDY, LIGHTNING, CLOUDY, SNOW, DUST, FOGGY}
+	public enum AstralAlignment {DAY, NIGHT, ECLIPSE, FULL_MOON}
 
 	void Start () {
 	
