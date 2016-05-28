@@ -3,28 +3,31 @@ using System.Collections;
 
 public class PlayerInput : MonoBehaviour {
 
-	public Turret turret;
-	public float doubleTapThreshold = .5f;
+	public int playerNum = 0;
+	public bool checkingInput = false;
 	public string joystick = "unset";
 	public LayerMask mask;
 	public Transform station;
 
-	public bool checkingInput = false;
-	public bool releasedRightTrigger = true;
+
 	public string LSHorizontal = "LS_Horizontal";
 	public string LSVertical = "LS_Vertical";
 	public string RSHorizontal = "RS_Horizontal";
 	public string RSVertical = "RS_Vertical";
-	public string rightTrigger = "RT";
 	public string leftTrigger = "LT";
-	public string rightClick = "R_Click";
-	public string menuButton = "Menu";
-	public string aButton = "A";
-	public string bButton = "B";
-	public string xButton = "X";
-	public string yButton = "Y";
+	public string rightTrigger = "RT";
+	public string DPadHorizontal = "dph";
+	public string DPadVertical = "dpv";
+	public string backButton = "Back";
+	public string startButton = "Start";
+	public string aCrossButton = "A";
+	public string bCircleButton = "B";
+	public string xSquareButton = "X";
+	public string yTriangleButton = "Y";
 	public string LB = "LB";
 	public string RB = "RB";
+	public string leftClick = "L_Click";
+	public string rightClick = "R_Click";
 
 	public enum State {NEUTRAL, FLYING, CHANGING_STATIONS, DOCKED, ON_TURRET, IN_COCKPIT, IN_BUBBLE}
 	public State state = State.DOCKED;
@@ -35,6 +38,10 @@ public class PlayerInput : MonoBehaviour {
 	private SpriteRenderer sr;
 	private BigBird bigBird;
 	private Player p;
+	private Turret turret;
+	private bool releasedRightTrigger = true;
+	private bool isXboxController = false;
+
 
 	void Awake () {
 		gm = GameObject.FindGameObjectWithTag ("GameManager").GetComponent<GameManager> ();
@@ -44,74 +51,144 @@ public class PlayerInput : MonoBehaviour {
 	}
 
 	void Update () {
+
+
 		#region
 		////For mapping game pad
 		if (checkingInput) {
 			for (int i = 0; i < 20; i++) {
 				if (Input.GetKeyDown("joystick 1 button "+i)) {
 					// do something
-					print("pressed a joystick 1 button: " + i);
+					print("pressed joystick 1 button " + i);
 				}
 
 				if (Input.GetKeyDown("joystick 2 button "+i)) {
 					// do something
-					print("pressed a joystick 2 button: " + i);
+					print("pressed joystick 2 button " + i);
 				}
 
 				if (Input.GetKeyDown("joystick 3 button "+i)) {
 					// do something
-					print("pressed a joystick 3 button: " + i);
+					print("pressed joystick 3 button " + i);
 				}
 
 				if (Input.GetKeyDown("joystick 4 button "+i)) {
 					// do something
-					print("pressed a joystick 4 button: " + i);
+					print("pressed joystick 4 button " + i);
 				}
 
 				if (Input.GetKeyDown("joystick 5 button "+i)) {
 					// do something
-					print("pressed a joystick 5 button: " + i);
+					print("pressed joystick 5 button " + i);
 				}
 
 				if (Input.GetKeyDown("joystick 6 button "+i)) {
 					// do something
-					print("pressed a joystick 6 button: " + i);
+					print("pressed joystick 6 button " + i);
 				}
+			}		
+		
+
+			if (Input.GetAxis("x_axis_p1") != 0) {
+				print("x_axis_p1");
 			}
+
+			if (Input.GetAxis("y_axis_p1") != 0) {
+				print("y_axis_p1");
+			}
+
+			if (Input.GetAxis("3rd_axis_p1") != 0) {
+				print("3rd_axis_p1");
+			}
+
+			if (Input.GetAxis("5th_axis_p1") != 0) {
+				print("5th_axis_p1");
+			}
+
+			if (Input.GetAxis("6th_axis_p1") != 0) {
+				print("6th_axis_p1");
+			}
+
+			if (Input.GetAxis("7th_axis_p1") != 0) {
+				print("7th_axis_p1");
+			}
+
+			if (Input.GetAxis("8th_axis_p1") != 0) {
+				print("8th_axis_p1");
+			}
+
+			if (Input.GetAxis("9th_axis_p1") != 0) {
+				print("9th_axis_p1");
+			}
+
+			if (Input.GetAxis("10th_axis_p1") != 0) {
+				print("10th_axis_p1");
+			}
+
+			if (Input.GetAxis("11th_axis_p1") != 0) {
+				print("11th_axis_p1");
+			}
+
+			if (Input.GetAxis("12th_axis_p1") != 0) {
+				print("11th_axis_p1");
+			}
+
+			if (Input.GetAxis("13th_axis_p1") != 0) {
+				print("13th_axis_p1");
+			}
+
+			if (Input.GetAxis("14th_axis_p1") != 0) {
+				print("14th_axis_p1");
+			}
+
+			if (Input.GetAxis("15th_axis_p1") != 0) {
+				print("15th_axis_p1");
+			}
+
+			if (Input.GetAxis("16th_axis_p1") != 0) {
+				print("16th_axis_p1");
+			}
+
+			if (Input.GetAxis("16th_axis_p1") != 0) {
+				print("16th_axis_p1");
+			}
+
+
+		
 		}
+			
+
+
 
 		#endregion
 
 		if (joystick == "unset") {
-			if (Input.GetButtonDown (menuButton)) {
-				if (menuButton == "Menu_P1") {
-					joystick = "_P1";
-				} else if (menuButton == "Menu_P2") {
-					joystick = "_P2";
-				} else if (menuButton == "Menu_P3") {
-					joystick = "_P3";
-				} else if (menuButton == "Menu_P4") {
-					joystick = "_P4";
-				} else if (menuButton == "Menu_P5") {
-					joystick = "_P5";
-				} else if (menuButton == "Menu_P6") {
-					joystick = "_P6";
-				} else if (menuButton == "Menu_P7") {
-					joystick = "_P7";
-				} else if (menuButton == "Menu_P8") {
-					joystick = "_P8";
+			for (int i = 1; i < 12; i++) { 
+
+				if (Input.GetKeyDown ("joystick " + i + " button 7")) {
+					if (playerNum == i) {
+						isXboxController = true;
+						joystick = "_p" + i;
+					}
+				} else if (Input.GetKeyDown ("joystick " + i + " button 9")) {
+					if (playerNum == i) {
+						isXboxController = false;
+						joystick = "_p" + i;
+					}
 				}
-			} 
-				
-			if (joystick == "unset") {
-			} else {
+			}
+
+			//joystick is set, so player has hit start
+			if (joystick != "unset") {
 				SetButtonNames ();
 				p.StartPlayer ();
 			}
+
 			return;
-		}
-		
-		if (Input.GetButtonDown (menuButton)) {
+		} 
+
+
+		if (Input.GetButtonDown (startButton)) {
 			gm.TogglePause();
 		}
 
@@ -119,7 +196,7 @@ public class PlayerInput : MonoBehaviour {
 			HandleFlyingInput ();
 		}
 
-		if (state != State.FLYING && Input.GetButtonDown (bButton)) {
+		if (state != State.FLYING && Input.GetButtonDown (bCircleButton)) {
 			PrepareToChangeStations ();
 		}
 
@@ -135,6 +212,10 @@ public class PlayerInput : MonoBehaviour {
 	}
 
 	void HandleFlyingInput () {
+
+		if (playerNum == 6) {
+			print (Input.GetAxisRaw (rightTrigger));
+		}
 
 		p.b.direction = new Vector2( Input.GetAxis(LSHorizontal), Input.GetAxis(LSVertical));
 		if (p.b.gas <= 0) {
@@ -152,36 +233,38 @@ public class PlayerInput : MonoBehaviour {
 		}
 
 		if (p.w.automatic) {
-			if (!p.w.firing && Input.GetAxis (rightTrigger) > 0) {
+			if (!p.w.firing && Input.GetAxis (rightTrigger) < 0) {
 				//print ("!firing, and RT down: " + rightTrigger);
 				p.w.firing = true;
 				InvokeRepeating ("FireBullet", p.w.fireRate, p.w.fireRate);
-			} else if (p.w.firing && Input.GetAxis (rightTrigger) <= 0) {
+			} else if (p.w.firing && Input.GetAxis (rightTrigger) >= 0) {
 				//print ("firing, and RT up: " + rightTrigger);
 				p.w.firing = false;
 				p.CancelInvoke ();
 				CancelInvoke ();
 			}
 		} else {
-			if (Input.GetAxis (rightTrigger) > 0 && p.w.readyToFire && releasedRightTrigger && !p.w.reloading) {
+			if (Input.GetAxis (rightTrigger) < 0 && p.w.readyToFire && releasedRightTrigger && !p.w.reloading) {
 				p.w.Fire (p.aim);
 				releasedRightTrigger = false;
-			} else if (Input.GetAxis (rightTrigger) <= 0) {
+			} else if (Input.GetAxis (rightTrigger) >= 0) {
 				releasedRightTrigger = true;
 			}
 		}
 
 		if (Input.GetAxis (leftTrigger) > 0) {
-			if (p.b.canBoost) {
-				StartCoroutine( p.b.Boost ());
+			if (p.b.canRoll) {
+				p.b.rolling = true;
+				p.b.canRoll = false;
+				StartCoroutine (p.b.EndRoll ());
 			}
 		}
 
-		if (Input.GetButtonDown (yButton)) {
+		if (Input.GetButtonDown (yTriangleButton)) {
 			p.CycleWeapons ();
 		}
 
-		if (Input.GetButtonDown (xButton)) {
+		if (Input.GetButtonDown (xSquareButton)) {
 			p.StartCoroutine (p.Reload ());
 		}
 
@@ -194,10 +277,8 @@ public class PlayerInput : MonoBehaviour {
 		}
 
 		if (Input.GetButtonDown (LB)) {
-			if (p.b.canRoll) {
-				p.b.rolling = true;
-				p.b.canRoll = false;
-				StartCoroutine (p.b.EndRoll ());
+			if (p.b.canBoost) {
+				StartCoroutine( p.b.Boost ());
 			}
 		}
 	}
@@ -217,7 +298,7 @@ public class PlayerInput : MonoBehaviour {
 	}
 
 	void HandleChangingStations () {
-		if (Input.GetButtonUp(bButton)) {
+		if (Input.GetButtonUp(bCircleButton)) {
 			state = selectedState;
 			sr.enabled = false;
 			return;
@@ -249,7 +330,7 @@ public class PlayerInput : MonoBehaviour {
 			p.BoardBird (station.GetComponent<Dock> ().bird);
 		}
 
-		if (Input.GetButtonDown (aButton)) {
+		if (Input.GetButtonDown (aCrossButton)) {
 			p.b.Undock ();
 			if (!p.b.docked) {
 				state = State.FLYING;
@@ -259,24 +340,24 @@ public class PlayerInput : MonoBehaviour {
 
 	void HandleTurretInput () {
 		turret.Rotate (new Vector3( Input.GetAxis(LSHorizontal), Input.GetAxis(LSVertical), 0f));
-		if (Input.GetButtonDown (aButton)) {
+		if (Input.GetButtonDown (aCrossButton)) {
 			turret.PressedA ();
 		}
 
-		if (Input.GetButtonDown (xButton)) {
+		if (Input.GetButtonDown (xSquareButton)) {
 			turret.PressedX ();
 		}
 	}
 
 	void HandlePilotingInput () {
 		if (bigBird.Landed) {
-			if (Input.GetButtonDown (aButton)) {
+			if (Input.GetButtonDown (aCrossButton)) {
 				bigBird.LiftOff ();
 			}
 			return;
 		}
 
-		if (Input.GetButtonDown (aButton)) {
+		if (Input.GetButtonDown (aCrossButton)) {
 			if (bigBird.nearestPad) {
 				bigBird.SetDown (bigBird.nearestPad);
 				return;
@@ -303,19 +384,52 @@ public class PlayerInput : MonoBehaviour {
 	}
 
 	void SetButtonNames () {
-		LSHorizontal = "LS_Horizontal" + joystick;
-		LSVertical = "LS_Vertical" + joystick;
-		RSHorizontal = "RS_Horizontal" + joystick;
-		RSVertical = "RS_Vertical" + joystick;
-		rightTrigger = "RT" + joystick;
-		leftTrigger = "LT" + joystick;
-		rightClick = "R_Click" + joystick;
-		menuButton = "Menu" + joystick;
-		bButton = "B" + joystick;
-		aButton = "A" + joystick;
-		xButton = "X" + joystick;
-		yButton = "Y" + joystick;
-		LB = "LB" + joystick;
-		RB = "RB" + joystick;
+
+		if (isXboxController) {
+			Debug.Log ("setting up xbox controller for " + joystick);
+			LSHorizontal 		= "x_axis" + joystick;
+			LSVertical 			= "y_axis" + joystick;
+			RSHorizontal 		= "4th_axis" + joystick;
+			RSVertical 			= "5th_axis" + joystick;
+			DPadHorizontal 		= "6th_axis" + joystick;
+			DPadVertical 		= "7th_axis" + joystick;
+			leftTrigger 		= "3rd_axis" + joystick;
+			rightTrigger 		= "3rd_axis" + joystick;
+
+			aCrossButton 		= "button0" + joystick;
+			bCircleButton 		= "button1" + joystick;
+			xSquareButton 		= "button2" + joystick;
+			yTriangleButton 	= "button3" + joystick;
+			LB 					= "button4" + joystick;
+			RB 					= "button5" + joystick;
+			backButton 			= "button6" + joystick;
+			startButton 		= "button7" + joystick;
+			leftClick 			= "button8" + joystick;
+			rightClick 			= "button9" + joystick;
+		} 
+		//setup ps3 buttons
+		else {
+			LSHorizontal 		= "6th_axis" + joystick;
+			LSVertical 			= "7th_axis" + joystick;
+			RSHorizontal 		= "3rd_axis" + joystick;
+			RSVertical 			= "5th_axis" + joystick;
+			DPadHorizontal 		= "x_axis" + joystick;
+			DPadVertical 		= "y_axis" + joystick;
+
+			leftTrigger 		= "button6" + joystick;
+			rightTrigger 		= "button7" + joystick;
+
+			aCrossButton 		= "button2" + joystick;
+			bCircleButton 		= "button1" + joystick;
+			xSquareButton 		= "button3" + joystick;
+			yTriangleButton		= "button0" + joystick;
+			LB 					= "button4" + joystick;
+			RB 					= "button5" + joystick;
+			backButton 			= "button8" + joystick;
+			startButton 		= "button9" + joystick;
+			leftClick 			= "button10" + joystick;
+			rightClick 			= "button11" + joystick;
+			
+		}
 	}
 }

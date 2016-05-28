@@ -8,7 +8,7 @@ public class Flappy : Flyer {
 
 	void Awake () {
 		attackRange = 0;
-		accelerationMagnitude = accelMag;
+		forceMag = accelMag;
 		base.OnAwake ();
 	}
 	// TODO use giant player collider to wake up enemies

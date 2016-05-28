@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 public class Flyer : Unit {
 
-	public float accelerationMagnitude = 40f;
+	public float forceMag = 40f;
 	public int hp = 100;
 	public int kamikazeDamage = 200;
 	public float fireRate = 1f;
@@ -101,7 +101,7 @@ public class Flyer : Unit {
 		Vector3 direction = target.position - transform.position;
 		if (Vector3.Magnitude (direction) > attackRange) {  
 			direction.Normalize ();
-			rb.AddForce (direction * accelerationMagnitude * rb.mass);
+			rb.AddForce (direction * forceMag / rb.mass);
 		}
 	}
 
