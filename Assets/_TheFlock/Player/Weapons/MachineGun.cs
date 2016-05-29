@@ -3,7 +3,7 @@ using System.Collections;
 
 public class MachineGun : Weapon {
 	public MachineGun (Holster hol) : base (hol) {
-		bulletSpeed = 1000f;
+		bulletSpeed = 100f;
 		fireRate = .15f;
 		reloadSpeed = 3f;
 		clipSize = 40;

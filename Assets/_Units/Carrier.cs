@@ -1,8 +1,11 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 public class Carrier : Unit {
 
+	public int maxInterceptors = 8;
+	public List<Transform> interceptors = new List<Transform> ();
 	public float moveForceMagnitude = 75f;
 	public int hp = 1000;
 	public float spawnRate = .5f;
@@ -22,8 +25,22 @@ public class Carrier : Unit {
 	}
 
 	protected void SpawnEnemy () {
-		GameObject enemyObj = Instantiate (enemyPrefab, GetComponentInChildren<Dock> ().transform.position, Quaternion.identity) as GameObject;
-		enemyObj.transform.parent = this.transform.parent;
+		if (interceptors.Count < maxInterceptors) {
+			GameObject enemyObj = Instantiate (enemyPrefab, GetComponentInChildren<Dock> ().transform.position, Quaternion.identity) as GameObject;
+			interceptors.Add (enemyObj.transform);
+			enemyObj.transform.parent = transform;
+		}
+
+		if (interceptors.Count >= maxInterceptors) {
+			CancelInvoke ();
+		}
+	}
+
+	public void LoseInterceptor (Transform interceptor) {
+		interceptors.Remove (interceptor);
+		if (interceptors.Count < 2) {
+			InvokeRepeating ("SpawnEnemy", 0f, spawnRate);
+		}
 	}
 
 	protected void TakeDamage( int dam) {
@@ -33,7 +50,7 @@ public class Carrier : Unit {
 		}
 	}
 
-	protected void Die() {
+	public void Die() {
 		CancelInvoke ();
 		Destroy (gameObject);
 	}

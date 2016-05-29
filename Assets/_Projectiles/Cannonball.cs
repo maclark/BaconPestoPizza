@@ -22,7 +22,7 @@ public class Cannonball : Projectile {
 	}
 
 	public override void Fire (Vector3 start, Vector2 aim) {
-		accel = cannonballAccel;
+		forceMag = cannonballAccel;
 		base.Fire (start, aim);
 	}
 

@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 public class BigBird : MonoBehaviour {
 
-	public float accelerationMagnitude = 75f;
+	public float forceMag = 75f;
 	public int hp = 1000;
 	public float thresholdToTurnBigBird = .2f;
 	public bool turning { get; set; }
@@ -46,7 +46,7 @@ public class BigBird : MonoBehaviour {
 
 	void FixedUpdate () {
 		if (engineOn) {
-			rb.AddForce (transform.up * accelerationMagnitude * rb.mass);
+			rb.AddForce (transform.up * forceMag);
 		}
 
 		if (turning && !landed) {
@@ -63,11 +63,11 @@ public class BigBird : MonoBehaviour {
 		} 
 		else if (other.tag == "Enemy") {
 			TakeDamage (other.GetComponent<Flyer> ().kamikazeDamage);
-			Destroy (other.gameObject);
+			other.gameObject.GetComponent<Flyer> ().Die ();
 		}
 		else if (other.name == "Web") {
 			TurnEngineOn ();
-			accelerationMagnitude = 10 * accelerationMagnitude;
+			forceMag = 10 * forceMag;
 		}
 		else if (other.name == "LandingPad") {
 			nearestPad = other.GetComponent<LandingPad> ();

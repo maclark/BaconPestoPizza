@@ -8,9 +8,9 @@ public class Bird : MonoBehaviour {
 	public Player p;
 	public int health = 100;
 	public int maxHealth = 100;
-	public float accelerationMagnitude = 60f;
+	public float forceMag = 60f;
 
-	public float boostAccel = 60f;
+	public float boostForceMag = 60f;
 	public bool docked = false;
 	public float flashGap = 1f;
 	public float flashDuration = .15f;
@@ -49,9 +49,9 @@ public class Bird : MonoBehaviour {
 	private SpriteRenderer sr;
 	private BigBird bigBird;
 	private Dock dock = null;
+	private Shield shield;
 	private GameObject gasLight;
-	private float startScaleFactor;
-	private float startAccelerationgMagnitude;
+	private float startForceMag;
 	private bool ranOutOfGas = false;
 	private bool gasLightFlashing = false;
 
@@ -60,7 +60,7 @@ public class Bird : MonoBehaviour {
 		gm = GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager> ();
 		sr = GetComponent<SpriteRenderer> ();
 		bigBird = GameObject.FindObjectOfType<BigBird>() as BigBird;
-		startScaleFactor = transform.localScale.x;
+		shield = GetComponentInChildren<Shield> (true);
 	}
 
 	void Start () {
@@ -69,7 +69,7 @@ public class Bird : MonoBehaviour {
 		otherHarps = new List<Harpoon> ();
 		linkedBirds = new List<Bird> ();
 
-		startAccelerationgMagnitude = accelerationMagnitude;
+		startForceMag = forceMag;
 
 		Dock ();
 		gm.AddAlliedTransform (transform);
@@ -103,7 +103,7 @@ public class Bird : MonoBehaviour {
 
 		//check if just boosted
 		if (!canBoost) {
-			accelerationMagnitude = startAccelerationgMagnitude;
+			forceMag = startForceMag;
 		}	
 	}
 
@@ -112,15 +112,30 @@ public class Bird : MonoBehaviour {
 		if (other.tag == "EnemyBullet") {
 			if (rolling) {
 				BounceBullets (other);
+			} else if (!invincible) {
+				if (shield.gameObject.activeSelf) {
+					shield.DeactivateShield ();
+					StartCoroutine (HitInvincibility (hitInvincibilityDuration));
+					other.GetComponent<Bullet> ().Die ();
+				} else { 
+					TakeDamage (other.GetComponent<Bullet> ().damage);
+					other.GetComponent<Bullet> ().Die ();
+				}
 			}
-			else if (!invincible) {
-				TakeDamage (other.GetComponent<Bullet> ().damage);
-				other.GetComponent<Bullet> ().Die ();
-			}
-		}
-		else if (other.tag == "Enemy") {
+		} else if (other.tag == "Enemy") {
 			if (!invincible) {
-				TakeDamage (other.GetComponent<Flyer> ().kamikazeDamage);
+				if (shield.gameObject.activeSelf) {
+					shield.DeactivateShield ();
+					StartCoroutine (HitInvincibility (hitInvincibilityDuration));
+					other.GetComponent<Flyer> ().Die ();
+				} else { 
+					TakeDamage (other.GetComponent<Flyer> ().kamikazeDamage);
+					other.GetComponent<Flyer> ().Die ();
+				}
+			}
+		} else if (other.tag == "Pickup") {
+			if (!shield.gameObject.activeSelf) {
+				shield.ActivateShield ();
 				Destroy (other.gameObject);
 			}
 		}
@@ -131,8 +146,14 @@ public class Bird : MonoBehaviour {
 			Dock ();
 		} else if (coll.transform.tag == "Enemy") {
 			if (!invincible) {
-				TakeDamage (coll.transform.GetComponent<Flyer> ().kamikazeDamage);
-				Destroy (coll.gameObject);
+				if (shield.gameObject.activeSelf) {
+					shield.DeactivateShield ();
+					StartCoroutine (HitInvincibility (hitInvincibilityDuration));
+					coll.gameObject.GetComponent<Flyer> ().Die ();
+				} else { 
+					TakeDamage (coll.transform.GetComponent<Flyer> ().kamikazeDamage);
+					coll.gameObject.GetComponent<Flyer> ().Die ();
+				}
 			}
 		}
 	}
@@ -155,7 +176,7 @@ public class Bird : MonoBehaviour {
 			//Has launched harp, check if max tethered 
 			if (!harp.atMaxTether) {
 				//Harp not at max tether, bird not harpooned by anything, move normally
-				rb.AddForce (direction * accelerationMagnitude * rb.mass);
+				rb.AddForce (direction * forceMag);
 			} 
 			//Has launched harpoon and it is at max tether
 			else {
@@ -164,7 +185,7 @@ public class Bird : MonoBehaviour {
 		} 
 		//Hasn't launched harp and not harpooned by anything, move normally
 		else {
-			rb.AddForce (direction * accelerationMagnitude * rb.mass);
+			rb.AddForce (direction * forceMag);
 		}
 	}
 
@@ -190,12 +211,12 @@ public class Bird : MonoBehaviour {
 
 		//WhaleDynamics is for calculating effective drag masses and doing the physics
 		if (draggers.Count > 0) {
-			WhaleDynamics wd = new WhaleDynamics (transform, draggers, accelerationMagnitude, direction);
+			WhaleDynamics wd = new WhaleDynamics (transform, draggers, forceMag, direction);
 			wd.CalculateWhaleDragging ();
 		} 
 		//If harp and harpooners aren't at max tether, then fly normally
 		else {
-			rb.AddForce (direction * accelerationMagnitude * rb.mass);
+			rb.AddForce (direction * forceMag);
 		}
 	}
 
@@ -203,7 +224,7 @@ public class Bird : MonoBehaviour {
 		//Calculate and add force parallel to pull vector
 		pullDir = transform.position - harp.transform.position;
 		pullDir.Normalize ();
-		float pullMagnitude = Vector3.Dot (direction * accelerationMagnitude * rb.mass, pullDir);
+		float pullMagnitude = Vector3.Dot (direction * forceMag * rb.mass, pullDir);
 		if (pullMagnitude > 0) {
 			PullHarp (pullMagnitude);
 		}
@@ -213,7 +234,7 @@ public class Bird : MonoBehaviour {
 				TetherHarp ();
 			}
 			//Ship is not pulling on harp, so it moves normally
-			rb.AddForce (direction * accelerationMagnitude * rb.mass);
+			rb.AddForce (direction * forceMag);
 		} 
 	}
 
@@ -230,11 +251,11 @@ public class Bird : MonoBehaviour {
 
 		//Caclulate and add force orthogonal to pull vector
 		orthoPullDir = new Vector3 (-pullDir.y, pullDir.x, 0);
-		float orthoPullMag = Vector3.Dot (direction * accelerationMagnitude * rb.mass, orthoPullDir);		
+		float orthoPullMag = Vector3.Dot (direction * forceMag * rb.mass, orthoPullDir);		
 
 		rb.AddForce (pullDir * pullMag / totalMass);
 		rbOther.AddForce (pullDir * pullMag / totalMass);
-		rb.AddForce (orthoPullDir * orthoPullMag * rb.mass);
+		rb.AddForce (orthoPullDir * orthoPullMag);
 	}
 
 	void TetherHarp () {
@@ -369,12 +390,11 @@ public class Bird : MonoBehaviour {
 		dock = null;
 
 		transform.parent = null;
-		transform.localScale = new Vector3 (startScaleFactor, startScaleFactor, 1);
 		transform.rotation = Quaternion.identity;
 		rb.WakeUp ();
 		Vector3 releaseDirection = transform.position - bigBird.transform.position;
 		releaseDirection.Normalize ();
-		rb.AddForce (releaseDirection * boostAccel * rb.mass);
+		rb.AddForce (releaseDirection * boostForceMag);
 		Invoke ("EnableColliders", .5f);
 		sr.sortingLayerName = "Birds";
 		sr.sortingOrder = 0;
@@ -461,7 +481,7 @@ public class Bird : MonoBehaviour {
 	public IEnumerator Boost () {
 		canBoost = false;
 		gas -= gasPerBoost;
-		accelerationMagnitude = boostAccel;
+		forceMag = boostForceMag;
 		yield return new WaitForSeconds (boostCooldown);
 		canBoost = true;
 	}
@@ -527,4 +547,12 @@ public class Bird : MonoBehaviour {
 			other.GetComponent<Rigidbody2D> ().velocity = Vector2.zero;
 		}
 	}
+
+
+	public Shield Shield {
+		get {
+			return shield;
+		}
+	}
+
 }

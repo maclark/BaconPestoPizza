@@ -4,13 +4,13 @@ using System.Collections.Generic;
 public class Harpoon : MonoBehaviour {
 
 	public Vector2 direction = Vector2.zero;
-	public float accelerationMagnitude = 500f;
+	public float forceMag = 500f;
 	public float minWidth = .05f;
 	public float maxWidth = .2f;
 	public float minWidthTetherLength = 3;
 	public float tetherMaxLength = 10f;
 	public bool atMaxTether = false;
-	public float recallAccelerationMag	= 100f;
+	public float recallMag	= 100f;
 	public float detachDelay = .3f;
 	public float recallVelocity = 10f;
 	public bool recalling = false;
@@ -42,7 +42,7 @@ public class Harpoon : MonoBehaviour {
 		if (recalling) {
 			Vector3 detachDir = harpooner.GetComponent<Bird> ().p.transform.position - transform.position;
 			detachDir.Normalize ();
-			rb.AddForce (detachDir * recallAccelerationMag * rb.mass);
+			rb.AddForce (detachDir * recallMag);
 		}
 	}
 
@@ -78,7 +78,7 @@ public class Harpoon : MonoBehaviour {
 		transform.position = start.position;
 		transform.rotation = start.rotation;
 		SetDirection (aim);
-		rb.AddForce (direction * accelerationMagnitude * rb.mass);
+		rb.AddForce (direction * forceMag);
 	}
 
 	public void Die () {

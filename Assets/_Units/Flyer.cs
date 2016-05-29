@@ -71,7 +71,12 @@ public class Flyer : Unit {
 		}
 	}
 
-	protected virtual void Die() {
+	public virtual void Die() {
+		if (transform.parent) {
+			if (transform.parent.GetComponent<Carrier> ()) {
+				transform.parent.GetComponent<Carrier> ().LoseInterceptor (transform);
+			}
+		}
 		CancelInvoke ();
 		Destroy (gameObject);
 	}
@@ -101,7 +106,7 @@ public class Flyer : Unit {
 		Vector3 direction = target.position - transform.position;
 		if (Vector3.Magnitude (direction) > attackRange) {  
 			direction.Normalize ();
-			rb.AddForce (direction * forceMag / rb.mass);
+			rb.AddForce (direction * forceMag);
 		}
 	}
 

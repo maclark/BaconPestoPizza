@@ -5,7 +5,6 @@ public class Bullet : Projectile {
 
 	public int bulletDamage = 100;
 	public Vector3 direction = Vector3.zero;
-	public float accelerationMagnitude = 100f;
 
 	void Awake () {
 		base.OnAwake ();
@@ -23,7 +22,7 @@ public class Bullet : Projectile {
 	public override void Fire (Vector3 start, Vector2 aim) {
 		transform.position = start;
 		SetDirection (aim);
-		rb.AddForce (direction * accelerationMagnitude * rb.mass);
+		rb.AddForce (direction * forceMag);
 	}
 
 	public override void Die () {

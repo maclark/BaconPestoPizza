@@ -37,6 +37,7 @@ public class Player : MonoBehaviour {
 		b.p = this;
 		b.color = GetComponent<SpriteRenderer> ().color;
 		b.GetComponent<SpriteRenderer>().color = b.color;
+		b.Shield.SetColor (b.color);
 		GetComponent<ObjectPooler> ().enabled = true;
 		GetComponent<ObjectPooler> ().SetPooledObjectsColor (b.color);
 		b.transform.rotation = Quaternion.identity;
