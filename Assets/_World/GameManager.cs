@@ -8,27 +8,19 @@ public class GameManager : MonoBehaviour {
 	public GameObject bubblePrefab;
 	public BigBird bigBird;
 	public Vector3 birdScale = new Vector3 (1.25f, 1.25f, 1);
-	//public Player player1;
-	//private Player player2;
-	//private Player player3;
-	//private Player player4;
+	public Vector3 appointment1 = new Vector3 (100, 0, 0);
 	public bool inNavigation = false;
 	public GameObject navPointerPrefab;
 	public Text goldText;
+	public List<Transform> appointments = new List<Transform> ();
 
-	private List<Transform> alliedTransforms; 
+	private List<Transform> alliedTransforms = new List<Transform> (); 
 	private bool paused = false;
 	private GameObject navPointer;
 
-	// Use this for initialization
 	void Awake () {
 		bigBird = GameObject.FindGameObjectWithTag ("BigBird").GetComponent<BigBird> ();
-		alliedTransforms = new List<Transform> ();
 		AddAlliedTransform (bigBird.transform);
-	}
-
-	// Update is called once per frame
-	void Update () {
 	}
 
 	public List<Transform> GetAlliedTransforms () {
@@ -64,12 +56,17 @@ public class GameManager : MonoBehaviour {
 			Destroy (navPointer);
 		}
 	}
-	/*
-	public void Link (Player playerA, Player playerB) {
-		foreach (Player p in linkedPlayers) {
-			if (p.name == playerA.name) {
-			} else if (p.name == playerB.name) {
-			}
-		}
-	}*/
+
+	/// <summary>
+	/// Inadvisable to have an appointment at the origin.
+	/// </summary>
+	/// <returns>The appointment.</returns>
+	public Transform GetNextAppointment () {
+		if (appointments.Count > 0) {
+			Transform a = appointments [0];
+			appointments.Remove (a);
+			return a;
+		} else
+			return null;
+	}
 }

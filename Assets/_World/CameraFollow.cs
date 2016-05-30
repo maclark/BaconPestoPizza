@@ -4,6 +4,8 @@ using System.Collections.Generic;
 public class CameraFollow : MonoBehaviour {
 
 	public float smoothTime = 0.3f;
+	public Vector3 offsetDir = Vector3.zero;
+	public float offsetMag = 10f;
 
 	private Vector3 velocity = Vector3.zero;
 	private GameManager gm;
@@ -24,7 +26,7 @@ public class CameraFollow : MonoBehaviour {
 		x = x / targetTransforms.Count;
 		y = y / targetTransforms.Count;
 
-		Vector3 goalPos = new Vector3 (x, y, transform.position.z);
+		Vector3 goalPos = new Vector3 (x + offsetDir.x * offsetMag, y + offsetDir.y * offsetMag, transform.position.z);
 		transform.position = Vector3.SmoothDamp (transform.position, goalPos, ref velocity, smoothTime);
 	}
 }

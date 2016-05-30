@@ -4,11 +4,9 @@ using System.Collections;
 public class Flappy : Flyer {
 
 	public float lookDelay = 2f;
-	public float accelMag = 40f;
 
 	void Awake () {
 		attackRange = 0;
-		forceMag = accelMag;
 		base.OnAwake ();
 	}
 	// TODO use giant player collider to wake up enemies

@@ -386,7 +386,6 @@ public class PlayerInput : MonoBehaviour {
 	void SetButtonNames () {
 
 		if (isXboxController) {
-			Debug.Log ("setting up xbox controller for " + joystick);
 			LSHorizontal 		= "x_axis" + joystick;
 			LSVertical 			= "y_axis" + joystick;
 			RSHorizontal 		= "4th_axis" + joystick;
