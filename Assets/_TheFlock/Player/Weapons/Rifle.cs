@@ -8,5 +8,6 @@ public class Rifle : Weapon {
 		reloadSpeed = 2f;
 		clipSize = 20;
 		roundsLeftInClip = 20;
+		damage = 400;
 	}
 }

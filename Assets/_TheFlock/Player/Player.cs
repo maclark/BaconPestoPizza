@@ -16,12 +16,15 @@ public class Player : MonoBehaviour {
 	private BigBird bigBird;
 	private Holster hol;
 
+	private Color color;
+
 	void Awake () {
 		gm = GameObject.FindObjectOfType<GameManager> ();
 		pi = GetComponent<PlayerInput> ();
 		sr = GetComponent<SpriteRenderer> ();
 		bigBird = GameObject.FindObjectOfType<BigBird> ();
 		hol = new Holster (this);
+		color = sr.color;
 	}
 
 	public void StartPlayer () {
@@ -36,18 +39,19 @@ public class Player : MonoBehaviour {
 		b = bird;
 		b.p = this;
 		b.color = GetComponent<SpriteRenderer> ().color;
-		b.GetComponent<SpriteRenderer>().color = b.color;
+		b.body.GetComponent<SpriteRenderer>().color = b.color;
 		b.Shield.SetColor (b.color);
+		b.ReloadIndicator.SetColor (b.color);
 		GetComponent<ObjectPooler> ().enabled = true;
 		GetComponent<ObjectPooler> ().SetPooledObjectsColor (b.color);
 		b.transform.rotation = Quaternion.identity;
 		transform.rotation = b.transform.rotation;
 		transform.position = b.transform.position + ridingOffset;
-		transform.parent = b.transform;
+		transform.parent = b.body;
 	}
 
 	public void UnboardBird (Transform newParent) {
-		sr.color = new Color (sr.color.r, sr.color.g, sr.color.b, 1);
+		sr.color = color;
 		sr.sprite = sprites [0];
 		sr.sortingLayerName = newParent.GetComponent<SpriteRenderer> ().sortingLayerName;
 		sr.sortingOrder = 2;
@@ -56,7 +60,7 @@ public class Player : MonoBehaviour {
 		transform.position = pi.station.position;
 		b.p = null;
 		b.color = Color.black;
-		b.GetComponent<SpriteRenderer>().color = Color.black;
+		b.body.GetComponent<SpriteRenderer>().color = Color.black;
 		b = null;
 	}
 
@@ -72,6 +76,9 @@ public class Player : MonoBehaviour {
 	}
 
 	public void Bubble (Vector3 initialVelocity) {
+		if (b.harp) {
+			b.harp.DetachAndRecall ();
+		}
 		sr.sprite = sprites [0];
 		GameObject bub = Instantiate (gm.bubblePrefab, transform.position, transform.rotation) as GameObject;
 		gm.AddAlliedTransform (bub.transform);
@@ -82,20 +89,11 @@ public class Player : MonoBehaviour {
 	}
 
 	public void CycleWeapons () {
+		b.TurnOffReloadIndicator ();
 		hol.CycleWeapons ();
 	}
 
-	public IEnumerator Reload () {
-		Weapon weaponToReload = w;
-		w.reloading = true;
-		yield return new WaitForSeconds (w.reloadSpeed);
-		if (w == weaponToReload) {
-			w.roundsLeftInClip = w.clipSize;
-		}
-		weaponToReload.reloading = false;
-	}
-
-	public void CockShotgun () {
-		w.readyToFire = true;
+	public void CockWeapon () {
+		w.CockWeapon ();
 	}
 }

@@ -22,15 +22,16 @@ public class BigBird : MonoBehaviour {
 	private float startScale;
 	private bool engineOn = false;
 	private bool landed = false;
+	private HealthBar healthBar;
 	private Bird birdGettingRepairs = null;
 	private Bird birdGettingGas = null;
+	private Transform target = null;
 	private Pump pump;
 	private Medkit medkit;
 	private Thruster[] thrusters;
 	private List<Bird> dockedBirds = new List<Bird> ();
 	private List<Bird> gasLine = new List<Bird> ();
 	private List<Bird> repairLine = new List<Bird> ();
-
 
 	void Awake() {
 		gm = GameObject.FindObjectOfType<GameManager> ();
@@ -39,18 +40,29 @@ public class BigBird : MonoBehaviour {
 		medkit = GetComponentInChildren<Medkit> ();
 		thrusters = GetComponentsInChildren<Thruster> ();
 		startScale = transform.localScale.x;
+		healthBar = gm.GetBigBirdHealthBar ();
 	}
 
 	void Start () {
+		target = GameObject.FindObjectOfType<President> ().transform;
+		healthBar.max = hp;
+		healthBar.current = hp;
 	}
 
 	void FixedUpdate () {
 		if (engineOn) {
+			if (target) {
+				Quaternion r = Quaternion.LookRotation (Vector3.forward, target.position - transform.position);
+				transform.rotation = Quaternion.RotateTowards (transform.rotation, r, rotateSpeed);	
+				//TODO make this torque based to use physics engine collisions
+				//rb.AddTorque (rotateSpeed * 1000);
+			}
 			rb.AddForce (transform.up * forceMag);
 		}
 
-		if (turning && !landed) {
-			transform.rotation = Quaternion.Lerp (transform.rotation, targetRotation, Time.deltaTime * rotateSpeed);
+
+		else if (turning && !landed) {
+			transform.rotation = Quaternion.RotateTowards (transform.rotation, targetRotation, rotateSpeed);
 			rb.angularVelocity = 0f;
 		}
 	}
@@ -58,7 +70,8 @@ public class BigBird : MonoBehaviour {
 	void OnTriggerEnter2D (Collider2D other) {
 		if (other.tag == "EnemyBullet") {
 			if (Random.Range (0, 1f) > .5) {
-				other.GetComponent<Bullet>().Die();
+				TakeDamage (other.GetComponent<Bullet> ().damage);
+				other.GetComponent<Bullet> ().Die ();
 			}
 		} 
 		else if (other.tag == "Enemy") {
@@ -136,6 +149,7 @@ public class BigBird : MonoBehaviour {
 
 	void TakeDamage( int dam) {
 		hp -= dam;
+		healthBar.AdjustHealth (hp);
 		if (hp <= 0) {
 			Die ();
 		}

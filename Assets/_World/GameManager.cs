@@ -7,6 +7,7 @@ public class GameManager : MonoBehaviour {
 
 	public GameObject bubblePrefab;
 	public BigBird bigBird;
+	public GameObject bigBirdHealthBar;
 	public Vector3 birdScale = new Vector3 (1.25f, 1.25f, 1);
 	public Vector3 appointment1 = new Vector3 (100, 0, 0);
 	public bool inNavigation = false;
@@ -68,5 +69,9 @@ public class GameManager : MonoBehaviour {
 			return a;
 		} else
 			return null;
+	}
+
+	public HealthBar GetBigBirdHealthBar () {
+		return bigBirdHealthBar.GetComponent<HealthBar> ();
 	}
 }

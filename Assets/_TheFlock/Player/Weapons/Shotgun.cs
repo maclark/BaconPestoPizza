@@ -15,6 +15,7 @@ public class Shotgun : Weapon {
 		reloadSpeed = 1f;
 		clipSize = 6;
 		roundsLeftInClip = 6;
+		damage = 150;
 	}
 
 	public override void  Fire (Vector3 dir) {
@@ -34,13 +35,13 @@ public class Shotgun : Weapon {
 				Vector3 s = hol.p.transform.position + new Vector3 (u, v, 0f) + dir * spreadOffset;
 				bull.Fire (s, dir);
 			}
-			readyToFire = false;
-			hol.p.Invoke ("CockShotgun", cockDelay);
-			roundsLeftInClip--;
+			cocked = false;
+			hol.p.Invoke ("CockWeapon", cockDelay);
+			roundsLeftInClip--;  
 		}
 
-		if (roundsLeftInClip <= 0) {
-			hol.p.StartCoroutine (hol.p.Reload ());
+		if (roundsLeftInClip <= 0 && !reloading) {
+			hol.p.StartCoroutine (Reload ());
 		}
 	}
 }

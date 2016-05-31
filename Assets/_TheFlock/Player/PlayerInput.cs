@@ -236,7 +236,7 @@ public class PlayerInput : MonoBehaviour {
 			if (!p.w.firing && Input.GetAxis (rightTrigger) < 0) {
 				//print ("!firing, and RT down: " + rightTrigger);
 				p.w.firing = true;
-				InvokeRepeating ("FireBullet", p.w.fireRate, p.w.fireRate);
+				InvokeRepeating ("FireBullet", 0, p.w.fireRate);
 			} else if (p.w.firing && Input.GetAxis (rightTrigger) >= 0) {
 				//print ("firing, and RT up: " + rightTrigger);
 				p.w.firing = false;
@@ -244,7 +244,7 @@ public class PlayerInput : MonoBehaviour {
 				CancelInvoke ();
 			}
 		} else {
-			if (Input.GetAxis (rightTrigger) < 0 && p.w.readyToFire && releasedRightTrigger && !p.w.reloading) {
+			if (Input.GetAxis (rightTrigger) < 0 && p.w.cocked && releasedRightTrigger && !p.w.reloading) {
 				p.w.Fire (p.aim);
 				releasedRightTrigger = false;
 			} else if (Input.GetAxis (rightTrigger) >= 0) {
@@ -265,7 +265,9 @@ public class PlayerInput : MonoBehaviour {
 		}
 
 		if (Input.GetButtonDown (xSquareButton)) {
-			p.StartCoroutine (p.Reload ());
+			if (p.w.roundsLeftInClip < p.w.clipSize && !p.w.reloading) {
+				p.StartCoroutine (p.w.Reload ());
+			}
 		}
 
 		if (Input.GetButtonDown (rightClick)) {

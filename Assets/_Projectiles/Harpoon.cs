@@ -5,14 +5,14 @@ public class Harpoon : MonoBehaviour {
 
 	public Vector2 direction = Vector2.zero;
 	public float forceMag = 500f;
-	public float minWidth = .05f;
-	public float maxWidth = .2f;
+	public float minTetherWidth = .05f;
+	public float maxTetherWidth = .2f;
 	public float minWidthTetherLength = 3;
-	public float tetherMaxLength = 10f;
-	public bool atMaxTether = false;
+	public float tautLength = 10f;
+	public float maxTetherLength = 30f;
+	public bool taut = false;
 	public float recallMag	= 100f;
 	public float detachDelay = .3f;
-	public float recallVelocity = 10f;
 	public bool recalling = false;
 	public GameObject webPrefab;
 
@@ -35,6 +35,10 @@ public class Harpoon : MonoBehaviour {
 		DrawTether ();
 		if (harpooned != null) {
 			CheckTetherCollision ();
+		}
+
+		if (Vector3.Distance (transform.position, harpooner.transform.position) > maxTetherLength) {
+			DetachAndRecall (true);
 		}
 	}
 
@@ -96,21 +100,21 @@ public class Harpoon : MonoBehaviour {
 		lr.SetPositions (tetherPositions);
 
 		float distance = Vector3.Distance (tetherPositions[0], tetherPositions[1]);
-		float tetherWidth = Mathf.Lerp (maxWidth, minWidth, (distance - minWidthTetherLength )/ tetherMaxLength);
+		float tetherWidth = Mathf.Lerp (maxTetherWidth, minTetherWidth, (distance - minWidthTetherLength )/ tautLength);
 		lr.SetWidth (tetherWidth, tetherWidth);
 
 		//for determining when to stop thinning the line renderered
 		if (distance < minWidthTetherLength) {
-			atMaxTether = false;
+			taut = false;
 			lr.material.color = harpooner.GetComponent<Bird> ().color;
 		} 
-		else if (distance < tetherMaxLength + minWidthTetherLength) {
-			atMaxTether = false;
+		else if (distance < tautLength + minWidthTetherLength) {
+			taut = false;
 			lr.material.color = harpooner.GetComponent<Bird> ().color;
 		}
 		else {
 			lr.material.color = Color.red;
-			atMaxTether = true;
+			taut = true;
 		} 
 	}
 

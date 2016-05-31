@@ -6,6 +6,7 @@ public class Holster {
 	public enum WeaponType {MACHINE_GUN, RIFLE, SHOTGUN};
 	public WeaponType currentWeapon;
 	public Player p;
+	public bool weaponChangedDuringReload;
 
 	private int currentSlot;
 	private WeaponType[] slots = new WeaponType[3];
@@ -25,6 +26,10 @@ public class Holster {
 	}
 
 	public void CycleWeapons () {
+		if (p.w.reloading) {
+			weaponChangedDuringReload = true;
+		}
+
 		int nextWeaponSlot = currentSlot + 1;
 		if (currentSlot + 1 >= slots.Length) {
 			nextWeaponSlot = 0;

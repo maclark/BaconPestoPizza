@@ -29,6 +29,7 @@ public class Bird : MonoBehaviour {
 	public float rerollDelay = 1f;
 	public float rollSpeed = 1f;
 
+	public Transform body;
 	public GameObject harpoonPrefab;
 	public GameObject gasLightPrefab;
 	public List<Bird> linkedBirds;
@@ -50,6 +51,7 @@ public class Bird : MonoBehaviour {
 	private BigBird bigBird;
 	private Dock dock = null;
 	private Shield shield;
+	private ReloadIndicator reloadIndicator;
 	private GameObject gasLight;
 	private float startForceMag;
 	private bool ranOutOfGas = false;
@@ -58,9 +60,10 @@ public class Bird : MonoBehaviour {
 	void Awake() {
 		rb = GetComponent<Rigidbody2D> ();
 		gm = GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager> ();
-		sr = GetComponent<SpriteRenderer> ();
+		sr = body.GetComponent<SpriteRenderer> ();
 		bigBird = GameObject.FindObjectOfType<BigBird>() as BigBird;
 		shield = GetComponentInChildren<Shield> (true);
+		reloadIndicator = GetComponentInChildren<ReloadIndicator> (true);
 	}
 
 	void Start () {
@@ -165,22 +168,26 @@ public class Bird : MonoBehaviour {
 
 	void HandleFlying () {
 		if (direction == Vector2.zero) {
-			return;
+			if (harp != null) {
+				if (harp.taut) {
+					HandleHarpTaut ();
+					return;
+				}
+			}
 		}
-
 
 		if (otherHarps.Count > 0) {
 			HandleFlyingWhileHarpooned ();
 		}
 		else if (harp != null) {
 			//Has launched harp, check if max tethered 
-			if (!harp.atMaxTether) {
+			if (!harp.taut) {
 				//Harp not at max tether, bird not harpooned by anything, move normally
 				rb.AddForce (direction * forceMag);
 			} 
 			//Has launched harpoon and it is at max tether
 			else {
-				HandleHarpAtMaxTether ();
+				HandleHarpTaut ();
 			}
 		} 
 		//Hasn't launched harp and not harpooned by anything, move normally
@@ -193,14 +200,14 @@ public class Bird : MonoBehaviour {
 		//Make a list of masses dragging on Bird
 		List<Transform> draggers = new List<Transform>();
 		foreach (Harpoon h in otherHarps) {
-			if (h.atMaxTether) {
+			if (h.taut) {
 				draggers.Add (h.GetHarpooner ().transform);
 			}
 		}
 
 		//Check for harp at max tether and if it is attached to anything
 		if (harp != null) {
-			if (harp.atMaxTether) {
+			if (harp.taut) {
 				if (harp.GetHarpooned () != null) {
 					draggers.Add (harp.GetHarpooned ().transform);
 				} else {
@@ -220,7 +227,7 @@ public class Bird : MonoBehaviour {
 		}
 	}
 
-	void HandleHarpAtMaxTether () {
+	void HandleHarpTaut () {
 		//Calculate and add force parallel to pull vector
 		pullDir = transform.position - harp.transform.position;
 		pullDir.Normalize ();
@@ -260,18 +267,19 @@ public class Bird : MonoBehaviour {
 
 	void TetherHarp () {
 		//determine direction of tether and orthogonal axis to that
-		Vector2 directionOfTether = harp.transform.position - transform.position;
+		Vector2 directionOfTether = harp.transform.position - harp.GetHarpooner ().transform.position;
 		directionOfTether.Normalize ();
 		Vector2 orthoDirectionOfTether = new Vector2 (directionOfTether.y, -directionOfTether.x);
 
 		//find components of velocity along new axes
 		Vector2 harpVel = harp.GetComponent<Rigidbody2D> ().velocity;
 		float harpVelTetherComponent = Vector2.Dot (harpVel, directionOfTether);
+
 		float harpVelOrthoComponent = Vector2.Dot (harpVel, orthoDirectionOfTether);
 
 		//if harpoon still moving away from harpooner, stop it
 		if (harpVelTetherComponent > 0) {
-			harpVelTetherComponent = 0;
+			harpVelTetherComponent = .95f * harpVelTetherComponent;
 		}
 
 		//Add components of velocity to find resultant velocity vector of harpoon
@@ -487,14 +495,14 @@ public class Bird : MonoBehaviour {
 	}
 
 	public void AileronRoll () {
-		transform.Rotate (rollSpeed * Time.deltaTime, 0, 0);
+		body.Rotate (rollSpeed * Time.deltaTime, 0, 0);
 	}
 
 	public IEnumerator EndRoll () {
 		yield return new WaitForSeconds (rollDuration);
 		//if about to burn up (die) this invoke can fail
 		if (!docked) {
-			transform.rotation = Quaternion.identity;
+			body.transform.rotation = Quaternion.identity;
 			rolling = false;
 			yield return new WaitForSeconds (rerollDelay);
 			canRoll = true;
@@ -555,4 +563,18 @@ public class Bird : MonoBehaviour {
 		}
 	}
 
+	public ReloadIndicator ReloadIndicator {
+		get {
+			return reloadIndicator;
+		}
+	}
+
+	public void TurnOnReloadIndicator (float reloadTime) {
+		reloadIndicator.gameObject.SetActive (true);
+		reloadIndicator.StartReload (reloadTime);
+	}
+
+	public void TurnOffReloadIndicator () {
+		reloadIndicator.gameObject.SetActive (false);
+	}
 }

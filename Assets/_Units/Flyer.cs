@@ -110,7 +110,7 @@ public class Flyer : Unit {
 		}
 	}
 
-	public void FireBullet() {
+	public virtual void FireBullet() {
 		if (target == null) {
 			SetNearestTarget ();
 			if (target == null) {
