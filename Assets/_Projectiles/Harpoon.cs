@@ -15,12 +15,14 @@ public class Harpoon : MonoBehaviour {
 	public float detachDelay = .3f;
 	public bool recalling = false;
 	public GameObject webPrefab;
+	public GameObject orbWebPrefab;
 
 	private Rigidbody2D rb;
 	private LineRenderer lr;
 	private Vector3[] tetherPositions = new Vector3[2];
 	private GameObject harpooner = null;
 	private GameObject harpooned = null;
+	private List<Bird> linkedBirds = new List<Bird> ();
 
 	void Awake () {
 		rb = GetComponent<Rigidbody2D> ();
@@ -130,7 +132,8 @@ public class Harpoon : MonoBehaviour {
 		transform.parent = harpooned.transform;
 
 		if (harpoonRecipient.tag == "Player") {
-			AttemptWeb ();
+			linkedBirds.Clear ();
+			AttemptWeb (harpooner.GetComponent<Bird> ());
 		} else if (harpoonRecipient.tag == "Harpoonable") {
 			harpoonRecipient.GetComponent<Harpoonable> ().harp = this;
 		}
@@ -139,7 +142,6 @@ public class Harpoon : MonoBehaviour {
 	}
 
 	public void DetachAndRecall (bool overrideToggle=false) {
-
 		if (harpooned != null) {
 			if (harpooned.tag == "Player") {
 				harpooned.GetComponent<Bird> ().RemoveHarp (this);
@@ -198,16 +200,31 @@ public class Harpoon : MonoBehaviour {
 		}
 	}
 
-	void AttemptWeb () {
-		if (harpooned.GetComponent<Bird> ().harp) {
-			if (harpooned.GetComponent<Bird> ().harp.harpooned) {
-				if (harpooned.GetComponent<Bird> ().harp.harpooned.GetComponent<Bird> ().harp) {
-					if (harpooned.GetComponent<Bird> ().harp.harpooned.GetComponent<Bird> ().harp.harpooned == harpooner) {
-						ThrowWeb (harpooner.GetComponent<Bird> (), harpooned.GetComponent<Bird> (), harpooned.GetComponent<Bird> ().harp.harpooned.GetComponent<Bird> ());
+	void AttemptWeb (Bird birdie) {
+		linkedBirds.Add (birdie);
+		//first check if harpooned
+		if (birdie.harp) {
+			if (birdie.harp.harpooned) {
+				if (birdie.harp.harpooned.GetComponent<Bird> ()) {
+					Bird birdiesBird = birdie.harp.harpooned.GetComponent<Bird> ();
+					if (birdiesBird == linkedBirds [0]) {
+						MakeWeb ();
+					} else {
+						AttemptWeb (birdiesBird);
 					}
 				}
 			}
 		}
+	}
+
+	void MakeWeb () {
+		GameObject webObj = Instantiate (orbWebPrefab, Vector3.zero, Quaternion.identity) as GameObject;
+		OrbWeb web = webObj.GetComponent<OrbWeb> ();
+		Transform[] linkedBirdsTransforms = new Transform [linkedBirds.Count];
+		for (int i = 0; i < linkedBirds.Count; i++) {
+			linkedBirdsTransforms [i] = linkedBirds [i].transform;
+		}
+		web.SetWebbers (linkedBirdsTransforms);
 	}
 
 	void ThrowWeb (Bird b1, Bird b2, Bird b3) {

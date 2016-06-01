@@ -6,7 +6,6 @@ public class Player : MonoBehaviour {
 	public Vector3 ridingOffset;
 	public Bird b = null;
 	public Weapon w = null;
-	public bool navigating = false;
 	public Vector3 aim = Vector3.zero;
 	public Sprite[] sprites = new Sprite[2];
 
@@ -45,6 +44,7 @@ public class Player : MonoBehaviour {
 		GetComponent<ObjectPooler> ().enabled = true;
 		GetComponent<ObjectPooler> ().SetPooledObjectsColor (b.color);
 		b.transform.rotation = Quaternion.identity;
+		b.body.rotation = Quaternion.identity;
 		transform.rotation = b.transform.rotation;
 		transform.position = b.transform.position + ridingOffset;
 		transform.parent = b.body;

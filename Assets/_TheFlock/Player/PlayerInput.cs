@@ -9,27 +9,26 @@ public class PlayerInput : MonoBehaviour {
 	public LayerMask mask;
 	public Transform station;
 
+	public string LSHorizontal = "empty";
+	public string LSVertical = "empty";
+	public string RSHorizontal = "empty";
+	public string RSVertical = "empty";
+	public string leftTrigger = "empty";
+	public string rightTrigger = "empty";
+	public string DPadHorizontal = "empty";
+	public string DPadVertical = "empty";
+	public string backButton = "empty";
+	public string startButton = "empty";
+	public string aCrossButton = "empty";
+	public string bCircleButton = "empty";
+	public string xSquareButton = "empty";
+	public string yTriangleButton = "empty";
+	public string LB = "empty";
+	public string RB = "empty";
+	public string leftClick = "empty";
+	public string rightClick = "empty";
 
-	public string LSHorizontal = "LS_Horizontal";
-	public string LSVertical = "LS_Vertical";
-	public string RSHorizontal = "RS_Horizontal";
-	public string RSVertical = "RS_Vertical";
-	public string leftTrigger = "LT";
-	public string rightTrigger = "RT";
-	public string DPadHorizontal = "dph";
-	public string DPadVertical = "dpv";
-	public string backButton = "Back";
-	public string startButton = "Start";
-	public string aCrossButton = "A";
-	public string bCircleButton = "B";
-	public string xSquareButton = "X";
-	public string yTriangleButton = "Y";
-	public string LB = "LB";
-	public string RB = "RB";
-	public string leftClick = "L_Click";
-	public string rightClick = "R_Click";
-
-	public enum State {NEUTRAL, FLYING, CHANGING_STATIONS, DOCKED, ON_TURRET, IN_COCKPIT, IN_BUBBLE}
+	public enum State {NEUTRAL, FLYING, CHANGING_STATIONS, DOCKED, ON_TURRET, PILOTING, NAVIGATING, IN_BUBBLE}
 	public State state = State.DOCKED;
 	public State selectedState = State.NEUTRAL;
 
@@ -192,27 +191,32 @@ public class PlayerInput : MonoBehaviour {
 			gm.TogglePause();
 		}
 
-		if (state == State.FLYING) {
+		if (state == State.NEUTRAL) {
+			HandleNeutralInput ();
+		} 
+		else if (state == State.FLYING) {
 			HandleFlyingInput ();
-		}
-
-		if (state != State.FLYING && Input.GetButtonDown (bCircleButton)) {
-			PrepareToChangeStations ();
-		}
-
-		if (state == State.CHANGING_STATIONS) {
+		} else if (state == State.CHANGING_STATIONS) {
 			HandleChangingStations ();
 		} else if (state == State.ON_TURRET) {
 			HandleTurretInput ();
 		} else if (state == State.DOCKED) {
 			HandleDockedInput ();
-		} else if (state == State.IN_COCKPIT) {
+		} else if (state == State.PILOTING) {
 			HandlePilotingInput ();
+		} else if (state == State.NAVIGATING) {
+			HandleNavigationInput ();
+		}
+	}
+
+	void HandleNeutralInput () {
+		if (Input.GetButtonDown (bCircleButton)) {
+			state = State.CHANGING_STATIONS;
+			return;
 		}
 	}
 
 	void HandleFlyingInput () {
-
 		if (playerNum == 6) {
 			print (Input.GetAxisRaw (rightTrigger));
 		}
@@ -289,17 +293,8 @@ public class PlayerInput : MonoBehaviour {
 		p.w.Fire (p.aim);
 	}
 
-	void PrepareToChangeStations () {
-		if (state == State.DOCKED) {
-			if (p.b) {
-				p.UnboardBird (bigBird.transform);
-			}
-		}
-		p.navigating = false;
-		state = State.CHANGING_STATIONS;
-	}
-
 	void HandleChangingStations () {
+		//TODO can get stuck in changing stations at start because of being in Neutral
 		if (Input.GetButtonUp(bCircleButton)) {
 			state = selectedState;
 			sr.enabled = false;
@@ -317,7 +312,7 @@ public class PlayerInput : MonoBehaviour {
 			transform.position = station.position;
 
 			if (hit.collider.name == "Cockpit") {
-				selectedState = State.IN_COCKPIT;
+				selectedState = State.PILOTING;
 			} else if (hit.collider.name == "Dock") {
 				selectedState = State.DOCKED;
 			} else if (hit.collider.name == "Turret") {
@@ -328,6 +323,14 @@ public class PlayerInput : MonoBehaviour {
 	}
 
 	void HandleDockedInput () {
+		if (Input.GetButtonDown (bCircleButton)) {
+			if (p.b) {
+				p.UnboardBird (bigBird.transform);
+			}		
+			state = State.CHANGING_STATIONS;
+			return;
+		}
+
 		if (p.b == null && station.GetComponent<Dock> ().bird) {
 			p.BoardBird (station.GetComponent<Dock> ().bird);
 		}
@@ -341,6 +344,11 @@ public class PlayerInput : MonoBehaviour {
 	}
 
 	void HandleTurretInput () {
+		if (Input.GetButtonDown (bCircleButton)) {
+			state = State.CHANGING_STATIONS;
+			return;
+		}
+
 		turret.Rotate (new Vector3( Input.GetAxis(LSHorizontal), Input.GetAxis(LSVertical), 0f));
 		if (Input.GetButtonDown (aCrossButton)) {
 			turret.PressedA ();
@@ -352,6 +360,18 @@ public class PlayerInput : MonoBehaviour {
 	}
 
 	void HandlePilotingInput () {
+		if (Input.GetButtonDown (bCircleButton)) {
+			bigBird.turning = false;
+			state = State.CHANGING_STATIONS;
+			return;
+		}
+
+		if (Input.GetButtonDown (xSquareButton)) {
+			bigBird.turning = false;
+			state = State.NAVIGATING;
+			return;
+		}
+
 		if (bigBird.Landed) {
 			if (Input.GetButtonDown (aCrossButton)) {
 				bigBird.LiftOff ();
@@ -365,7 +385,7 @@ public class PlayerInput : MonoBehaviour {
 				return;
 			}
 		}
-
+			
 		float x = Input.GetAxis (LSHorizontal);
 		float y = Input.GetAxis(LSVertical); 
 
@@ -383,6 +403,16 @@ public class PlayerInput : MonoBehaviour {
 				bigBird.TurnEngineOn ();
 			}
 		}
+	}
+
+	void HandleNavigationInput () {
+		if (Input.GetButtonUp (xSquareButton)) {
+			gm.StopNavigating ();
+			state = State.PILOTING;
+			return;
+		}
+
+		gm.Navigate (Input.GetAxis (LSHorizontal), Input.GetAxis (LSVertical));
 	}
 
 	void SetButtonNames () {

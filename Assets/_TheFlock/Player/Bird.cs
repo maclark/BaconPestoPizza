@@ -367,10 +367,14 @@ public class Bird : MonoBehaviour {
 		}
 
 		if (otherHarps.Count > 0) {
+			List<Harpoon> harpsToDetach = new List<Harpoon> ();
 			foreach (Harpoon h in otherHarps) {
-				h.DetachAndRecall (true);
+				harpsToDetach.Add (h);
 			}
-			otherHarps.Clear ();
+
+			foreach (Harpoon h in harpsToDetach) {
+				h.DetachAndRecall ();
+			}
 		}
 
 		if (harp) {

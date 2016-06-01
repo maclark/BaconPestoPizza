@@ -8,20 +8,21 @@ public class GameManager : MonoBehaviour {
 	public GameObject bubblePrefab;
 	public BigBird bigBird;
 	public GameObject bigBirdHealthBar;
+	public GameObject navPrefab;
+	public GameObject invisibleTarget;
 	public Vector3 birdScale = new Vector3 (1.25f, 1.25f, 1);
 	public Vector3 appointment1 = new Vector3 (100, 0, 0);
-	public bool inNavigation = false;
-	public GameObject navPointerPrefab;
 	public Text goldText;
 	public List<Transform> appointments = new List<Transform> ();
 
 	private List<Transform> alliedTransforms = new List<Transform> (); 
 	private bool paused = false;
-	private GameObject navPointer;
+	private NavPointer nav;
 
 	void Awake () {
 		bigBird = GameObject.FindGameObjectWithTag ("BigBird").GetComponent<BigBird> ();
 		AddAlliedTransform (bigBird.transform);
+		MakeInvisibleTarget ();
 	}
 
 	public List<Transform> GetAlliedTransforms () {
@@ -47,17 +48,6 @@ public class GameManager : MonoBehaviour {
 		}
 	}
 
-	public void ToggleNavPanel (string leftHorizontal, string leftVertical) {
-		if (!inNavigation) {
-			inNavigation = true;
-			navPointer = Instantiate (navPointerPrefab, bigBird.transform.position, Quaternion.identity) as GameObject; 
-			navPointer.GetComponent<NavPointer> ().SetAxes (leftHorizontal, leftVertical);
-		} else {
-			inNavigation = false;
-			Destroy (navPointer);
-		}
-	}
-
 	/// <summary>
 	/// Inadvisable to have an appointment at the origin.
 	/// </summary>
@@ -73,5 +63,26 @@ public class GameManager : MonoBehaviour {
 
 	public HealthBar GetBigBirdHealthBar () {
 		return bigBirdHealthBar.GetComponent<HealthBar> ();
+	}
+
+	public void Navigate (float leftHorizontal, float leftVertical) {
+		if (nav == null) {
+			GameObject navObj = GameObject.Instantiate(navPrefab, bigBird.transform.position, Quaternion.identity) as GameObject;
+			nav = navObj.GetComponent<NavPointer> ();
+		}
+		nav.SetAxes (leftHorizontal, leftVertical);
+	}
+
+	public void StopNavigating () {
+		bigBird.SetTarget (nav);
+		nav.SetAxes (0, 0);
+		Destroy (nav.gameObject);
+	}
+
+	public void MakeInvisibleTarget () {
+		invisibleTarget = new GameObject ();
+		invisibleTarget.AddComponent<BoxCollider2D> ();
+		invisibleTarget.GetComponent<BoxCollider2D> ().isTrigger = true;
+		invisibleTarget.name = "InvisibleTarget";
 	}
 }

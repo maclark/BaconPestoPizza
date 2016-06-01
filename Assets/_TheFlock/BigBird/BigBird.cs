@@ -44,7 +44,6 @@ public class BigBird : MonoBehaviour {
 	}
 
 	void Start () {
-		target = GameObject.FindObjectOfType<President> ().transform;
 		healthBar.max = hp;
 		healthBar.current = hp;
 	}
@@ -56,18 +55,29 @@ public class BigBird : MonoBehaviour {
 				transform.rotation = Quaternion.RotateTowards (transform.rotation, r, rotateSpeed);	
 				//TODO make this torque based to use physics engine collisions
 				//rb.AddTorque (rotateSpeed * 1000);
+				if (transform.position == target.position) {
+					target = null;
+					TurnEngineOff ();
+				}
 			}
 			rb.AddForce (transform.up * forceMag);
 		}
 
 
-		else if (turning && !landed) {
+		if (turning && !landed) {
 			transform.rotation = Quaternion.RotateTowards (transform.rotation, targetRotation, rotateSpeed);
 			rb.angularVelocity = 0f;
 		}
 	}
 
 	void OnTriggerEnter2D (Collider2D other) {
+		if (target) {
+			if (other.transform == target.transform) {
+				target = null;
+				TurnEngineOff ();
+			}
+		}
+
 		if (other.tag == "EnemyBullet") {
 			if (Random.Range (0, 1f) > .5) {
 				TakeDamage (other.GetComponent<Bullet> ().damage);
@@ -88,6 +98,14 @@ public class BigBird : MonoBehaviour {
 	}
 
 	void OnCollisionEnter2D (Collision2D coll) {
+		if (target) {
+			if (coll.transform == target.transform) {
+				print ("collided  with target");
+				target = null;
+				TurnEngineOff ();
+			}
+		}
+
 		if (coll.gameObject.tag == "Harpoonable") {
 			if (coll.gameObject.GetComponent<Harpoonable> ().isGold) {
 				gold++;
@@ -101,6 +119,8 @@ public class BigBird : MonoBehaviour {
 		if (other.name == "LandingPad") {
 			if (nearestPad == other.GetComponent<LandingPad> ()) {
 				nearestPad = null;
+				print ("turning off bc of landing pad? lol");
+				TurnEngineOff ();
 			}
 		}
 	}
@@ -298,5 +318,18 @@ public class BigBird : MonoBehaviour {
 		get {
 			return landed;
 		}
+	}
+
+	public void SetTarget (NavPointer nav) {
+		if (nav.target) {
+			if (nav.target != transform) {
+				target = nav.target;
+			} else
+				target = null;
+		} else {
+			gm.invisibleTarget.transform.position = nav.transform.position;
+			target = gm.invisibleTarget.transform;
+		}
+		TurnEngineOn ();
 	}
 }
