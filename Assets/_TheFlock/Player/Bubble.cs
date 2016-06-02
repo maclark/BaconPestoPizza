@@ -11,6 +11,10 @@ public class Bubble : MonoBehaviour {
 		gm = GameObject.FindObjectOfType<GameManager> ();
 	}
 
+	void Update () {
+		transform.position = gm.ClampToScreen (transform.position);
+	}
+
 	void OnCollisionEnter2D (Collision2D coll) {
 		if (coll.transform.name == "BigBird") {
 			p.BoardBigBird ();

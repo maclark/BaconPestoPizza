@@ -15,13 +15,13 @@ public class Turret : MonoBehaviour {
 		balls = new List<Cannonball> ();
 	}
 
-	public void PressedA () {
+	public void RightTrigger () {
 		if (ready) {
 			Fire ();
 		}
 	}
 
-	public void PressedX () {
+	public void PressedA () {
 		if (balls.Count > 0) {
 			balls [0].Detonate ();
 		}

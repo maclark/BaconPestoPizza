@@ -17,16 +17,17 @@ public class Flyer : Unit {
 	protected bool stopFiring = false;
 
 	// Use this for initialization
-	public void OnAwake(){
+	protected override void OnAwake() {
 		gm = GameObject.FindGameObjectWithTag ("GameManager").GetComponent<GameManager> ();
 		rb = GetComponent<Rigidbody2D> ();
+		base.OnAwake ();
 	}
 
-	public void OnStart () {
+	protected override void OnStart () {
 		SetNearestTarget ();
 	}
 
-	public void OnUpdate () {
+	protected override void OnUpdate () {
 		if (target == null) {
 			SetNearestTarget ();
 		}
@@ -68,7 +69,8 @@ public class Flyer : Unit {
 		hp -= dam;
 		if (hp <= 0) {
 			Die ();
-		}
+		} else
+			StartCoroutine (base.FlashRed (0.1f));
 	}
 
 	public virtual void Die() {

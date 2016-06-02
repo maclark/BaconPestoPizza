@@ -10,10 +10,11 @@ public class Harpoon : MonoBehaviour {
 	public float minWidthTetherLength = 3;
 	public float tautLength = 10f;
 	public float maxTetherLength = 30f;
-	public bool taut = false;
 	public float recallMag	= 100f;
 	public float detachDelay = .3f;
 	public bool recalling = false;
+	public bool taut = false;
+	public OrbWeb web = null;
 	public GameObject webPrefab;
 	public GameObject orbWebPrefab;
 
@@ -35,10 +36,6 @@ public class Harpoon : MonoBehaviour {
 
 	void Update () {
 		DrawTether ();
-		if (harpooned != null) {
-			CheckTetherCollision ();
-		}
-
 		if (Vector3.Distance (transform.position, harpooner.transform.position) > maxTetherLength) {
 			DetachAndRecall (true);
 		}
@@ -150,6 +147,9 @@ public class Harpoon : MonoBehaviour {
 			}
 			harpooned = null;
 			transform.parent = null;
+			if (web) {
+				web.Break ();
+			}
 			GetComponent<Rigidbody2D> ().WakeUp ();
 			GetComponent<BoxCollider2D> ().enabled = true;
 		}
@@ -171,35 +171,7 @@ public class Harpoon : MonoBehaviour {
 			}
 		}
 	}
-
-
-	//#TODO what happens when objects cross a tether?
-	void CheckTetherCollision () {
-		RaycastHit2D[] hits = Physics2D.LinecastAll (transform.position, harpooner.GetComponent<Bird> ().p.transform.position);
-		for (int i = 0; i < hits.Length; i++) {
-			Transform t = hits [i].transform;
-			if (t.name != name && t.name != harpooner.name && t.name != harpooned.name) {
-				if (t.tag == "Player") {
-				} else if (t.tag == "Enemy") {
-				} else if (t.tag == "BigBird") {
-				}
-			}
-		}
-
-		if (hits.Length == 0) {
-			//print ("hitting nothing");
-		}
-		else if (hits.Length == 1) {
-			//print (hits [0].transform.name);
-		}
-		else if (hits.Length == 2) {
-			//print (hits [0].transform.name + " " + hits[1].transform.name);
-		}
-		else if (hits.Length == 3) {
-			//print (hits [0].transform.name + " " + hits[1].transform.name + " " + hits[2].transform.name);
-		}
-	}
-
+		
 	void AttemptWeb (Bird birdie) {
 		linkedBirds.Add (birdie);
 		//first check if harpooned
@@ -218,22 +190,14 @@ public class Harpoon : MonoBehaviour {
 	}
 
 	void MakeWeb () {
+		//TODO special case for only 2 bids in web
 		GameObject webObj = Instantiate (orbWebPrefab, Vector3.zero, Quaternion.identity) as GameObject;
-		OrbWeb web = webObj.GetComponent<OrbWeb> ();
+		OrbWeb newWeb = webObj.GetComponent<OrbWeb> ();
 		Transform[] linkedBirdsTransforms = new Transform [linkedBirds.Count];
 		for (int i = 0; i < linkedBirds.Count; i++) {
 			linkedBirdsTransforms [i] = linkedBirds [i].transform;
 		}
-		web.SetWebbers (linkedBirdsTransforms);
-	}
-
-	void ThrowWeb (Bird b1, Bird b2, Bird b3) {
-		GameObject webObject = Instantiate (webPrefab, Vector3.zero, Quaternion.identity) as GameObject;
-		Web web = webObject.GetComponent<Web> ();
-		web.Add (b1.transform, b2.transform, b3.transform);
-		b1.web = web;
-		b2.web = web;
-		b3.web = web;
+		newWeb.SetWebbers (linkedBirdsTransforms);
 	}
 
 	public GameObject GetHarpooner () {

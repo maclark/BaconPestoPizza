@@ -25,6 +25,8 @@ public class Holster {
 		EquipCurrentSlot ();
 	}
 
+	public Holster () {}
+
 	public void CycleWeapons () {
 		if (p.w.reloading) {
 			weaponChangedDuringReload = true;

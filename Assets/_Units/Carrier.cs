@@ -12,19 +12,36 @@ public class Carrier : Unit {
 	public GameObject enemyPrefab;
 
 	private Component[] dockTransforms;
+	private bool spawning = false;
+	private bool hitExplosion;
 
-	public void OnStart () {
+	protected override void OnAwake() {
+		base.OnAwake ();
+	}
+
+	protected override void OnStart () {
 		InvokeRepeating ("SpawnEnemy", 0f, spawnRate);
+	}
+
+	protected override void OnUpdate () {
+		hitExplosion = false;
+		base.OnUpdate ();
 	}
 
 	public void TriggerEnter2D (Collider2D other) {
 		if (other.tag == "PlayerBullet") {
 			TakeDamage (other.GetComponent<Bullet> ().damage);
 			other.GetComponent<Bullet> ().Die ();
+		} else if (other.tag == "Explosion") {
+			if (hitExplosion)
+				return;
+			hitExplosion = true;
+			TakeDamage (other.GetComponent<Projectile> ().damage);
 		}
 	}
 
 	protected void SpawnEnemy () {
+		spawning = true;
 		if (interceptors.Count < maxInterceptors) {
 			GameObject enemyObj = Instantiate (enemyPrefab, GetComponentInChildren<Dock> ().transform.position, Quaternion.identity) as GameObject;
 			interceptors.Add (enemyObj.transform);
@@ -32,13 +49,14 @@ public class Carrier : Unit {
 		}
 
 		if (interceptors.Count >= maxInterceptors) {
+			spawning = false;
 			CancelInvoke ();
 		}
 	}
 
 	public void LoseInterceptor (Transform interceptor) {
 		interceptors.Remove (interceptor);
-		if (interceptors.Count < 2) {
+		if (interceptors.Count < 2 && !spawning) {
 			InvokeRepeating ("SpawnEnemy", 0f, spawnRate);
 		}
 	}
@@ -47,7 +65,8 @@ public class Carrier : Unit {
 		hp -= dam;
 		if (hp <= 0) {
 			Die ();
-		}
+		} else
+			StartCoroutine (base.FlashRed (.1f));
 	}
 
 	public void Die() {

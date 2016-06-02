@@ -6,7 +6,6 @@ public class Explosion : Projectile {
 	public float animLength = .5f;
 
 	void Start () {
-		damage = 100;
 		Invoke ("Die", animLength);
 		base.OnStart ();
 	}

@@ -14,6 +14,7 @@ public class BigBird : MonoBehaviour {
 	public int gold = 0;
 	public LandingPad nearestPad = null;
 	public float landedScale = 15f;
+	public CargoHold hold;
 
 	private GameManager gm;
 	private Rigidbody2D rb;
@@ -38,6 +39,7 @@ public class BigBird : MonoBehaviour {
 		rb = GetComponent<Rigidbody2D> ();
 		pump = GetComponentInChildren<Pump> ();
 		medkit = GetComponentInChildren<Medkit> ();
+		hold = GetComponentInChildren<CargoHold> ();
 		thrusters = GetComponentsInChildren<Thruster> ();
 		startScale = transform.localScale.x;
 		healthBar = gm.GetBigBirdHealthBar ();
@@ -85,8 +87,8 @@ public class BigBird : MonoBehaviour {
 			}
 		} 
 		else if (other.tag == "Enemy") {
-			TakeDamage (other.GetComponent<Flyer> ().kamikazeDamage);
-			other.gameObject.GetComponent<Flyer> ().Die ();
+			//TakeDamage (other.GetComponent<Flyer> ().kamikazeDamage);
+			//other.gameObject.GetComponent<Flyer> ().Die ();
 		}
 		else if (other.name == "Web") {
 			TurnEngineOn ();
@@ -106,7 +108,10 @@ public class BigBird : MonoBehaviour {
 			}
 		}
 
-		if (coll.gameObject.tag == "Harpoonable") {
+		if (coll.transform.tag == "Enemy") {
+			TakeDamage (coll.transform.GetComponent<Flyer> ().kamikazeDamage);
+			coll.transform.gameObject.GetComponent<Flyer> ().Die ();
+		} else if (coll.gameObject.tag == "Harpoonable") {
 			if (coll.gameObject.GetComponent<Harpoonable> ().isGold) {
 				gold++;
 				gm.goldText.text = gold.ToString ();
@@ -239,7 +244,7 @@ public class BigBird : MonoBehaviour {
 				repairLine.Remove (repairLine [repairLine.Count - 1]);
 				StartCoroutine (RepairBird (nextInLine));
 			} else {
-				medkit.transform.position = transform.position;
+				medkit.Reset ();
 				yield break;
 			}
 		}
@@ -256,7 +261,7 @@ public class BigBird : MonoBehaviour {
 				StartCoroutine (RepairBird (nextInLine));
 			} else {
 				birdGettingRepairs = null;
-				medkit.transform.position = transform.position;
+				medkit.Reset ();
 			}
 		} else {
 			StartCoroutine (RepairBird (birdGettingRepairs));

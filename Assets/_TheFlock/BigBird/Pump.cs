@@ -3,8 +3,6 @@ using System.Collections;
 
 public class Pump : MonoBehaviour {
 	public bool update = true;
-	public float yOffset = -1f;
-	public float xOffset = -.05f;
 
 	private GameManager gm;
 	private LineRenderer lr;
@@ -12,12 +10,16 @@ public class Pump : MonoBehaviour {
 	private bool moveToBird = false;
 	private Vector3 birdPos = Vector3.zero;
 	private Vector3[] positions = new Vector3[2];
+	private float yOffset;
+	private float xOffset;
 
 	void Start () {
 		gm = GameObject.FindObjectOfType<GameManager> ();
 		lr = GetComponent<LineRenderer> ();	
 		lr.sortingLayerName = "BigBird";
 		lr.sortingOrder = 2;
+		xOffset = transform.localPosition.x;
+		yOffset = transform.localPosition.y;
 	}
 	
 	void Update () {
@@ -39,8 +41,9 @@ public class Pump : MonoBehaviour {
 
 	void DrawPumpHose () {
 		Vector3 upOffset = gm.bigBird.transform.up * yOffset * gm.bigBird.transform.localScale.y;
+		Vector3 rightOffset = gm.bigBird.transform.right * xOffset * gm.bigBird.transform.localScale.x;
 		positions [0] = transform.position;
-		positions [1] = gm.bigBird.transform.position + upOffset;
+		positions [1] = gm.bigBird.transform.position + rightOffset + upOffset;
 		lr.SetPositions (positions);
 	}
 

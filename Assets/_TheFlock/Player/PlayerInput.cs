@@ -28,7 +28,7 @@ public class PlayerInput : MonoBehaviour {
 	public string leftClick = "empty";
 	public string rightClick = "empty";
 
-	public enum State {NEUTRAL, FLYING, CHANGING_STATIONS, DOCKED, ON_TURRET, PILOTING, NAVIGATING, IN_BUBBLE}
+	public enum State {NEUTRAL, FLYING, CHANGING_STATIONS, DOCKED, ON_TURRET, PILOTING, NAVIGATING, IN_BUBBLE, IN_WEB, IN_HOLD, ON_PLATFORM}
 	public State state = State.DOCKED;
 	public State selectedState = State.NEUTRAL;
 
@@ -39,6 +39,9 @@ public class PlayerInput : MonoBehaviour {
 	private Player p;
 	private Turret turret;
 	private bool releasedRightTrigger = true;
+	private bool verticalPadInUse = false;
+	private bool horizontalPadInUse = false;
+	private bool rightTriggerInUse = false;
 	private bool isXboxController = false;
 
 
@@ -206,6 +209,12 @@ public class PlayerInput : MonoBehaviour {
 			HandlePilotingInput ();
 		} else if (state == State.NAVIGATING) {
 			HandleNavigationInput ();
+		} else if (state == State.IN_WEB) {
+			HandleInWebInput ();
+		} else if (state == State.IN_HOLD) {
+			HandleInHoldInput ();
+		} else if (state == State.ON_PLATFORM) {
+			HandleOnPlatformInput ();
 		}
 	}
 
@@ -217,10 +226,6 @@ public class PlayerInput : MonoBehaviour {
 	}
 
 	void HandleFlyingInput () {
-		if (playerNum == 6) {
-			print (Input.GetAxisRaw (rightTrigger));
-		}
-
 		p.b.direction = new Vector2( Input.GetAxis(LSHorizontal), Input.GetAxis(LSVertical));
 		if (p.b.gas <= 0) {
 			p.b.direction = Vector2.zero;
@@ -236,24 +241,8 @@ public class PlayerInput : MonoBehaviour {
 			}
 		}
 
-		if (p.w.automatic) {
-			if (!p.w.firing && Input.GetAxis (rightTrigger) < 0) {
-				//print ("!firing, and RT down: " + rightTrigger);
-				p.w.firing = true;
-				InvokeRepeating ("FireBullet", 0, p.w.fireRate);
-			} else if (p.w.firing && Input.GetAxis (rightTrigger) >= 0) {
-				//print ("firing, and RT up: " + rightTrigger);
-				p.w.firing = false;
-				p.CancelInvoke ();
-				CancelInvoke ();
-			}
-		} else {
-			if (Input.GetAxis (rightTrigger) < 0 && p.w.cocked && releasedRightTrigger && !p.w.reloading) {
-				p.w.Fire (p.aim);
-				releasedRightTrigger = false;
-			} else if (Input.GetAxis (rightTrigger) >= 0) {
-				releasedRightTrigger = true;
-			}
+		if (!p.GetHoldingString ()) {
+			HandleFiring ();
 		}
 
 		if (Input.GetAxis (leftTrigger) > 0) {
@@ -275,8 +264,8 @@ public class PlayerInput : MonoBehaviour {
 		}
 
 		if (Input.GetButtonDown (rightClick)) {
-			if (!p.b.hasHarpoon) {
-				p.b.DetachHarpoon ();
+			if (p.b.harp) {
+				p.b.harp.DetachAndRecall ();
 			} else {
 				p.b.HurlHarpoon ();
 			}
@@ -289,14 +278,17 @@ public class PlayerInput : MonoBehaviour {
 		}
 	}
 		
-	void FireBullet () {
-		p.w.Fire (p.aim);
-	}
+
 
 	void HandleChangingStations () {
 		//TODO can get stuck in changing stations at start because of being in Neutral
 		if (Input.GetButtonUp(bCircleButton)) {
 			state = selectedState;
+			if (state == State.ON_TURRET) {
+				station.GetComponentInChildren<SpriteRenderer> ().color = p.color;
+			} else if (state == State.PILOTING) {
+				station.GetComponentInChildren<SpriteRenderer> ().color = p.color;
+			}
 			sr.enabled = false;
 			return;
 		} 
@@ -318,6 +310,8 @@ public class PlayerInput : MonoBehaviour {
 			} else if (hit.collider.name == "Turret") {
 				turret = station.GetComponent<Turret> ();
 				selectedState = State.ON_TURRET;
+			} else if (hit.collider.name == "CargoPlatform") {
+				selectedState = State.ON_PLATFORM;
 			}
 		}
 	}
@@ -346,22 +340,24 @@ public class PlayerInput : MonoBehaviour {
 	void HandleTurretInput () {
 		if (Input.GetButtonDown (bCircleButton)) {
 			state = State.CHANGING_STATIONS;
+			turret.transform.GetComponentInChildren<SpriteRenderer> ().color = Color.grey;
 			return;
 		}
 
 		turret.Rotate (new Vector3( Input.GetAxis(LSHorizontal), Input.GetAxis(LSVertical), 0f));
-		if (Input.GetButtonDown (aCrossButton)) {
-			turret.PressedA ();
+		if (Input.GetAxis (rightTrigger) < 0) {
+			turret.RightTrigger ();
 		}
 
-		if (Input.GetButtonDown (xSquareButton)) {
-			turret.PressedX ();
+		if (Input.GetButtonDown (aCrossButton)) {
+			turret.PressedA ();
 		}
 	}
 
 	void HandlePilotingInput () {
 		if (Input.GetButtonDown (bCircleButton)) {
 			bigBird.turning = false;
+			station.GetComponentInChildren<SpriteRenderer> ().color = Color.grey;
 			state = State.CHANGING_STATIONS;
 			return;
 		}
@@ -413,6 +409,120 @@ public class PlayerInput : MonoBehaviour {
 		}
 
 		gm.Navigate (Input.GetAxis (LSHorizontal), Input.GetAxis (LSVertical));
+	}
+
+	void HandleInHoldInput () {
+		if (Input.GetButtonDown (bCircleButton)) {
+			state = State.CHANGING_STATIONS;
+			return;
+		}
+
+		if (Input.GetAxisRaw(DPadVertical) != 0) {
+			if (verticalPadInUse == false) {
+				
+				verticalPadInUse = true;
+				if (Input.GetAxisRaw(DPadVertical) > 0) {
+					gm.bigBird.hold.SelectorStep (p.transform, 0, 1);
+				} else {
+					gm.bigBird.hold.SelectorStep (p.transform, 0, -1);
+				}
+			}
+
+		} else if (Input.GetAxisRaw (DPadVertical) == 0) {
+			verticalPadInUse = false;
+		}
+
+
+		if (Input.GetAxisRaw(DPadHorizontal) != 0) {
+			if (horizontalPadInUse == false) {
+
+				horizontalPadInUse = true;
+				if (Input.GetAxisRaw(DPadHorizontal) > 0) {
+					gm.bigBird.hold.SelectorStep (p.transform, 1, 0);
+				} else {
+					gm.bigBird.hold.SelectorStep (p.transform, -1, 0);
+				}
+			}
+
+		} else if (Input.GetAxisRaw (DPadVertical) == 0) {
+			horizontalPadInUse = false;
+		}
+
+		if (Input.GetAxisRaw(rightTrigger) != 0) {
+			if (rightTriggerInUse == false) {
+				rightTriggerInUse = true;
+				gm.bigBird.hold.GrabSwapOrStoreCargo ();
+			}
+
+		} else if (Input.GetAxisRaw (DPadVertical) == 0) {
+			rightTriggerInUse = false;
+		}
+	}
+
+	void HandleOnPlatformInput () {
+		if (Input.GetButtonDown (bCircleButton)) {
+			state = State.CHANGING_STATIONS;
+			return;
+		}
+
+		if (!sr.enabled) {
+			sr.enabled = true;
+			gm.bigBird.hold.xSelector = 1;
+			gm.bigBird.hold.ySelector = -1;
+			verticalPadInUse = false;
+			horizontalPadInUse = false;
+		}
+
+		if (Input.GetAxis (DPadVertical) > 0) {
+			//TODO this is relying on not being able to tap dpad as an axis for only 1 frame
+			state = State.IN_HOLD;
+		}
+
+		if (Input.GetAxis (rightTrigger) < 0) {
+			Debug.Log ("dumped cargo");
+			Destroy (gm.bigBird.hold.platformCargo.gameObject);
+		}
+	}
+
+	void HandleInWebInput () {
+		Vector2 rightStick = new Vector2( Input.GetAxis(RSHorizontal), Input.GetAxis(RSVertical));
+		if (rightStick != Vector2.zero) {
+			p.aim = rightStick;
+		} 
+		else if (p.aim == Vector3.zero) {
+			if (p.b.direction != Vector2.zero) {
+				p.aim = new Vector3 (p.b.direction.x, p.b.direction.y, 0);
+			}
+		}
+		HandleFiring ();
+	}
+
+
+
+	void HandleFiring () {
+		if (p.w.automatic) {
+			if (!p.w.firing && Input.GetAxis (rightTrigger) < 0) {
+				//print ("!firing, and RT down: " + rightTrigger);
+				p.w.firing = true;
+				InvokeRepeating ("FireBullet", 0, p.w.fireRate);
+			} else if (p.w.firing && Input.GetAxis (rightTrigger) >= 0) {
+				//print ("firing, and RT up: " + rightTrigger);
+				p.w.firing = false;
+				p.CancelInvoke ();
+				CancelInvoke ();
+			}
+		} else {
+			if (Input.GetAxis (rightTrigger) < 0 && p.w.cocked && releasedRightTrigger && !p.w.reloading) {
+				p.w.Fire (p.aim);
+				releasedRightTrigger = false;
+			} else if (Input.GetAxis (rightTrigger) >= 0) {
+				releasedRightTrigger = true;
+			}
+		}
+	}
+
+	void FireBullet () {
+		p.w.Fire (p.aim);
 	}
 
 	void SetButtonNames () {

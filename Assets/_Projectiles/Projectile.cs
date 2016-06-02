@@ -17,6 +17,9 @@ public class Projectile : MonoBehaviour {
 	protected virtual void OnUpdate () {
 	}
 
+	protected virtual void CollisionEnter2D (Collision2D other) {
+	}
+
 	public virtual void Fire (Vector3 start, Vector2 aim) {
 		transform.position = start;
 		aim.Normalize ();

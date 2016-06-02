@@ -3,19 +3,21 @@ using System.Collections;
 
 public class Player : MonoBehaviour {
 
+	public Color color;
 	public Vector3 ridingOffset;
 	public Bird b = null;
 	public Weapon w = null;
+	public Weapon storedWeapon = null;
 	public Vector3 aim = Vector3.zero;
 	public Sprite[] sprites = new Sprite[2];
 
+	private bool holdingString = false;
 	private GameManager gm;
 	private SpriteRenderer sr;
 	private PlayerInput pi;
 	private BigBird bigBird;
 	private Holster hol;
 
-	private Color color;
 
 	void Awake () {
 		gm = GameObject.FindObjectOfType<GameManager> ();
@@ -95,5 +97,56 @@ public class Player : MonoBehaviour {
 
 	public void CockWeapon () {
 		w.CockWeapon ();
+	}
+
+	public void DockOnBigBird (Dock d) {
+		sr.sortingLayerName = "BigBird";
+		sr.sortingOrder = 2;
+		pi.station = d.transform;
+		pi.state = PlayerInput.State.DOCKED;
+		pi.CancelInvoke ();
+		w.firing = false;
+
+		d.GetComponent<BoxCollider2D> ().enabled = false;
+	}
+
+	public void Webbed (OrbWeb ow) {
+		if (ow.webType == OrbWeb.WebType.POWERBIRD) {
+			storedWeapon = w;
+			w = new PowerWeapon (hol);
+		}
+		pi.state = PlayerInput.State.IN_WEB;
+		pi.CancelInvoke ();
+	}
+
+	public void Unwebbed () {
+		if (storedWeapon != null) {
+			pi.CancelInvoke ();
+			w = storedWeapon;
+			storedWeapon = null;
+		}
+		pi.CancelInvoke ();
+		pi.state = PlayerInput.State.FLYING;
+	}
+
+	public void HoldWebString (OrbWeb ow) {
+		holdingString = true;
+		if (ow.webType == OrbWeb.WebType.POWERBIRD) {
+			print ("hold the line!");
+		}
+		pi.CancelInvoke ();
+	}
+
+	public void ReleaseWebString () {
+		holdingString = false;
+	}
+
+	public bool GetHoldingString () {
+		return holdingString;
+	}
+
+	public void MoveToPlatform () {
+		sr.enabled = false;
+		pi.state = PlayerInput.State.ON_PLATFORM;
 	}
 }

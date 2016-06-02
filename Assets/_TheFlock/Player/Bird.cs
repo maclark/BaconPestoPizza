@@ -11,7 +11,6 @@ public class Bird : MonoBehaviour {
 	public float forceMag = 60f;
 
 	public float boostForceMag = 60f;
-	public bool docked = false;
 	public float flashGap = 1f;
 	public float flashDuration = .15f;
 	public float flashDampener = .1f;
@@ -29,9 +28,13 @@ public class Bird : MonoBehaviour {
 	public float rerollDelay = 1f;
 	public float rollSpeed = 1f;
 
+	public bool docked = false;
+	public bool webbed = false;
+
 	public Transform body;
 	public GameObject harpoonPrefab;
 	public GameObject gasLightPrefab;
+	public OrbWeb webTrap;
 	public List<Bird> linkedBirds;
 	public List<Harpoon> otherHarps;
 
@@ -42,8 +45,6 @@ public class Bird : MonoBehaviour {
 	public Vector2 direction = Vector2.zero, pullDir = Vector2.zero, orthoPullDir = Vector2.zero;
 	[HideInInspector]
 	public Harpoon harp;
-	[HideInInspector]
-	public Web web;
 
 	private Rigidbody2D rb;
 	private GameManager gm;
@@ -74,7 +75,7 @@ public class Bird : MonoBehaviour {
 
 		startForceMag = forceMag;
 
-		Dock ();
+		DockOnBigBird ();
 		gm.AddAlliedTransform (transform);
 	}
 
@@ -95,10 +96,11 @@ public class Bird : MonoBehaviour {
 				AileronRoll ();
 			}
 		}
+		transform.position = gm.ClampToScreen (transform.position);
 	}
 
 	void FixedUpdate () {
-		if (!docked) {
+		if (!docked && !webbed) {
 			HandleFlying ();
 		}
 
@@ -146,7 +148,7 @@ public class Bird : MonoBehaviour {
 
 	void OnCollisionEnter2D (Collision2D coll) {
 		if (coll.gameObject.name == "BigBird") {
-			Dock ();
+			DockOnBigBird ();
 		} else if (coll.transform.tag == "Enemy") {
 			if (!invincible) {
 				if (shield.gameObject.activeSelf) {
@@ -309,80 +311,52 @@ public class Bird : MonoBehaviour {
 
 	void Die () {
 		gm.RemoveAlliedTransform (transform);
-		//instantiate bubble
-		if (p != null) {
+		DetachOtherHarps ();
+		if (p) {
 			p.Bubble (rb.velocity);
 		}
 		Destroy (gameObject);
 	}
 			
-	public bool Dock () {
+	public bool DockOnBigBird () {
 		dock = bigBird.GetNearestOpenDock (transform.position);
 		if (!dock) {
 			docked = false;
 			return docked;
 		}
 
-		dock.bird = this;
-		docked = true;
-		dock.gameObject.layer = LayerMask.NameToLayer ("Stations");
-
+		if (rolling) {
+			transform.rotation = Quaternion.identity;
+			rolling = false;
+			canRoll = true;
+		}
+		if (harp) {
+			harp.DetachAndRecall ();
+			Destroy (harp.gameObject);
+			hasHarpoon = true;
+		}
+		DetachOtherHarps ();
+		transform.position = dock.transform.position;
+		transform.parent = dock.transform;
 		DisableColliders ();
 		sr.color = color;
 		sr.sortingLayerName = "BigBird";
 		sr.sortingOrder = 1;
-		if (p) {
-			p.GetComponent<SpriteRenderer> ().sortingLayerName = "BigBird";
-			p.GetComponent<SpriteRenderer> ().sortingOrder = 2;
-		}
-		rb.Sleep ();
-
-		transform.position = dock.transform.position;
-		transform.parent = dock.transform;
-
 		damaged = false;
 		invincible = false;
 		gasLightFlashing = false;
 		ranOutOfGas = false;
 		Destroy (gasLight);
 		CancelInvoke ();
-
-		if (rolling) {
-			transform.rotation = Quaternion.identity;
-			rolling = false;
-			canRoll = true;
-		}
+		rb.Sleep ();
 
 		if (p) {
-			dock.GetComponent<BoxCollider2D> ().enabled = false;
-			p.GetComponent<PlayerInput> ().station = dock.transform;
-			p.GetComponent<PlayerInput> ().state = PlayerInput.State.DOCKED;
-			p.GetComponent<PlayerInput> ().CancelInvoke ();
-			p.w.firing = false;
+			p.DockOnBigBird (dock);
 		}
-
-		if (dock.transform.parent == bigBird.transform) {
-			bigBird.AddToDockedBirds (this);
-			//close
-		}
-
-		if (otherHarps.Count > 0) {
-			List<Harpoon> harpsToDetach = new List<Harpoon> ();
-			foreach (Harpoon h in otherHarps) {
-				harpsToDetach.Add (h);
-			}
-
-			foreach (Harpoon h in harpsToDetach) {
-				h.DetachAndRecall ();
-			}
-		}
-
-		if (harp) {
-			harp.DetachAndRecall ();
-			Destroy (harp.gameObject);
-			hasHarpoon = true;
-		}
-
+		bigBird.AddToDockedBirds (this);
+		dock.bird = this;
+		dock.gameObject.layer = LayerMask.NameToLayer ("Stations");
+		docked = true;
 		return docked;
 	}
 
@@ -468,12 +442,6 @@ public class Bird : MonoBehaviour {
 		}
 	}
 
-	public void DetachHarpoon () {
-		if (harp) {
-			harp.DetachAndRecall ();
-		}
-	}
-
 	IEnumerator HitInvincibility (float duration) {	
 		invincible = true;
 		Color startColor = sr.color;
@@ -499,6 +467,7 @@ public class Bird : MonoBehaviour {
 	}
 
 	public void AileronRoll () {
+		DetachOtherHarps ();
 		body.Rotate (rollSpeed * Time.deltaTime, 0, 0);
 	}
 
@@ -580,5 +549,59 @@ public class Bird : MonoBehaviour {
 
 	public void TurnOffReloadIndicator () {
 		reloadIndicator.gameObject.SetActive (false);
+	}
+
+	public void DetachOtherHarps () {
+		if (otherHarps.Count > 0) {
+			List<Harpoon> harpsToDetach = new List<Harpoon> ();
+			foreach (Harpoon h in otherHarps) {
+				harpsToDetach.Add (h);
+			}
+
+			foreach (Harpoon h in harpsToDetach) {
+				h.DetachAndRecall ();
+			}
+		}
+	}
+
+	public void Webbed (OrbWeb ow) {
+		ow.captive = transform;
+		webTrap = ow;
+		webbed = true;
+		if (rolling) {
+			transform.rotation = Quaternion.identity;
+			rolling = false;
+			canRoll = true;
+		}
+		if (harp) {
+			harp.DetachAndRecall ();
+			Destroy (harp.gameObject);
+			hasHarpoon = true;
+		}
+		DetachOtherHarps ();
+		transform.position = ow.transform.position;
+		transform.parent = ow.transform;
+		DisableColliders ();
+		sr.color = color;
+		damaged = false;
+		invincible = false;
+		gasLightFlashing = false;
+		ranOutOfGas = false;
+		Destroy (gasLight);
+		CancelInvoke ();
+		rb.Sleep ();
+
+		if (p) {
+			p.Webbed (ow);
+		}
+	}
+
+	public void Unwebbed () {
+		webbed = false;
+		webTrap = null;
+		transform.parent = null;
+		if (p) {
+			p.Unwebbed ();
+		}
 	}
 }

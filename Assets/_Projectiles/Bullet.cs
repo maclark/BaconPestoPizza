@@ -19,6 +19,12 @@ public class Bullet : Projectile {
 		direction.Normalize ();
 	}
 
+	void OnTriggerEnter2D (Collider2D other) {
+		if (other.tag == "Unpassable") {
+			Die ();
+		}
+	}
+
 	public override void Fire (Vector3 start, Vector2 aim) {
 		transform.position = start;
 		SetDirection (aim);

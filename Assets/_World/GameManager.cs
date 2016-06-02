@@ -6,14 +6,15 @@ using System.Collections.Generic;
 public class GameManager : MonoBehaviour {
 
 	public GameObject bubblePrefab;
-	public BigBird bigBird;
 	public GameObject bigBirdHealthBar;
 	public GameObject navPrefab;
 	public GameObject invisibleTarget;
 	public Vector3 birdScale = new Vector3 (1.25f, 1.25f, 1);
 	public Vector3 appointment1 = new Vector3 (100, 0, 0);
+	public float screenBuffer = 1;
 	public Text goldText;
 	public List<Transform> appointments = new List<Transform> ();
+	public BigBird bigBird;
 
 	private List<Transform> alliedTransforms = new List<Transform> (); 
 	private bool paused = false;
@@ -84,5 +85,23 @@ public class GameManager : MonoBehaviour {
 		invisibleTarget.AddComponent<BoxCollider2D> ();
 		invisibleTarget.GetComponent<BoxCollider2D> ().isTrigger = true;
 		invisibleTarget.name = "InvisibleTarget";
+	}
+
+	public Vector3 ClampToScreen (Vector3 position) {
+		
+		Vector3 bottomLeft = Camera.main.ScreenToWorldPoint(Vector3.zero);
+		Vector3 topRight = Camera.main.ScreenToWorldPoint(new Vector3(
+			Camera.main.pixelWidth, Camera.main.pixelHeight));
+
+		Rect cameraRect = new Rect (
+			bottomLeft.x,
+			bottomLeft.y,
+			topRight.x - bottomLeft.x,
+			topRight.y - bottomLeft.y);
+		
+		return new Vector3 (
+			Mathf.Clamp(position.x, cameraRect.xMin + screenBuffer, cameraRect.xMax - screenBuffer),
+			Mathf.Clamp(position.y, cameraRect.yMin + screenBuffer, cameraRect.yMax - screenBuffer),
+			transform.position.z);
 	}
 }
