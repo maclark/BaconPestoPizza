@@ -4,44 +4,36 @@ using System.Collections;
 public class CargoHold : MonoBehaviour {
 	public GameObject cargoPrefab;
 	public Cargo[,] cargo = new Cargo[3, 3];
+	public Cargo platformCargo;
+	public Transform loadingPlatform;
 	public float columnWidth = 1f;
 	public float rowWidth = 1.2f;
 	public float holdWidthOffset = -1f;
 	public float holdHeightOffset = -1.2f;
-	public Transform loadingPlatform;
+	public float dumpForce = 100f;
+	public float torqueSkew = 10f;
 	public int xSelector;
 	public int ySelector;
-	public Cargo platformCargo;
 
 
+	private SpriteRenderer coverRenderer;
+	private GameManager gm;
+
+	void Awake () {
+		gm = GameObject.FindObjectOfType<GameManager> ();
+		coverRenderer = GetComponentInChildren <SpriteRenderer> ();
+	}
 
 	// Use this for initialization
 	void Start () {
-		GameObject cargoObj = Instantiate (cargoPrefab, transform.position, Quaternion.identity) as GameObject;
-		Cargo cargo = cargoObj.GetComponent<Cargo> ();
-		cargo.transform.parent = transform;
-		platformCargo = cargo;
-		xSelector = 0;
-		ySelector = 0;
-		GrabSwapOrStoreCargo ();
-
-
-		GameObject cargoObj1 = Instantiate (cargoPrefab, transform.position, Quaternion.identity) as GameObject;
-		Cargo cargo1 = cargoObj1.GetComponent<Cargo> ();
-		cargo1.transform.parent = transform;
-		platformCargo = cargo1;
-		xSelector = 2;
-		ySelector = 2;
-		GrabSwapOrStoreCargo ();
-
-		GameObject cargoObj2 = Instantiate (cargoPrefab, transform.position, Quaternion.identity) as GameObject;
-		Cargo cargo2 = cargoObj2.GetComponent<Cargo> ();
-		cargo2.transform.parent = transform;
-		platformCargo = cargo2;
-		xSelector = 1;
-		ySelector = 0;
-		GrabSwapOrStoreCargo ();
-		platformCargo = null;
+		CreateCargo ();
+		CreateCargo ();
+		CreateCargo ();
+		CreateCargo ();
+		CreateCargo ();
+		CreateCargo ();
+		CreateCargo ();
+		CreateCargo ();
 	}
 
 	public void GrabSwapOrStoreCargo () {
@@ -104,9 +96,87 @@ public class CargoHold : MonoBehaviour {
 		}
 		Player tPlayer = t.GetComponent<Player> ();
 		if (tPlayer) {
-			print ("moving player to plat");
 			MoveSelector (t, 1, -1);
 			tPlayer.MoveToPlatform ();
 		}
+	}
+
+	public void Occupy (bool isOccupied) {
+		if (isOccupied) {
+			coverRenderer.enabled = false;
+		} else coverRenderer.enabled = true;
+	}
+
+	public void Dump (Transform t) {
+		t.parent = null;
+
+		Cargo tCar = t.GetComponent<Cargo> ();
+		if (tCar) {
+			platformCargo = null;
+			t.tag = "Harpoonable";
+		}
+
+		StartCoroutine (tCar.Dumped ());
+
+		Vector3 dir = transform.position - gm.bigBird.transform.position;
+		dir.Normalize ();
+		Rigidbody2D trb = t.GetComponent<Rigidbody2D> ();
+		trb.AddTorque (Random.Range (-torqueSkew, torqueSkew));
+		trb.AddForce (dir * dumpForce);
+	}
+
+	//TODO could require someone to help with the unloading on big bird?
+	public void Load (Transform t) {
+		Cargo tCar = t.GetComponent<Cargo> ();
+		if (tCar && platformCargo == null) {
+			t.rotation = transform.rotation;
+			t.parent = transform;
+			t.tag = "Untagged";
+			t.GetComponent<BoxCollider2D> ().enabled = false;
+			t.GetComponent<Rigidbody2D> ().Sleep ();
+			MoveToLoadingPlatform (t);
+		}
+	}
+
+	void EnableCollider () {
+		GetComponent<BoxCollider2D> ().enabled = true;
+	}
+
+	int[] GetAvailableCompartment () {
+		int[] availableCompartment = new int[2];
+		for (int i = 0; i < 3; i++) {
+			for (int j = 0; j < 3; j++) {
+				if (cargo [i, j] == null) {
+					availableCompartment [0] = i;
+					availableCompartment [1] = j;
+					return availableCompartment;
+				}
+			}
+		}
+		return null;
+	}
+
+	public void CreateCargo () {
+		int[] compartment = GetAvailableCompartment ();
+		if (compartment == null) {
+			Debug.Log ("no available compartment");
+			return;
+		}
+		int xSelectorTemp = xSelector;
+		int ySelectorTemp = ySelector;
+		Cargo tempCargo = platformCargo;
+
+		GameObject cargoObj = Instantiate (cargoPrefab, transform.position, Quaternion.identity) as GameObject;
+		Cargo cargo = cargoObj.GetComponent<Cargo> ();
+		cargo.transform.parent = transform;
+		//cargo.transform.GetComponentInChildren<SpriteRenderer> ().color = Random.ColorHSV ();
+		platformCargo = cargo;
+		xSelector = compartment[0];
+		ySelector = compartment[1];
+		GrabSwapOrStoreCargo ();
+
+		xSelector = xSelectorTemp;
+		ySelector = ySelectorTemp;
+		platformCargo = tempCargo;
 	}
 }

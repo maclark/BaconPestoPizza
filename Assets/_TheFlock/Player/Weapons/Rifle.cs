@@ -3,6 +3,7 @@ using System.Collections;
 
 public class Rifle : Weapon {
 	public Rifle (Holster hol) : base (hol) {
+		name = "Rifle";
 		bulletSpeed = 300f;
 		fireRate = .3f;
 		reloadSpeed = 2f;

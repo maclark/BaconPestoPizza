@@ -138,10 +138,15 @@ public class Bird : MonoBehaviour {
 					other.GetComponent<Flyer> ().Die ();
 				}
 			}
-		} else if (other.tag == "Pickup") {
-			if (!shield.gameObject.activeSelf) {
-				shield.ActivateShield ();
-				Destroy (other.gameObject);
+		} else if (other.tag == "Harpoonable") {
+			Cargo otherC = other.GetComponent<Cargo> ();
+			if (otherC) {
+				if (otherC.cargoType == Cargo.CargoType.SHIELD) {
+					if (!shield.gameObject.activeSelf) {
+						shield.ActivateShield ();
+						Destroy (other.gameObject);
+					}
+				}
 			}
 		}
 	}
@@ -158,6 +163,16 @@ public class Bird : MonoBehaviour {
 				} else { 
 					TakeDamage (coll.transform.GetComponent<Flyer> ().kamikazeDamage);
 					coll.gameObject.GetComponent<Flyer> ().Die ();
+				}
+			}
+		} else if (coll.transform.tag == "Harpoonable") {
+			Cargo otherC = coll.transform.GetComponent<Cargo> ();
+			if (otherC) {
+				if (otherC.cargoType == Cargo.CargoType.SHIELD) {
+					if (!shield.gameObject.activeSelf) {
+						shield.ActivateShield ();
+						Destroy (coll.transform.gameObject);
+					}
 				}
 			}
 		}
@@ -449,7 +464,7 @@ public class Bird : MonoBehaviour {
 		p.GetComponent<SpriteRenderer> ().color = sr.color;
 		yield return new WaitForSeconds (duration);
 		if (p) { 
-			p.GetComponent<SpriteRenderer> ().color = startColor;
+			p.GetComponent<SpriteRenderer> ().color = p.color;
 			sr.color = startColor;
 
 		} else {
@@ -581,15 +596,8 @@ public class Bird : MonoBehaviour {
 		DetachOtherHarps ();
 		transform.position = ow.transform.position;
 		transform.parent = ow.transform;
-		DisableColliders ();
-		sr.color = color;
-		damaged = false;
-		invincible = false;
-		gasLightFlashing = false;
-		ranOutOfGas = false;
-		Destroy (gasLight);
-		CancelInvoke ();
 		rb.Sleep ();
+		//DisableColliders ();
 
 		if (p) {
 			p.Webbed (ow);
@@ -600,6 +608,7 @@ public class Bird : MonoBehaviour {
 		webbed = false;
 		webTrap = null;
 		transform.parent = null;
+		//EnableColliders ();
 		if (p) {
 			p.Unwebbed ();
 		}

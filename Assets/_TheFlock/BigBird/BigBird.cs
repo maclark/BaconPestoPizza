@@ -77,6 +77,7 @@ public class BigBird : MonoBehaviour {
 			if (other.transform == target.transform) {
 				target = null;
 				TurnEngineOff ();
+				SetCamera ();
 			}
 		}
 
@@ -102,9 +103,9 @@ public class BigBird : MonoBehaviour {
 	void OnCollisionEnter2D (Collision2D coll) {
 		if (target) {
 			if (coll.transform == target.transform) {
-				print ("collided  with target");
 				target = null;
 				TurnEngineOff ();
+				SetCamera ();
 			}
 		}
 
@@ -116,6 +117,8 @@ public class BigBird : MonoBehaviour {
 				gold++;
 				gm.goldText.text = gold.ToString ();
 				coll.transform.GetComponent<Harpoonable> ().Die ();
+			} else if (coll.gameObject.GetComponent<Cargo> ()) {
+				hold.Load (coll.transform);
 			}
 		}
 	}
@@ -326,15 +329,49 @@ public class BigBird : MonoBehaviour {
 	}
 
 	public void SetTarget (NavPointer nav) {
+
 		if (nav.target) {
-			if (nav.target != transform) {
-				target = nav.target;
-			} else
+			if (nav.target == transform) {
 				target = null;
+				TurnEngineOff ();
+				SetCamera ();
+				return;
+			}
+
+			if (nav.target.parent) {
+				if (nav.target.parent.transform == transform) {
+					target = null;
+					TurnEngineOff ();
+					SetCamera ();
+					return;
+				}
+			}
+
+			target = nav.target;
+			TurnEngineOn ();
+			SetCamera ();
 		} else {
 			gm.invisibleTarget.transform.position = nav.transform.position;
 			target = gm.invisibleTarget.transform;
+			TurnEngineOn ();
+			SetCamera ();
 		}
-		TurnEngineOn ();
+	}
+
+	void SetCamera () {
+		Camera.main.GetComponent<CameraFollow> ().offsetDir = DirectionOfTravel ();
+	}
+
+	public Vector3 DirectionOfTravel () {
+		Vector3 dot;
+		if (target) {
+			dot = target.position - transform.position;
+			dot.Normalize ();
+		} else if (engineOn) {
+			dot = transform.up;
+		} else
+			dot = Vector3.zero;
+	
+		return dot;
 	}
 }

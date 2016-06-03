@@ -28,4 +28,12 @@ public class Harpoonable : MonoBehaviour {
 
 	public void IsPierced () {
 	}
+
+	public void SetSortingLayer (string layerName) {
+		if (GetComponent<SpriteRenderer> ()) {
+			GetComponent<SpriteRenderer> ().sortingLayerName = layerName;
+		} else if (GetComponentInChildren<SpriteRenderer> ()) {
+			GetComponentInChildren<SpriteRenderer> ().sortingLayerName = layerName;
+		}
+	}
 }

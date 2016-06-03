@@ -2,6 +2,7 @@
 using System.Collections;
 
 public class Weapon {
+	public string name = "unnamed";
 	public bool automatic = true;
 	public bool cocked = true;
 	public bool reloading = false;

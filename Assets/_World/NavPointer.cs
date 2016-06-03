@@ -39,26 +39,29 @@ public class NavPointer : MonoBehaviour {
 	}
 
 	void OnTriggerEnter2D (Collider2D other) {
-		if (other.tag != "EnemyBullet") {
-			if (other.tag != "BigBird") {
-				if (other.transform.parent) {
-					if (other.transform.parent.tag != "BigBird") {
-						sr.color = Color.green;
-						target = other.transform;
-					}
-				} else {
-					sr.color = Color.green;
-					target = other.transform;
-				}
-			} 
+		if (other.tag == "EnemyBullet") {
+			target = null;
+			return;
+		} 
+
+		target = other.transform;
+		if (other.tag == "BigBird") {
+			return;
 		}
-		target = null;
+		if (other.transform.parent) {
+			if (other.transform.parent.tag == "BigBird") {
+				return;
+			}
+		}
+		sr.color = Color.green;
 	}
 
 	void OnTriggerExit2D (Collider2D other) {
-		if (other.tag != "EnemyBullet") {
-			sr.color = Color.blue;
-			target = null;
+		if (target) {
+			if (other.transform == target) {
+				sr.color = Color.blue;
+				target = null;
+			}
 		}
 	}
 

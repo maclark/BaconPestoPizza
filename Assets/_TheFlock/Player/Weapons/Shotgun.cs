@@ -10,6 +10,7 @@ public class Shotgun : Weapon {
 	public float cockDelay = 0f;
 
 	public Shotgun (Holster hol) : base (hol) {
+		name = "Shotgun";
 		automatic = false;
 		bulletSpeed = 250f;
 		reloadSpeed = 1f;

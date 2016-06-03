@@ -39,12 +39,12 @@ public class Player : MonoBehaviour {
 
 		b = bird;
 		b.p = this;
-		b.color = GetComponent<SpriteRenderer> ().color;
-		b.body.GetComponent<SpriteRenderer>().color = b.color;
-		b.Shield.SetColor (b.color);
-		b.ReloadIndicator.SetColor (b.color);
+		//b.color = GetComponent<SpriteRenderer> ().color;
+		//b.body.GetComponent<SpriteRenderer>().color = b.color;
+		b.Shield.SetColor (color);
+		b.ReloadIndicator.SetColor (color);
 		GetComponent<ObjectPooler> ().enabled = true;
-		GetComponent<ObjectPooler> ().SetPooledObjectsColor (b.color);
+		GetComponent<ObjectPooler> ().SetPooledObjectsColor (color);
 		b.transform.rotation = Quaternion.identity;
 		b.body.rotation = Quaternion.identity;
 		transform.rotation = b.transform.rotation;
@@ -52,7 +52,7 @@ public class Player : MonoBehaviour {
 		transform.parent = b.body;
 	}
 
-	public void UnboardBird (Transform newParent) {
+	public void Debird (Transform newParent) {
 		sr.color = color;
 		sr.sprite = sprites [0];
 		sr.sortingLayerName = newParent.GetComponent<SpriteRenderer> ().sortingLayerName;
@@ -60,10 +60,16 @@ public class Player : MonoBehaviour {
 
 		transform.parent = newParent;
 		transform.position = pi.station.position;
+
+		if (b.Shield != null) {
+			b.GetComponentInChildren<Shield> (true).DeactivateShield ();
+		}
+		b.transform.rotation = bigBird.transform.rotation;
 		b.p = null;
-		b.color = Color.black;
-		b.body.GetComponent<SpriteRenderer>().color = Color.black;
 		b = null;
+
+		//b.color = Color.black;
+		//b.body.GetComponent<SpriteRenderer>().color = Color.black;
 	}
 
 	public void BoardBigBird () {
@@ -86,7 +92,9 @@ public class Player : MonoBehaviour {
 		gm.AddAlliedTransform (bub.transform);
 		bub.GetComponent<Bubble> ().p = this;
 		bub.GetComponent<Rigidbody2D> ().velocity = initialVelocity;
+		bub.GetComponent<SpriteRenderer> ().color = new Color (color.r, color.g, color.b, .5f);
 		transform.parent = bub.transform;
+		pi.CancelInvoke ();
 		pi.state = PlayerInput.State.IN_BUBBLE;
 	}
 
@@ -123,6 +131,7 @@ public class Player : MonoBehaviour {
 		if (storedWeapon != null) {
 			pi.CancelInvoke ();
 			w = storedWeapon;
+
 			storedWeapon = null;
 		}
 		pi.CancelInvoke ();
@@ -132,7 +141,7 @@ public class Player : MonoBehaviour {
 	public void HoldWebString (OrbWeb ow) {
 		holdingString = true;
 		if (ow.webType == OrbWeb.WebType.POWERBIRD) {
-			print ("hold the line!");
+			print ("player" + pi.playerNum + " cries, 'hold the line!'");
 		}
 		pi.CancelInvoke ();
 	}

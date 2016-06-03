@@ -67,7 +67,7 @@ public class Harpoon : MonoBehaviour {
 		else if (other.tag == "Harpoonable") {
 			if (!recalling) {
 				HarpoonObject (other.gameObject);
-				other.GetComponent<SpriteRenderer> ().sortingLayerName = "Birds";
+				other.GetComponent<Harpoonable> ().SetSortingLayer ("Birds");
 			}
 		}
 	}
@@ -105,11 +105,11 @@ public class Harpoon : MonoBehaviour {
 		//for determining when to stop thinning the line renderered
 		if (distance < minWidthTetherLength) {
 			taut = false;
-			lr.material.color = harpooner.GetComponent<Bird> ().color;
+			lr.material.color = harpooner.GetComponent<Bird> ().p.color;
 		} 
 		else if (distance < tautLength + minWidthTetherLength) {
 			taut = false;
-			lr.material.color = harpooner.GetComponent<Bird> ().color;
+			lr.material.color = harpooner.GetComponent<Bird> ().p.color;
 		}
 		else {
 			lr.material.color = Color.red;
@@ -138,7 +138,7 @@ public class Harpoon : MonoBehaviour {
 		harpoonRecipient.SendMessage ("BeenHarpooned", null, SendMessageOptions.DontRequireReceiver);
 	}
 
-	public void DetachAndRecall (bool overrideToggle=false) {
+	public void DetachAndRecall (bool forceRecall=false) {
 		if (harpooned != null) {
 			if (harpooned.tag == "Player") {
 				harpooned.GetComponent<Bird> ().RemoveHarp (this);
@@ -147,27 +147,30 @@ public class Harpoon : MonoBehaviour {
 			}
 			harpooned = null;
 			transform.parent = null;
-			if (web) {
-				web.Break ();
-			}
 			GetComponent<Rigidbody2D> ().WakeUp ();
 			GetComponent<BoxCollider2D> ().enabled = true;
+			if (web) {
+				web.Break ();
+				//must return here, because other this call will untoggle recalling bool
+				return;
+			}
 		}
 
 
 		SpriteRenderer[] renderers = GetComponentsInChildren<SpriteRenderer> ();
-		if (overrideToggle) {
+		if (forceRecall) {
 			recalling = true;
 		} else {
 			recalling = !recalling;
-			if (!recalling) {
-				foreach (SpriteRenderer r in renderers) {
-					r.color = new Color (r.color.r, r.color.g, r.color.b, 1f);
-				}
-			} else {
-				foreach (SpriteRenderer r in renderers) {
-					r.color = new Color (r.color.r, r.color.g, r.color.b, .5f);
-				}
+		}
+
+		if (!recalling) {
+			foreach (SpriteRenderer r in renderers) {
+				r.color = new Color (r.color.r, r.color.g, r.color.b, 1f);
+			}
+		} else {
+			foreach (SpriteRenderer r in renderers) {
+				r.color = new Color (r.color.r, r.color.g, r.color.b, .5f);
 			}
 		}
 	}

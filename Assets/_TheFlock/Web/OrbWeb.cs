@@ -8,13 +8,15 @@ public class OrbWeb : MonoBehaviour {
 	public float stringWidth = .2f;
 	public float orbRadius = 1f;
 
-	public enum WebType {TURRET, NET, POWERBIRD}
-	public WebType webType = WebType.POWERBIRD;
+	public enum WebType {NET, AUTOTURRET, POWERBIRD}
+	public WebType webType = WebType.NET;
 
+	private SpriteRenderer sr;
 	private Transform[] webbers;
 	private LineRenderer[] lrs;
 
 	void Awake () {
+		sr = GetComponentInChildren<SpriteRenderer> ();
 		lrs = GetComponentsInChildren<LineRenderer> (true);
 	}
 	
@@ -24,7 +26,12 @@ public class OrbWeb : MonoBehaviour {
 	}
 
 	void OnTriggerEnter2D (Collider2D other) {
-		if (other.tag == "Player" && !CheckIfWebber (other.transform)) {
+		if (other.tag == "Harpoonable") {
+			if (other.GetComponent<Cargo> ()) {
+				HandleHitCargo (other.GetComponent<Cargo> ());
+			}
+		}
+		else if (other.tag == "Player" && !CheckIfWebber (other.transform) && !other.transform.GetComponent<Bird> ().webbed) {
 			other.transform.GetComponent<Bird> ().Webbed (this);
 		}
 	}
@@ -33,7 +40,7 @@ public class OrbWeb : MonoBehaviour {
 		webbers = new Transform [webThrowers.Length];
 		lrs = new LineRenderer [webThrowers.Length];
 
-		transform.localScale *= webbers.Length;
+
 		//GetComponentInChildren<CircleCollider2D> ().radius = orbRadius * webbers.Length;
 		transform.localScale *= webbers.Length;
 
@@ -47,16 +54,14 @@ public class OrbWeb : MonoBehaviour {
 			webString.AddComponent<LineRenderer> ();
 			webString.transform.parent = transform;
 
-			SpriteRenderer sr = GetComponentInChildren<SpriteRenderer> ();
-			sr.color = color;
+			Color c = webThrowers [i].GetComponent<Bird> ().p.color;
 
 			LineRenderer lr = webString.GetComponent<LineRenderer> ();
 			lr.material = stringMaterial;
-			lr.SetColors (color, color);
+			lr.SetColors (c, c);
 			lr.SetWidth (stringWidth, stringWidth);
 			lrs [i] = webString.GetComponent<LineRenderer> ();
 		}
-
 	}
 
 	public void Break () {
@@ -68,7 +73,7 @@ public class OrbWeb : MonoBehaviour {
 			Bird birdie = webbers [i].GetComponent<Bird> ();
 			birdie.p.ReleaseWebString ();
 			birdie.harp.web = null;
-			birdie.harp.DetachAndRecall ();
+			birdie.harp.DetachAndRecall (true);
 		}
 		GetComponentInChildren<Transform> ().parent = null;
 		Destroy (gameObject);
@@ -102,6 +107,24 @@ public class OrbWeb : MonoBehaviour {
 			}
 		}
 		return false;
+	}
+
+	void HandleHitCargo (Cargo c) {
+		switch (c.cargoType) 
+		{
+		case Cargo.CargoType.POWERBIRD:
+			webType = WebType.POWERBIRD;
+			sr.color = c.GetComponentInChildren<SpriteRenderer> ().color;
+			Destroy (c.gameObject);
+			break;
+		case Cargo.CargoType.AUTOTURRET:
+			webType = WebType.AUTOTURRET;
+			sr.color = c.GetComponentInChildren<SpriteRenderer> ().color;
+			Destroy (c.gameObject);
+			break;
+		default:
+			break;
+		}
 	}
 
 	//TODO make differentee from break?

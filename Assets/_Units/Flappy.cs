@@ -19,10 +19,6 @@ public class Flappy : Flyer {
 	}
 
 	void OnCollision2D (Collision2D coll) {
-		print ("collision!?");
-		print (coll.transform.name);
-		print (coll.transform.tag);
-
 	}
 
 	void OnTriggerEnter2D (Collider2D other) {

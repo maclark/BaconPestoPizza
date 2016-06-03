@@ -13,7 +13,7 @@ public class President : MonoBehaviour {
 	// Use this for initialization
 	void Start () {
 		target = gm.GetNextAppointment ();
-		SetCamera ();
+		//SetCamera ();
 	}
 	
 	// Update is called once per frame
@@ -44,6 +44,6 @@ public class President : MonoBehaviour {
 
 	void ReachedTarget () {
 		target = gm.GetNextAppointment ();
-		SetCamera ();
+		//SetCamera ();
 	}
 }

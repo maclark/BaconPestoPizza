@@ -6,6 +6,7 @@ public class PlayerInput : MonoBehaviour {
 	public int playerNum = 0;
 	public bool checkingInput = false;
 	public string joystick = "unset";
+	public float moveCooldown = .2f;
 	public LayerMask mask;
 	public Transform station;
 
@@ -36,20 +37,22 @@ public class PlayerInput : MonoBehaviour {
 	private GameManager gm;
 	private SpriteRenderer sr;
 	private BigBird bigBird;
+	private StickHandler sh;
 	private Player p;
 	private Turret turret;
 	private bool releasedRightTrigger = true;
-	private bool verticalPadInUse = false;
-	private bool horizontalPadInUse = false;
+
 	private bool rightTriggerInUse = false;
 	private bool isXboxController = false;
-
+	private bool stationcasting = false;
+	private float timeOfStationcast;
 
 	void Awake () {
 		gm = GameObject.FindGameObjectWithTag ("GameManager").GetComponent<GameManager> ();
 		sr = GetComponent<SpriteRenderer> ();
 		bigBird = GameObject.FindObjectOfType<BigBird>() as BigBird;
 		p = GetComponent<Player> ();
+		sh = new StickHandler ();
 	}
 
 	void Update () {
@@ -294,7 +297,25 @@ public class PlayerInput : MonoBehaviour {
 		} 
 
 		sr.enabled = true;
-		RaycastHit2D hit = Physics2D.Raycast (transform.position, new Vector2 (Input.GetAxis(LSHorizontal), Input.GetAxis(LSVertical)), Mathf.Infinity, mask);
+
+		float horizontalness = 0f;
+		float verticalness = 0f;
+
+		if (Input.GetAxisRaw(LSHorizontal) != 0 || Input.GetAxisRaw(LSVertical) != 0) {
+			if (stationcasting == false) {
+				stationcasting = true;
+				timeOfStationcast = Time.time;
+				verticalness = Input.GetAxis(LSVertical);
+				horizontalness = Input.GetAxis(LSHorizontal);
+			} else if (Time.time > timeOfStationcast + moveCooldown) {
+				stationcasting =  false;
+			}
+
+		} else if (Input.GetAxisRaw(LSHorizontal) == 0 && Input.GetAxisRaw(LSVertical) == 0) {
+			stationcasting =  false;
+		} 
+
+		RaycastHit2D hit = Physics2D.Raycast (transform.position, new Vector2 (horizontalness, verticalness), Mathf.Infinity, mask);
 		if (hit) {
 			if (station) {
 				station.GetComponent<BoxCollider2D> ().enabled = true;
@@ -319,7 +340,7 @@ public class PlayerInput : MonoBehaviour {
 	void HandleDockedInput () {
 		if (Input.GetButtonDown (bCircleButton)) {
 			if (p.b) {
-				p.UnboardBird (bigBird.transform);
+				p.Debird (bigBird.transform);
 			}		
 			state = State.CHANGING_STATIONS;
 			return;
@@ -413,41 +434,49 @@ public class PlayerInput : MonoBehaviour {
 
 	void HandleInHoldInput () {
 		if (Input.GetButtonDown (bCircleButton)) {
+			gm.bigBird.hold.MoveToLoadingPlatform (p.transform);
+			gm.bigBird.hold.Occupy (false);
 			state = State.CHANGING_STATIONS;
 			return;
 		}
 
-		if (Input.GetAxisRaw(DPadVertical) != 0) {
-			if (verticalPadInUse == false) {
-				
-				verticalPadInUse = true;
-				if (Input.GetAxisRaw(DPadVertical) > 0) {
+		sh.HandleInHoldSticks (p, LSVertical, LSHorizontal);
+		/*
+		if (Input.GetAxisRaw(LSVertical) != 0) {
+			if (verticalStickInUse == false) {
+				verticalStickInUse = true;
+				timeOfLastVertStep = Time.time;
+				if (Input.GetAxisRaw(LSVertical) > 0) {
 					gm.bigBird.hold.SelectorStep (p.transform, 0, 1);
 				} else {
 					gm.bigBird.hold.SelectorStep (p.transform, 0, -1);
 				}
+			}  else if (Time.time > timeOfLastVertStep + moveCooldown) {
+				verticalStickInUse =  false;
 			}
 
-		} else if (Input.GetAxisRaw (DPadVertical) == 0) {
-			verticalPadInUse = false;
+		} else if (Input.GetAxisRaw (LSVertical) == 0) {
+			verticalStickInUse = false;
 		}
 
 
-		if (Input.GetAxisRaw(DPadHorizontal) != 0) {
-			if (horizontalPadInUse == false) {
-
-				horizontalPadInUse = true;
-				if (Input.GetAxisRaw(DPadHorizontal) > 0) {
+		if (Input.GetAxisRaw(LSHorizontal) != 0) {
+			if (horizontalStickInUse == false) {
+				horizontalStickInUse = true;
+				timeOfLastHorzStep = Time.time;
+				if (Input.GetAxisRaw(LSHorizontal) > 0) {
 					gm.bigBird.hold.SelectorStep (p.transform, 1, 0);
 				} else {
 					gm.bigBird.hold.SelectorStep (p.transform, -1, 0);
 				}
+			} else if (Time.time > timeOfLastHorzStep + moveCooldown) {
+				horizontalStickInUse =  false;
 			}
 
-		} else if (Input.GetAxisRaw (DPadVertical) == 0) {
-			horizontalPadInUse = false;
+		} else if (Input.GetAxisRaw (LSHorizontal) == 0) {
+			horizontalStickInUse = false;
 		}
-
+		*/
 		if (Input.GetAxisRaw(rightTrigger) != 0) {
 			if (rightTriggerInUse == false) {
 				rightTriggerInUse = true;
@@ -461,6 +490,7 @@ public class PlayerInput : MonoBehaviour {
 
 	void HandleOnPlatformInput () {
 		if (Input.GetButtonDown (bCircleButton)) {
+			gm.bigBird.hold.Occupy (false);
 			state = State.CHANGING_STATIONS;
 			return;
 		}
@@ -469,18 +499,19 @@ public class PlayerInput : MonoBehaviour {
 			sr.enabled = true;
 			gm.bigBird.hold.xSelector = 1;
 			gm.bigBird.hold.ySelector = -1;
-			verticalPadInUse = false;
-			horizontalPadInUse = false;
+			sh.verticalStickInUse = false;
+			sh.horizontalStickInUse = false;
+			gm.bigBird.hold.Occupy (true);
 		}
 
-		if (Input.GetAxis (DPadVertical) > 0) {
-			//TODO this is relying on not being able to tap dpad as an axis for only 1 frame
+		if (Input.GetAxis (LSVertical) > 0) {
 			state = State.IN_HOLD;
 		}
 
 		if (Input.GetAxis (rightTrigger) < 0) {
-			Debug.Log ("dumped cargo");
-			Destroy (gm.bigBird.hold.platformCargo.gameObject);
+			if (gm.bigBird.hold.platformCargo) {
+				gm.bigBird.hold.Dump (gm.bigBird.hold.platformCargo.transform);
+			}
 		}
 	}
 

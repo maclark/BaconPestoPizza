@@ -17,7 +17,7 @@ public class Pump : MonoBehaviour {
 		gm = GameObject.FindObjectOfType<GameManager> ();
 		lr = GetComponent<LineRenderer> ();	
 		lr.sortingLayerName = "BigBird";
-		lr.sortingOrder = 2;
+		lr.sortingOrder = 3;
 		xOffset = transform.localPosition.x;
 		yOffset = transform.localPosition.y;
 	}

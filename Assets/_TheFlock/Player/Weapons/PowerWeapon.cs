@@ -3,17 +3,18 @@ using System.Collections;
 
 public class PowerWeapon : Weapon {
 
-	public int barrelAmount = 3;
+	public int barrelAmount = 1;
 	public float scatter = .1f;
 	public float spread = 1f;
 	public float spreadOffset = 1f;
 
 	public PowerWeapon (Holster hol) : base (hol) {
+		name = "Power Weapon";
 		bulletSpeed = 250f;
 		reloadSpeed = 1f;
 		fireRate = .001f;
-		clipSize = 10000;
-		roundsLeftInClip = 10000;
+		clipSize = 100;
+		roundsLeftInClip = 100;
 		damage = 150;
 	}
 
