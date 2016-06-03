@@ -91,6 +91,31 @@ public class PlayerInput : MonoBehaviour {
 					// do something
 					print("pressed joystick 6 button " + i);
 				}
+
+				if (Input.GetKeyDown("joystick 7 button "+i)) {
+					// do something
+					print("pressed joystick 7 button " + i);
+				}
+
+				if (Input.GetKeyDown("joystick 8 button "+i)) {
+					// do something
+					print("pressed joystick 8 button " + i);
+				}
+
+				if (Input.GetKeyDown("joystick 9 button "+i)) {
+					// do something
+					print("pressed joystick 9 button " + i);
+				}
+
+				if (Input.GetKeyDown("joystick 10 button "+i)) {
+					// do something
+					print("pressed joystick 10 button " + i);
+				}
+
+				if (Input.GetKeyDown("joystick 11 button "+i)) {
+					// do something
+					print("pressed joystick 11 button " + i);
+				}
 			}		
 		
 

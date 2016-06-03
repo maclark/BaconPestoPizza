@@ -30,7 +30,7 @@ public class Cargo : MonoBehaviour {
 			sr.color = Color.black;
 			break;
 		case CargoType.SHIELD:
-			sr.color = Color.gray;
+			sr.color = Color.blue;
 			break;
 		case CargoType.GOLD:
 			sr.color = Color.yellow;

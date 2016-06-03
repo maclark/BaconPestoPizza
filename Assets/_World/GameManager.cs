@@ -15,15 +15,27 @@ public class GameManager : MonoBehaviour {
 	public Text goldText;
 	public List<Transform> appointments = new List<Transform> ();
 	public BigBird bigBird;
+	public int gatesBroken;
 
 	private List<Transform> alliedTransforms = new List<Transform> (); 
 	private bool paused = false;
 	private NavPointer nav;
+	private Tetris tetrisGod;
 
 	void Awake () {
 		bigBird = GameObject.FindGameObjectWithTag ("BigBird").GetComponent<BigBird> ();
 		AddAlliedTransform (bigBird.transform);
 		MakeInvisibleTarget ();
+		tetrisGod = GameObject.FindObjectOfType<Tetris> ();
+
+	}
+
+	void Start () {
+		goldText.text = 0.ToString();
+	}
+
+	void Update () {
+		goldText.text = gatesBroken.ToString ();
 	}
 
 	public List<Transform> GetAlliedTransforms () {
@@ -103,5 +115,11 @@ public class GameManager : MonoBehaviour {
 			Mathf.Clamp(position.x, cameraRect.xMin + screenBuffer, cameraRect.xMax - screenBuffer),
 			Mathf.Clamp(position.y, cameraRect.yMin + screenBuffer, cameraRect.yMax - screenBuffer),
 			transform.position.z);
+	}
+
+	public void BrokeGate () {
+		//spawn new level
+		gatesBroken++;
+		tetrisGod.SpawnRectangleField (new Vector2 (-tetrisGod.width / 2, tetrisGod.height * gatesBroken), tetrisGod.width, tetrisGod.height, tetrisGod.attempts);
 	}
 }
