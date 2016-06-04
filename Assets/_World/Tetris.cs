@@ -13,31 +13,37 @@ public class Tetris : MonoBehaviour {
 	public GameObject wallPrefab;
 	public GameObject gatePrefab;
 	public GameObject gateSpaceSaverPrefab;
+	public GameObject invaderPrefab;
 	public GameObject invaderCarrierPrefab;
 	public GameObject pufferPrefab;
 
 	public float radius = 1000;
 	public float width;
 	public float height;
-	public int attempts;
+	public int tetroAttempts;
+	public int difficultyMod = 2;
+	public int invaderAttempts;
 	public int invaderCarrierAttempts;
 	public int pufferAttempts;
+
 
 	public enum TetrominoBasicShape {L, LINE, S, SQUARE, T}
 	public enum TetrominoShape {J, L, LINE, S, SQUARE, T, Z}
 
 	private float gateWidth;
 	private GameObject gateSpaceSaver;
+	private GameManager gm;
 
 	void Awake () {
 		gateWidth = gatePrefab.transform.localScale.x; 
+		gm = GameObject.FindObjectOfType<GameManager> ();
 	}
 
 
 	// Use this for initialization
 	void Start () {
 		MakeGateSpaceSaver ();
-		SpawnRectangleField (new Vector2 (-width / 2, 0), width, height, attempts);
+		SpawnRectangleField (new Vector2 (-width / 2, 0), width, height, tetroAttempts);
 		//SpawnCircleField (Vector2.zero, radius, attempts);
 	}
 	
@@ -115,7 +121,7 @@ public class Tetris : MonoBehaviour {
 			Vector2 boxSize = new Vector2 (col.transform.localScale.x + buff * 2, col.transform.localScale.y + buff * 2);
 			Vector2 spawnPosition = transform.position + col.transform.position;
 			float angle = 0f;
-			if (collider.transform.parent) {
+			if (col.transform.parent) {
 				angle = col.transform.parent.rotation.eulerAngles.z;
 			}
 			RaycastHit2D hit = Physics2D.BoxCast (spawnPosition, boxSize, angle, Vector2.zero, 0f); 
@@ -156,7 +162,14 @@ public class Tetris : MonoBehaviour {
 		}
 	}
 
-	void SpawnEnemies (Vector2 botLeft, float fieldWidth, float fieldHeight, int invCarAttempts, int puffAttempts) {
+	void SpawnEnemies (Vector2 botLeft, float fieldWidth, float fieldHeight, int invAttempts, int invCarAttempts, int puffAttempts) {
+		for (int i = 0; i < invAttempts; i++) {
+			float x = Random.Range (botLeft.x, botLeft.x + fieldWidth);
+			float y = Random.Range (botLeft.y, botLeft.y+ fieldHeight);
+			transform.position = new Vector2 (x, y);
+			SpawnGameObject (invaderPrefab);
+		}
+
 		for (int i = 0; i < invCarAttempts; i++) {
 			float x = Random.Range (botLeft.x, botLeft.x + fieldWidth);
 			float y = Random.Range (botLeft.y, botLeft.y+ fieldHeight);
@@ -182,7 +195,15 @@ public class Tetris : MonoBehaviour {
 
 		MoveGateSpaceSaver ();
 		Spawn3Sides (botLeft, fieldWidth, fieldHeight);
-		SpawnEnemies (botLeft, fieldWidth, fieldHeight, invaderCarrierAttempts, pufferAttempts);
+		int iAtts = Mathf.RoundToInt (Mathf.Log (invaderAttempts * difficultyMod * (gm.gatesBroken + 1)));
+		print ("iAtts: " + iAtts);
+		int icAtts = Mathf.RoundToInt (Mathf.Log (invaderCarrierAttempts * difficultyMod * (gm.gatesBroken + 1)));
+		print ("icAtts: " + icAtts);
+
+		int pufAtts = Mathf.RoundToInt (Mathf.Log (pufferAttempts * difficultyMod *(gm.gatesBroken + 1)));
+		print ("pufAtts: " + pufAtts);
+
+		SpawnEnemies (botLeft, fieldWidth, fieldHeight, iAtts, icAtts, pufAtts);
 	}
 
 	public void SpawnCircleField (Vector2 origin, float radius, float circleAttempts) {

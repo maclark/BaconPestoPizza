@@ -120,6 +120,6 @@ public class GameManager : MonoBehaviour {
 	public void BrokeGate () {
 		//spawn new level
 		gatesBroken++;
-		tetrisGod.SpawnRectangleField (new Vector2 (-tetrisGod.width / 2, tetrisGod.height * gatesBroken), tetrisGod.width, tetrisGod.height, tetrisGod.attempts);
+		tetrisGod.SpawnRectangleField (new Vector2 (-tetrisGod.width / 2, tetrisGod.height * gatesBroken), tetrisGod.width, tetrisGod.height, tetrisGod.tetroAttempts);
 	}
 }
