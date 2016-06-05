@@ -27,7 +27,8 @@ public class Harpoonable : MonoBehaviour {
 
 	public void Die () {
 		if (harp) {
-			harp.DetachAndRecall ();
+			harp.SetGripping (false);
+			harp.SetRecalling (true);
 		}
 		Destroy (gameObject);
 	}

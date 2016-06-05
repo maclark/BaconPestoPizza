@@ -3,16 +3,20 @@ using System.Collections.Generic;
 
 public class Harpoon : MonoBehaviour {
 
-	public Vector2 direction = Vector2.zero;
+	public Vector3 tetherDirection = Vector3.zero;
 	public float forceMag = 500f;
+	public float recallMag = 100f;
+	public float tetherLength;
+	public float tautLength = 10f;
+	public float stretchiness = .1f;
+	public float k = 1f;
+	public float maxTetherLength = 20f;
+
+	public float minWidthTetherLength = 3;
 	public float minTetherWidth = .05f;
 	public float maxTetherWidth = .2f;
-	public float minWidthTetherLength = 3;
-	public float tautLength = 10f;
-	public float maxTetherLength = 30f;
-	public float recallMag	= 100f;
-	public float detachDelay = .3f;
 	public bool recalling = false;
+	public bool gripping = true;
 	public bool taut = false;
 	public OrbWeb web = null;
 	public GameObject webPrefab;
@@ -24,6 +28,7 @@ public class Harpoon : MonoBehaviour {
 	private GameObject harpooner = null;
 	private GameObject harpooned = null;
 	private List<Bird> linkedBirds = new List<Bird> ();
+	private Vector3 tetherVector;
 
 	void Awake () {
 		rb = GetComponent<Rigidbody2D> ();
@@ -36,16 +41,17 @@ public class Harpoon : MonoBehaviour {
 
 	void Update () {
 		DrawTether ();
-		if (Vector3.Distance (transform.position, harpooner.transform.position) > maxTetherLength) {
-			DetachAndRecall (true);
-		}
 	}
 
 	void FixedUpdate () {
-		if (recalling) {
-			Vector3 detachDir = harpooner.GetComponent<Bird> ().p.transform.position - transform.position;
-			detachDir.Normalize ();
-			rb.AddForce (detachDir * recallMag);
+		tetherVector = transform.position - harpooner.transform.position;
+		tetherLength = tetherVector.magnitude;
+		if (tetherLength > maxTetherLength) {
+			SetGripping (false);
+			Destroy (gameObject);
+			Debug.Log ("snapped harp off");
+		} else {
+			HandleTether ();
 		}
 	}
 
@@ -53,11 +59,14 @@ public class Harpoon : MonoBehaviour {
 		if (other.name == "BirdTrigger") {
 			Bird pBird = other.transform.parent.GetComponent<Bird> ();
 			if (harpooner.name == pBird.name) {
-				pBird.hasHarpoon = true;
-				Destroy (gameObject);
+				if (!pBird.aimingHarp && !pBird.swingingHarp && !pBird.throwingHarp) {
+					pBird.hurledHarp = false;
+					pBird.catchingHarp = true;
+					Destroy (gameObject);
+				}
 			} else {
 				//implement linking
-				if (!recalling) {
+				if (gripping) {
 					HarpoonObject (pBird.gameObject);
 					pBird.otherHarps.Add (this);
 				}
@@ -65,23 +74,18 @@ public class Harpoon : MonoBehaviour {
 		}
 
 		else if (other.tag == "Harpoonable") {
-			if (!recalling) {
+			if (gripping) {
 				HarpoonObject (other.gameObject);
 				other.GetComponent<Harpoonable> ().SetSortingLayer ("Birds");
 			}
 		}
 	}
 
-	public void SetDirection (Vector2 dir) {
-		direction = dir;
-		direction.Normalize ();
-	}
-
 	public void Fire (Transform start, Vector2 aim) {
 		transform.position = start.position;
 		transform.rotation = start.rotation;
-		SetDirection (aim);
-		rb.AddForce (direction * forceMag);
+		aim.Normalize ();
+		rb.AddForce (aim * forceMag);
 	}
 
 	public void Die () {
@@ -103,11 +107,7 @@ public class Harpoon : MonoBehaviour {
 		lr.SetWidth (tetherWidth, tetherWidth);
 
 		//for determining when to stop thinning the line renderered
-		if (distance < minWidthTetherLength) {
-			taut = false;
-			lr.material.color = harpooner.GetComponent<Bird> ().p.color;
-		} 
-		else if (distance < tautLength + minWidthTetherLength) {
+		if (distance < tautLength) {
 			taut = false;
 			lr.material.color = harpooner.GetComponent<Bird> ().p.color;
 		}
@@ -119,6 +119,14 @@ public class Harpoon : MonoBehaviour {
 
 	public void SetHarpooner (GameObject harpoonThrower) {
 		harpooner = harpoonThrower;
+	}
+
+	public GameObject GetHarpooner () {
+		return harpooner;
+	}
+
+	public GameObject GetHarpooned () {
+		return harpooned;
 	}
 
 	public void HarpoonObject (GameObject harpoonRecipient) {
@@ -138,41 +146,56 @@ public class Harpoon : MonoBehaviour {
 		harpoonRecipient.SendMessage ("BeenHarpooned", null, SendMessageOptions.DontRequireReceiver);
 	}
 
-	public void DetachAndRecall (bool forceRecall=false) {
-		if (harpooned != null) {
-			if (harpooned.tag == "Player") {
-				harpooned.GetComponent<Bird> ().RemoveHarp (this);
-			} else if (harpooned.tag == "Harpoonable") {
-				harpooned.SendMessage ("HarpoonReleased", null, SendMessageOptions.DontRequireReceiver);
-			}
-			harpooned = null;
-			transform.parent = null;
-			GetComponent<Rigidbody2D> ().WakeUp ();
-			GetComponent<BoxCollider2D> ().enabled = true;
-			if (web) {
-				web.Break ();
-				//must return here, because other this call will untoggle recalling bool
-				return;
-			}
-		}
-
-
-		SpriteRenderer[] renderers = GetComponentsInChildren<SpriteRenderer> ();
-		if (forceRecall) {
-			recalling = true;
+	public void ToggleRecalling () {
+		if (recalling) {
+			SetRecalling (false);
 		} else {
-			recalling = !recalling;
-		}
+			SetRecalling (true);
+		}	
+	}
 
-		if (!recalling) {
-			foreach (SpriteRenderer r in renderers) {
-				r.color = new Color (r.color.r, r.color.g, r.color.b, 1f);
-			}
+	public void SetRecalling (bool setRecalling) {
+		recalling = setRecalling;
+	}
+
+	public void ToggleGripping () {
+		print ("togging grip");
+		if (gripping) {
+			SetGripping (false);
 		} else {
-			foreach (SpriteRenderer r in renderers) {
-				r.color = new Color (r.color.r, r.color.g, r.color.b, .5f);
-			}
+			SetGripping (true);
 		}
+	}
+
+	public void SetGripping (bool setGripping) {
+		if (setGripping != gripping) {
+			SpriteRenderer[] renderers = GetComponentsInChildren<SpriteRenderer> ();
+			if (gripping) {
+				foreach (SpriteRenderer r in renderers) {
+					r.color = new Color (r.color.r, r.color.g, r.color.b, .5f);
+					lr.material.color = new Color (lr.material.color.r, lr.material.color.g, lr.material.color.b, .2f);
+				}
+				if (harpooned != null) {
+					if (harpooned.tag == "Player") {
+						harpooned.GetComponent<Bird> ().RemoveHarp (this);
+					} else if (harpooned.tag == "Harpoonable") {
+						harpooned.SendMessage ("HarpoonReleased", null, SendMessageOptions.DontRequireReceiver);
+					}
+					harpooned = null;
+					transform.parent = null;
+					GetComponent<Rigidbody2D> ().WakeUp ();
+					GetComponent<BoxCollider2D> ().enabled = true;
+				}
+				gripping = false;
+			} else {
+				foreach (SpriteRenderer r in renderers) {
+					r.color = new Color (r.color.r, r.color.g, r.color.b, 1f);
+				}
+				lr.material.color = new Color (lr.material.color.r, lr.material.color.g, lr.material.color.b, 1f);
+				gripping = true;
+			}
+		} 
+		//else setGripping is the same gripping, do nothing
 	}
 		
 	void AttemptWeb (Bird birdie) {
@@ -203,11 +226,42 @@ public class Harpoon : MonoBehaviour {
 		newWeb.SetWebbers (linkedBirdsTransforms);
 	}
 
-	public GameObject GetHarpooner () {
-		return harpooner;
+	void HandleRecalling () {
+		Vector3 recallDir = harpooner.GetComponent<Bird> ().p.transform.position - transform.position;
+		SetTautLength (recallDir.magnitude);
+		recallDir.Normalize ();
+
+		if (harpooned) {
+			harpooned.GetComponent<Rigidbody2D> ().AddForce (recallDir * recallMag);
+		} else {
+			//TODO would need to chceck if harpooner is harpooned and has an effective mass
+			rb.AddForce (recallDir * recallMag);
+		}
+		harpooner.GetComponent<Rigidbody2D> ().AddForce (-recallDir * recallMag);
 	}
 
-	public GameObject GetHarpooned () {
-		return harpooned;
+	void SetTautLength (float newLength) {
+		//stretchiness should be some % set elsewhere of the tautlength
+		tautLength = newLength;
+		maxTetherLength = tautLength * (1 + stretchiness);
+	}
+
+	void HandleTether () {
+		if (tetherLength > tautLength) {
+			float x = tetherLength - tautLength;
+			tetherDirection = transform.position - harpooner.transform.position;
+			tetherDirection.Normalize ();
+			Vector3 springForce = -k * x * tetherDirection;
+			if (!harpooned) {
+				rb.AddForce (springForce);
+			} else {
+				harpooned.GetComponent<Rigidbody2D> ().AddForce (springForce);
+			}
+			harpooner.GetComponent<Rigidbody2D> ().AddForce (-springForce);
+		}
+
+		if (recalling) {
+			HandleRecalling ();
+		}
 	}
 }

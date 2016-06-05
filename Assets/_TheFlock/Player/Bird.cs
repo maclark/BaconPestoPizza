@@ -24,12 +24,22 @@ public class Bird : MonoBehaviour {
 	public float gasPerBoost = 2f;
 	public float gasLightDelay = .2f;
 	public float harpHurlOffset = 1f;
+	public float swingSpeed = 3f;
+	public float windUpTime = 1f;
+	public float aimThetaModifier = 1f;
+	public float earlyReleaseAngleRad = Mathf.PI / 4;
 	public float rollDuration = 1f;
 	public float rerollDelay = 1f;
 	public float rollSpeed = 1f;
 
 	public bool docked = false;
 	public bool webbed = false;
+	public bool harpLoaded = false;
+	public bool aimingHarp = false;
+	public bool swingingHarp = false;
+	public bool windingUp = false;
+	public bool throwingHarp = false;
+	public bool catchingHarp = false;
 
 	public Transform body;
 	public GameObject harpoonPrefab;
@@ -40,7 +50,7 @@ public class Bird : MonoBehaviour {
 
 	[HideInInspector]
 	public Color color;
-	public bool damaged = false, invincible = false, canBoost = true, hasHarpoon = true, canRoll = true, rolling = false;
+	public bool damaged = false, invincible = false, canBoost = true, hurledHarp = false, canRoll = true, rolling = false;
 	[HideInInspector]
 	public Vector2 direction = Vector2.zero, pullDir = Vector2.zero, orthoPullDir = Vector2.zero;
 	[HideInInspector]
@@ -54,9 +64,20 @@ public class Bird : MonoBehaviour {
 	private Shield shield;
 	private ReloadIndicator reloadIndicator;
 	private GameObject gasLight;
+	private Harpoon loadedHarp;
+	private Vector3 releaseHarpPosition;
+	private Vector3 windUpOffset;
+	private Vector3 hurlAim;
 	private float startForceMag;
+	private float swingStartTime;
+	private float windUpStartTime;
+	private float theta;
+	private float releaseTheta;
 	private bool ranOutOfGas = false;
 	private bool gasLightFlashing = false;
+	private bool swingStarted = false;
+	private bool windUpStarted = false;
+
 
 	void Awake() {
 		rb = GetComponent<Rigidbody2D> ();
@@ -90,6 +111,14 @@ public class Bird : MonoBehaviour {
 						ranOutOfGas = true;
 					}
 				}
+			}
+
+			if (aimingHarp) {
+				AimHarp ();
+			} else if (swingingHarp) {
+				SwingHarp ();
+			} else if (windingUp) {
+				WindUp ();
 			}
 
 			if (rolling) {
@@ -248,7 +277,7 @@ public class Bird : MonoBehaviour {
 		//Calculate and add force parallel to pull vector
 		pullDir = transform.position - harp.transform.position;
 		pullDir.Normalize ();
-		float pullMagnitude = Vector3.Dot (direction * forceMag * rb.mass, pullDir);
+		float pullMagnitude = Vector3.Dot (direction * forceMag, pullDir);
 		if (pullMagnitude > 0) {
 			PullHarp (pullMagnitude);
 		}
@@ -283,7 +312,7 @@ public class Bird : MonoBehaviour {
 	}
 
 	void TetherHarp () {
-		//determine direction of tether and orthogonal axis to that
+		/*//determine direction of tether and orthogonal axis to that
 		Vector2 directionOfTether = harp.transform.position - harp.GetHarpooner ().transform.position;
 		directionOfTether.Normalize ();
 		Vector2 orthoDirectionOfTether = new Vector2 (directionOfTether.y, -directionOfTether.x);
@@ -302,6 +331,7 @@ public class Bird : MonoBehaviour {
 		//Add components of velocity to find resultant velocity vector of harpoon
 		Vector2 resultantHarpVel = (directionOfTether * harpVelTetherComponent) + (orthoDirectionOfTether * harpVelOrthoComponent);
 		harp.GetComponent<Rigidbody2D> ().velocity = resultantHarpVel;
+		*/
 	}
 
 	/// <summary>
@@ -346,9 +376,10 @@ public class Bird : MonoBehaviour {
 			canRoll = true;
 		}
 		if (harp) {
-			harp.DetachAndRecall ();
+			harp.SetGripping (false);
+			harp.SetRecalling (true);
 			Destroy (harp.gameObject);
-			hasHarpoon = true;
+			hurledHarp = false;
 		}
 		DetachOtherHarps ();
 		transform.position = dock.transform.position;
@@ -438,22 +469,6 @@ public class Bird : MonoBehaviour {
 				yield break;
 			}
 			StartCoroutine (FlashDamage (timeAtDamage));
-		}
-	}
-
-	/// <summary>
-	/// Hurls the harpoon.
-	/// </summary>
-	public void HurlHarpoon () {
-		if (hasHarpoon) {
-			//Offset harp so it doesn't immediately collide with ship
-			p.aim.Normalize ();
-			GameObject harpoon = Instantiate (harpoonPrefab, p.transform.position + p.aim * harpHurlOffset, transform.rotation) as GameObject;
-			harpoon.name = "Harpoon";
-			harp = harpoon.GetComponent<Harpoon> ();
-			harp.SetHarpooner (gameObject);
-			harp.Fire (harp.transform, p.aim);
-			hasHarpoon = false;
 		}
 	}
 
@@ -574,7 +589,8 @@ public class Bird : MonoBehaviour {
 			}
 
 			foreach (Harpoon h in harpsToDetach) {
-				h.DetachAndRecall ();
+				h.SetGripping (false);
+				h.SetRecalling (true);
 			}
 		}
 	}
@@ -589,9 +605,10 @@ public class Bird : MonoBehaviour {
 			canRoll = true;
 		}
 		if (harp) {
-			harp.DetachAndRecall ();
+			harp.SetGripping (false);
+			harp.SetRecalling (true);
 			Destroy (harp.gameObject);
-			hasHarpoon = true;
+			hurledHarp = false;
 		}
 		DetachOtherHarps ();
 		transform.position = ow.transform.position;
@@ -612,5 +629,100 @@ public class Bird : MonoBehaviour {
 		if (p) {
 			p.Unwebbed ();
 		}
+	}
+
+	/// <summary>
+	/// Hurls the harpoon.
+	/// </summary>
+	public void HurlHarpoon () {
+		if (!hurledHarp && !swingingHarp) {
+			p.aim.Normalize ();
+			harp.transform.parent = null;
+
+			////Offset harp so it doesn't immediately collide with ship
+			releaseHarpPosition = p.transform.position + p.aim * harpHurlOffset;
+
+
+			swingingHarp = true;
+			hurledHarp = true;
+			aimingHarp = false;
+			harpLoaded = false;
+
+			//windingUp = true;
+			//releaseHarpPosition = harp.transform.position;
+			//throwingHarp = true;
+		}
+	}
+
+	public void LoadHarp () {
+		p.w.firing = false;
+		p.CancelInvoke ();
+		p.GetComponent<PlayerInput> ().CancelInvoke ();
+
+
+		GameObject harpoon = Instantiate (harpoonPrefab, p.transform.position + p.aim, transform.rotation) as GameObject;
+		harpoon.name = "Harpoon";
+		harp = harpoon.GetComponent<Harpoon> ();
+		harp.SetHarpooner (gameObject);
+		harp.GetComponent<BoxCollider2D> ().enabled = false;
+		harp.GetComponent<Rigidbody2D> ().Sleep ();
+		harp.transform.parent = transform;
+
+		aimingHarp = true;
+		harpLoaded = true;
+	}
+
+	public void UnloadHarp () {
+		hurledHarp = false;
+		catchingHarp = true;
+		aimingHarp = false;
+		harpLoaded = false;
+		Destroy (harp.gameObject);
+	}
+
+	public void AimHarp () {
+		harp.transform.position = p.transform.position + p.aim;
+	}
+
+	public void SwingHarp () {
+		if (!swingStarted) {
+			swingStarted = true;
+			releaseTheta = Mathf.Atan2 (releaseHarpPosition.y - p.transform.position.y, releaseHarpPosition.x - p.transform.position.x);
+			theta = releaseTheta + 2 * Mathf.PI;
+			float aimTheta = releaseTheta + aimThetaModifier;
+			hurlAim.x = Mathf.Cos (aimTheta);
+			hurlAim.y = Mathf.Sin (aimTheta);
+			releaseTheta += earlyReleaseAngleRad;
+		} else if (theta < releaseTheta) {
+			swingStarted = false;
+			swingingHarp = false;
+			harp.Fire (harp.transform, hurlAim);
+			harp.GetComponent<BoxCollider2D> ().enabled = true;
+		} else {
+			theta = theta - swingSpeed * Time.deltaTime;
+			float x = p.transform.position.x + Mathf.Cos (theta) * harpHurlOffset;
+			float y = p.transform.position.y + Mathf.Sin (theta) * harpHurlOffset;
+			harp.transform.position = new Vector3 (x, y, 0);
+		}
+	}
+
+	public void WindUp () {
+		if (!windUpStarted) {
+			windUpStarted = true;
+			windUpStartTime = Time.time;
+			hurlAim = p.aim;
+		} else if ((Time.time - windUpStartTime) > windUpTime) {
+			harp.Fire (harp.transform, hurlAim);
+			windingUp = false;
+			windUpStarted = false;
+			Invoke ("EnableHarpCollider", .5f);
+		} else {
+			harp.transform.position = p.transform.position + Vector3.Lerp (hurlAim, -hurlAim * 2, (Time.time - windUpStartTime) / windUpTime);
+		}
+	}
+
+	void EnableHarpCollider () {
+		harp.GetComponent<BoxCollider2D> ().enabled = true;
+		throwingHarp = false;
 	}
 }

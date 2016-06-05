@@ -150,14 +150,14 @@ public class Tetris : MonoBehaviour {
 		BoxCollider2D[] colls = obj.GetComponentsInChildren<BoxCollider2D> ();
 		if (colls.Length > 0) {
 			if (CheckSpaceClear(colls, 0f)) {
-				GameObject instance = Instantiate(obj, transform.position, transform.rotation) as GameObject;
+				Instantiate(obj, transform.position, transform.rotation);
 			}
 		}
 
 		CircleCollider2D cc = obj.GetComponent<CircleCollider2D> ();
 		if (cc) {
 			if (CheckSpaceClear(cc, 0f)) {
-				GameObject instance = Instantiate(obj, transform.position, transform.rotation) as GameObject;
+				Instantiate(obj, transform.position, transform.rotation);
 			}
 		}
 	}

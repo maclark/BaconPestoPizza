@@ -41,8 +41,6 @@ public class PlayerInput : MonoBehaviour {
 	private Player p;
 	private Turret turret;
 	private bool releasedRightTrigger = true;
-
-	private bool rightTriggerInUse = false;
 	private bool isXboxController = false;
 	private bool stationcasting = false;
 	private float timeOfStationcast;
@@ -254,26 +252,47 @@ public class PlayerInput : MonoBehaviour {
 	}
 
 	void HandleFlyingInput () {
-		p.b.direction = new Vector2( Input.GetAxis(LSHorizontal), Input.GetAxis(LSVertical));
+		p.b.direction = new Vector2 (Input.GetAxis (LSHorizontal), Input.GetAxis (LSVertical));
 		if (p.b.gas <= 0) {
 			p.b.direction = Vector2.zero;
 		}
 
-		Vector2 rightStick = new Vector2( Input.GetAxis(RSHorizontal), Input.GetAxis(RSVertical));
+		Vector2 rightStick = new Vector2 (Input.GetAxis (RSHorizontal), Input.GetAxis (RSVertical));
 		if (rightStick != Vector2.zero) {
 			p.aim = rightStick;
-		} 
-		else if (p.aim == Vector3.zero) {
+		} else if (p.aim == Vector3.zero) {
 			if (p.b.direction != Vector2.zero) {
 				p.aim = new Vector3 (p.b.direction.x, p.b.direction.y, 0);
 			}
 		}
 
-		if (!p.GetHoldingString ()) {
-			HandleFiring ();
+		if (!p.b.hurledHarp && !p.b.harpLoaded && !p.b.catchingHarp) {
+			if (Input.GetAxisRaw (leftTrigger) > 0) {
+				p.b.LoadHarp ();
+			} 
+		} else if (p.b.hurledHarp) {
+			if (Input.GetAxisRaw (leftTrigger) > 0) {
+				p.b.harp.SetRecalling (true);
+			} else if (Input.GetAxis (leftTrigger) <= 0) {
+				p.b.harp.SetRecalling (false);
+			}
+		} else if (p.b.harpLoaded) {
+			if (Input.GetAxisRaw (leftTrigger) <= 0) {
+				p.b.HurlHarpoon ();
+			}
+		} else if (p.b.catchingHarp) {
+			if (Input.GetAxisRaw (leftTrigger) <= 0) {
+				p.b.catchingHarp = false;
+			}
 		}
 
-		if (Input.GetAxis (leftTrigger) > 0) {
+		if (!p.GetHoldingString () && !p.b.harpLoaded) {
+			HandleWeaponFiring ();
+		}
+
+
+
+		if (Input.GetButtonDown (RB)) {
 			if (p.b.canRoll) {
 				p.b.rolling = true;
 				p.b.canRoll = false;
@@ -281,8 +300,15 @@ public class PlayerInput : MonoBehaviour {
 			}
 		}
 
+
+
 		if (Input.GetButtonDown (yTriangleButton)) {
-			p.CycleWeapons ();
+			if (p.b.harpLoaded) {
+				p.b.UnloadHarp ();
+				p.b.catchingHarp = true;
+			} else {
+				p.CycleWeapons ();
+			}
 		}
 
 		if (Input.GetButtonDown (xSquareButton)) {
@@ -292,10 +318,8 @@ public class PlayerInput : MonoBehaviour {
 		}
 
 		if (Input.GetButtonDown (rightClick)) {
-			if (p.b.harp) {
-				p.b.harp.DetachAndRecall ();
-			} else {
-				p.b.HurlHarpoon ();
+			if (p.b.hurledHarp) {
+				p.b.harp.ToggleGripping ();
 			}
 		}
 
@@ -466,51 +490,11 @@ public class PlayerInput : MonoBehaviour {
 		}
 
 		sh.HandleInHoldSticks (p, LSVertical, LSHorizontal);
-		/*
-		if (Input.GetAxisRaw(LSVertical) != 0) {
-			if (verticalStickInUse == false) {
-				verticalStickInUse = true;
-				timeOfLastVertStep = Time.time;
-				if (Input.GetAxisRaw(LSVertical) > 0) {
-					gm.bigBird.hold.SelectorStep (p.transform, 0, 1);
-				} else {
-					gm.bigBird.hold.SelectorStep (p.transform, 0, -1);
-				}
-			}  else if (Time.time > timeOfLastVertStep + moveCooldown) {
-				verticalStickInUse =  false;
-			}
 
-		} else if (Input.GetAxisRaw (LSVertical) == 0) {
-			verticalStickInUse = false;
+		if (Input.GetButtonDown (aCrossButton)) {
+			gm.bigBird.hold.GrabSwapOrStoreCargo ();
 		}
 
-
-		if (Input.GetAxisRaw(LSHorizontal) != 0) {
-			if (horizontalStickInUse == false) {
-				horizontalStickInUse = true;
-				timeOfLastHorzStep = Time.time;
-				if (Input.GetAxisRaw(LSHorizontal) > 0) {
-					gm.bigBird.hold.SelectorStep (p.transform, 1, 0);
-				} else {
-					gm.bigBird.hold.SelectorStep (p.transform, -1, 0);
-				}
-			} else if (Time.time > timeOfLastHorzStep + moveCooldown) {
-				horizontalStickInUse =  false;
-			}
-
-		} else if (Input.GetAxisRaw (LSHorizontal) == 0) {
-			horizontalStickInUse = false;
-		}
-		*/
-		if (Input.GetAxisRaw(rightTrigger) != 0) {
-			if (rightTriggerInUse == false) {
-				rightTriggerInUse = true;
-				gm.bigBird.hold.GrabSwapOrStoreCargo ();
-			}
-
-		} else if (Input.GetAxisRaw (DPadVertical) == 0) {
-			rightTriggerInUse = false;
-		}
 	}
 
 	void HandleOnPlatformInput () {
@@ -533,7 +517,7 @@ public class PlayerInput : MonoBehaviour {
 			state = State.IN_HOLD;
 		}
 
-		if (Input.GetAxis (rightTrigger) < 0) {
+		if (Input.GetButtonDown (aCrossButton)) {
 			if (gm.bigBird.hold.platformCargo) {
 				gm.bigBird.hold.Dump (gm.bigBird.hold.platformCargo.transform);
 			}
@@ -550,19 +534,17 @@ public class PlayerInput : MonoBehaviour {
 				p.aim = new Vector3 (p.b.direction.x, p.b.direction.y, 0);
 			}
 		}
-		HandleFiring ();
+		HandleWeaponFiring ();
 	}
 
 
 
-	void HandleFiring () {
+	void HandleWeaponFiring () {
 		if (p.w.automatic) {
 			if (!p.w.firing && Input.GetAxis (rightTrigger) < 0) {
-				//print ("!firing, and RT down: " + rightTrigger);
 				p.w.firing = true;
 				InvokeRepeating ("FireBullet", 0, p.w.fireRate);
 			} else if (p.w.firing && Input.GetAxis (rightTrigger) >= 0) {
-				//print ("firing, and RT up: " + rightTrigger);
 				p.w.firing = false;
 				p.CancelInvoke ();
 				CancelInvoke ();

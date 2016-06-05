@@ -85,7 +85,8 @@ public class Player : MonoBehaviour {
 
 	public void Bubble (Vector3 initialVelocity) {
 		if (b.harp) {
-			b.harp.DetachAndRecall ();
+			b.harp.SetGripping (false);
+			b.harp.SetRecalling (true);
 		}
 		sr.sprite = sprites [0];
 		GameObject bub = Instantiate (gm.bubblePrefab, transform.position, transform.rotation) as GameObject;

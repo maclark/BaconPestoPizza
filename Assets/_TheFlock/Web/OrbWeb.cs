@@ -73,7 +73,8 @@ public class OrbWeb : MonoBehaviour {
 			Bird birdie = webbers [i].GetComponent<Bird> ();
 			birdie.p.ReleaseWebString ();
 			birdie.harp.web = null;
-			birdie.harp.DetachAndRecall (true);
+			birdie.harp.SetGripping (false);
+			birdie.harp.SetRecalling (true);
 		}
 		GetComponentInChildren<Transform> ().parent = null;
 		Destroy (gameObject);
