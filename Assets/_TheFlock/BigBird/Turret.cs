@@ -3,7 +3,6 @@ using System.Collections.Generic;
 
 public class Turret : MonoBehaviour {
 
-	public bool rightCannon;
 	public GameObject prefabProjectile;
 	public float cooldown = 1f;
 
@@ -41,7 +40,7 @@ public class Turret : MonoBehaviour {
 		balls.Add (ball);
 		if (aim == Vector3.zero) {
 			//depends on base rotation of object... TODO
-			aim = Vector3.up;
+			//aim = transform.up;
 		}
 		ball.Fire (transform.position, aim);
 		ready = false;

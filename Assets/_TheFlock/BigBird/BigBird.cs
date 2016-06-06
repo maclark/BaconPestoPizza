@@ -329,7 +329,6 @@ public class BigBird : MonoBehaviour {
 	}
 
 	public void SetTarget (NavPointer nav) {
-
 		if (nav.target) {
 			if (nav.target == transform) {
 				target = null;
