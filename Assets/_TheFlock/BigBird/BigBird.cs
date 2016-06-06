@@ -6,15 +6,17 @@ public class BigBird : MonoBehaviour {
 
 	public float forceMag = 75f;
 	public int hp = 1000;
-	public float thresholdToTurnBigBird = .2f;
-	public bool turning { get; set; }
-	public float rotateSpeed = .3f;
+	public int turn = 0;
+	public float turnSpeed = 200f;
 	public float halfSecFill = 5f;
 	public int halfSecRepair = 5;
 	public int gold = 0;
 	public LandingPad nearestPad = null;
 	public float landedScale = 15f;
 	public CargoHold hold;
+	public GameObject cannonballPrefab;
+	public List<Transform> rightCans;
+	public List<Transform> leftCans;
 
 	private GameManager gm;
 	private Rigidbody2D rb;
@@ -33,6 +35,7 @@ public class BigBird : MonoBehaviour {
 	private List<Bird> dockedBirds = new List<Bird> ();
 	private List<Bird> gasLine = new List<Bird> ();
 	private List<Bird> repairLine = new List<Bird> ();
+
 
 	void Awake() {
 		gm = GameObject.FindObjectOfType<GameManager> ();
@@ -54,7 +57,7 @@ public class BigBird : MonoBehaviour {
 		if (engineOn) {
 			if (target) {
 				Quaternion r = Quaternion.LookRotation (Vector3.forward, target.position - transform.position);
-				transform.rotation = Quaternion.RotateTowards (transform.rotation, r, rotateSpeed);	
+				transform.rotation = Quaternion.RotateTowards (transform.rotation, r, turnSpeed);	
 				//TODO make this torque based to use physics engine collisions
 				//rb.AddTorque (rotateSpeed * 1000);
 				if (transform.position == target.position) {
@@ -65,10 +68,12 @@ public class BigBird : MonoBehaviour {
 			rb.AddForce (transform.up * forceMag);
 		}
 
+		if (turn != 0 && !landed) {
+			rb.AddTorque (turnSpeed * turn);
 
-		if (turning && !landed) {
-			transform.rotation = Quaternion.RotateTowards (transform.rotation, targetRotation, rotateSpeed);
-			rb.angularVelocity = 0f;
+			if (engineOn) {
+				SetCamera ();
+			}
 		}
 	}
 
@@ -83,8 +88,8 @@ public class BigBird : MonoBehaviour {
 
 		if (other.tag == "EnemyBullet") {
 			if (Random.Range (0, 1f) > .5) {
-				TakeDamage (other.GetComponent<Bullet> ().damage);
-				other.GetComponent<Bullet> ().Die ();
+				TakeDamage (other.GetComponent<Projectile> ().damage);
+				other.GetComponent<Projectile> ().Die ();
 			}
 		} 
 		else if (other.tag == "Enemy") {
@@ -198,6 +203,7 @@ public class BigBird : MonoBehaviour {
 		foreach (Thruster thrust in thrusters) {
 			thrust.GetComponent<SpriteRenderer> ().enabled = true;
 		}
+		SetCamera ();
 	}
 
 	public void TurnEngineOff () {
@@ -205,6 +211,7 @@ public class BigBird : MonoBehaviour {
 		foreach (Thruster thrust in thrusters) {
 			thrust.GetComponent<SpriteRenderer> ().enabled = false;
 		}
+		SetCamera ();
 	}
 
 	public bool GetEngineOn () {

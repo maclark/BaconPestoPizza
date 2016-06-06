@@ -42,7 +42,7 @@ public class Alakazam : Flyer {
 			if (!teleporting) {
 				StartCoroutine (Teleport ());
 			}
-			other.GetComponent<Bullet> ().Die ();
+			other.GetComponent<Projectile> ().Die ();
 		}
 		else if (other.tag == "Explosion") {
 			base.TriggerEnter2D (other);
@@ -73,7 +73,6 @@ public class Alakazam : Flyer {
 		bullet.Fire (transform.position, aim + skewVector);	
 	}
 	public void TakeShieldDamage (int dam) {
-		print ("taking shield dam");
 		if (!shieldBroken) {
 			shieldHealth -= dam;
 			if (shieldHealth <= 0) {

@@ -159,7 +159,6 @@ public class Harpoon : MonoBehaviour {
 	}
 
 	public void ToggleGripping () {
-		print ("togging grip");
 		if (gripping) {
 			SetGripping (false);
 		} else {

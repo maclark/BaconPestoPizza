@@ -38,6 +38,7 @@ public class PlayerInput : MonoBehaviour {
 	private SpriteRenderer sr;
 	private BigBird bigBird;
 	private StickHandler sh;
+	private SystemsHandler sysH;
 	private Player p;
 	private Turret turret;
 	private bool releasedRightTrigger = true;
@@ -51,6 +52,10 @@ public class PlayerInput : MonoBehaviour {
 		bigBird = GameObject.FindObjectOfType<BigBird>() as BigBird;
 		p = GetComponent<Player> ();
 		sh = new StickHandler ();
+	}
+
+	void Start () {
+		sysH = new SystemsHandler (bigBird.rightCans, bigBird.leftCans, bigBird.cannonballPrefab);
 	}
 
 	void Update () {
@@ -300,8 +305,6 @@ public class PlayerInput : MonoBehaviour {
 			}
 		}
 
-
-
 		if (Input.GetButtonDown (yTriangleButton)) {
 			if (p.b.harpLoaded) {
 				p.b.UnloadHarp ();
@@ -426,14 +429,14 @@ public class PlayerInput : MonoBehaviour {
 
 	void HandlePilotingInput () {
 		if (Input.GetButtonDown (bCircleButton)) {
-			bigBird.turning = false;
+			bigBird.turn = 0;
 			station.GetComponentInChildren<SpriteRenderer> ().color = Color.grey;
 			state = State.CHANGING_STATIONS;
 			return;
 		}
 
 		if (Input.GetButtonDown (xSquareButton)) {
-			bigBird.turning = false;
+			bigBird.turn = 0;
 			state = State.NAVIGATING;
 			return;
 		}
@@ -452,15 +455,7 @@ public class PlayerInput : MonoBehaviour {
 			}
 		}
 			
-		float x = Input.GetAxis (LSHorizontal);
-		float y = Input.GetAxis(LSVertical); 
-
-		if (Mathf.Sqrt (x * x + y * y) > bigBird.thresholdToTurnBigBird) {
-			float angle = Mathf.Atan2 (Input.GetAxis (LSHorizontal), Input.GetAxis (LSVertical)) * Mathf.Rad2Deg;
-			bigBird.turning = true;
-			bigBird.SetTargetRotationZAngle (-angle);
-		} else
-			bigBird.turning = false;
+		bigBird.turn = -Mathf.RoundToInt (Input.GetAxis (LSHorizontal));
 
 		if (Input.GetButtonDown (LB)) {
 			if (bigBird.GetEngineOn ()) {
@@ -468,6 +463,12 @@ public class PlayerInput : MonoBehaviour {
 			} else {
 				bigBird.TurnEngineOn ();
 			}
+		}
+
+		if (Input.GetAxisRaw (rightTrigger) < 0) {
+			sysH.FireBroadside (true);
+		} else if (Input.GetAxisRaw (leftTrigger) > 0) {
+			sysH.FireBroadside (false);
 		}
 	}
 

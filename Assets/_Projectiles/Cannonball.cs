@@ -13,12 +13,16 @@ public class Cannonball : Projectile {
 	}
 
 	void Start () {
-		Invoke ("Detonate", maxDetonation);
+		//Invoke ("Detonate", maxDetonation);
 		base.OnStart ();
 	}
 	
 	void Update () {
 		base.OnUpdate ();
+	}
+
+	void OnTriggerEnter2D (Collider2D other) {
+		base.TriggerEnter2D (other);
 	}
 
 	public override void Fire (Vector3 start, Vector2 aim) {
@@ -31,5 +35,9 @@ public class Cannonball : Projectile {
 		Instantiate (explosionPrefab, transform.position, transform.rotation);
 		CancelInvoke ();
 		Destroy (gameObject);
+	}
+
+	void OnBecameInsivible () {
+		base.BecameInvisible ();
 	}
 }

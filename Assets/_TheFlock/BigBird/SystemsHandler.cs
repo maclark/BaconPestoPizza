@@ -13,15 +13,20 @@ public class SystemsHandler {
 	private GameManager gm;
 	private BigBird bb;
 
-	public SystemsHandler () {
+	public SystemsHandler (List<Transform> cannonsR, List<Transform> cannonsL, GameObject ball) {
+		rightCannons = cannonsR;
+		leftCannons = cannonsL;
 		gm = GameObject.FindObjectOfType<GameManager> ();
 		bb = gm.bigBird;
+		cannonballPrefab = ball;
 	}
 
-
 	public void FireBroadside (bool rightSide) {
-		bb.Invoke ("ReadyCannons", cannonLoadTime);
-
+		if (!cannonsReady) {
+			return;
+		}
+			
+		bb.StartCoroutine (ReadyCannons());
 		if (rightSide) {
 			foreach (Transform t in rightCannons) {
 				float fuse = Random.Range (0, maxFuseTime);
@@ -33,15 +38,19 @@ public class SystemsHandler {
 				bb.StartCoroutine (FireCannon (t, fuse));
 			}
 		}
+		cannonsReady = false;
 	}
 
 	IEnumerator FireCannon (Transform t, float fuseLength) {
 		yield return new WaitForSeconds (fuseLength);
 		//TODO object pooling
-		GameObject obj = Instantiate (cannonballPrefab, t.position, Quaternion.identity) as GameObject; 
+		GameObject obj = GameObject.Instantiate (cannonballPrefab, t.position, Quaternion.identity) as GameObject; 
+		Cannonball ball = obj.GetComponent<Cannonball> ();
+		ball.Fire (t.position, t.up);
 	}
 
-	void ReadyCannons () {
+	IEnumerator ReadyCannons () {
+		yield return new WaitForSeconds (cannonLoadTime);
 		cannonsReady = true;
 	}
 }

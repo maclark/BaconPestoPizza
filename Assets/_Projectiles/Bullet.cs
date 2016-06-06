@@ -20,9 +20,7 @@ public class Bullet : Projectile {
 	}
 
 	void OnTriggerEnter2D (Collider2D other) {
-		if (other.tag == "Unpassable") {
-			Die ();
-		}
+		base.TriggerEnter2D (other);
 	}
 
 	public override void Fire (Vector3 start, Vector2 aim) {

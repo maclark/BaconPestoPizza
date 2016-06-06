@@ -184,14 +184,16 @@ public class Bird : MonoBehaviour {
 		if (coll.gameObject.name == "BigBird") {
 			DockOnBigBird ();
 		} else if (coll.transform.tag == "Enemy") {
+			//TODO jousting
+			//print (rb.velocity.sqrMagnitude);
 			if (!invincible) {
 				if (shield.gameObject.activeSelf) {
-					shield.DeactivateShield ();
-					StartCoroutine (HitInvincibility (hitInvincibilityDuration));
-					coll.gameObject.GetComponent<Flyer> ().Die ();
+					//shield.DeactivateShield ();
+					//StartCoroutine (HitInvincibility (hitInvincibilityDuration));
+					//coll.gameObject.GetComponent<Flyer> ().Die ();
 				} else { 
-					TakeDamage (coll.transform.GetComponent<Flyer> ().kamikazeDamage);
-					coll.gameObject.GetComponent<Flyer> ().Die ();
+					//TakeDamage (coll.transform.GetComponent<Flyer> ().kamikazeDamage);
+					//coll.gameObject.GetComponent<Flyer> ().Die ();
 				}
 			}
 		} else if (coll.transform.tag == "Harpoonable") {

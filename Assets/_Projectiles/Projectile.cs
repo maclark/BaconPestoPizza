@@ -20,6 +20,12 @@ public class Projectile : MonoBehaviour {
 	protected virtual void CollisionEnter2D (Collision2D other) {
 	}
 
+	protected virtual void TriggerEnter2D (Collider2D other) {
+		if (other.tag == "Unpassable") {
+			Die ();
+		}
+	}
+
 	public virtual void Fire (Vector3 start, Vector2 aim) {
 		transform.position = start;
 		aim.Normalize ();
@@ -27,5 +33,10 @@ public class Projectile : MonoBehaviour {
 	}
 
 	public virtual void Die () {
+		Destroy (gameObject);
+	}
+
+	public virtual void BecameInvisible () {
+		Die ();
 	}
 }

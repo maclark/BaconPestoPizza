@@ -50,7 +50,7 @@ public class Flyer : Unit {
 	public void TriggerEnter2D ( Collider2D other) {
 		if (other.tag == "PlayerBullet") {
 			TakeDamage (other.GetComponent<Projectile> ().damage, Color.red);
-			other.GetComponent<Bullet> ().Die ();
+			other.GetComponent<Projectile> ().Die ();
 		}
 		else if (other.tag == "Explosion") {
 			TakeDamage (other.GetComponent<Projectile> ().damage, Color.red);
