@@ -8,7 +8,7 @@ public class WhaleDynamics {
 		public float m; //mass
 		public float a; //accel
 		public float theta; //angle
-		public Vector3 v;
+		public Vector3 v; //vector
 
 		public AttachedMass () {}
 	}

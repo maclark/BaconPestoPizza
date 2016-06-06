@@ -5,15 +5,15 @@ using System.Collections.Generic;
 public class Flyer : Unit {
 
 	public float forceMag = 40f;
-	public int hp = 100;
 	public int kamikazeDamage = 200;
 	public float fireRate = 1f;
 	public float attackRange = 6f;
+	public float bulletForce = 60f;
 
 	protected Rigidbody2D rb;
 	protected GameManager gm;
 	protected Transform target;
-	protected bool startFiring = false;
+	protected bool startAttacking = false;
 	protected bool stopFiring = false;
 
 	// Use this for initialization
@@ -32,9 +32,9 @@ public class Flyer : Unit {
 			SetNearestTarget ();
 		}
 
-		if (startFiring) {
+		if (startAttacking) {
 			InvokeRepeating ("FireBullet", fireRate, fireRate);
-			startFiring = false;
+			startAttacking = false;
 		}
 
 		if (stopFiring) {
@@ -49,41 +49,37 @@ public class Flyer : Unit {
 
 	public void TriggerEnter2D ( Collider2D other) {
 		if (other.tag == "PlayerBullet") {
-			TakeDamage (other.GetComponent<Projectile> ().damage);
+			TakeDamage (other.GetComponent<Projectile> ().damage, Color.red);
 			other.GetComponent<Bullet> ().Die ();
 		}
 		else if (other.tag == "Explosion") {
-			TakeDamage (other.GetComponent<Projectile> ().damage);
+			TakeDamage (other.GetComponent<Projectile> ().damage, Color.red);
 		}
 	}
 
 	public void BecameVisible () {
-		startFiring = true;
+		startAttacking = true;
 	}
 
 	public void BecameInvisible () {
 		stopFiring = true;
 	}
 
-	protected virtual void TakeDamage( int dam) {
-		hp -= dam;
-		if (hp <= 0) {
-			Die ();
-		} else
-			StartCoroutine (base.FlashRed (0.1f));
+	public override void TakeDamage (int dam, Color c) {
+		base.TakeDamage (dam, c);
 	}
 
-	public virtual void Die() {
+	public override void Die() {
 		if (transform.parent) {
 			if (transform.parent.GetComponent<Carrier> ()) {
 				transform.parent.GetComponent<Carrier> ().LoseInterceptor (transform);
 			}
 		}
 		CancelInvoke ();
-		Destroy (gameObject);
+		base.Die ();
 	}
 
-	protected bool SetNearestTarget() {
+	protected virtual bool SetNearestTarget() {
 		bool targetSet = false;
 		float closestTargetDistance = 10000f;
 		Transform closestTarget = null;

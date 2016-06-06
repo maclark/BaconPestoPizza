@@ -1,0 +1,461 @@
+fileFormatVersion: 2
+guid: 857191abf32c0c549a9a07944810c9e0
+timeCreated: 1465188262
+licenseType: Free
+TextureImporter:
+  fileIDToRecycleName:
+    21300000: PC Computer - Warcraft 2 - Ballista_0
+    21300002: PC Computer - Warcraft 2 - Ballista_1
+    21300004: PC Computer - Warcraft 2 - Ballista_2
+    21300006: PC Computer - Warcraft 2 - Ballista_3
+    21300008: PC Computer - Warcraft 2 - Ballista_4
+    21300010: PC Computer - Warcraft 2 - Ballista_5
+    21300012: PC Computer - Warcraft 2 - Ballista_6
+    21300014: PC Computer - Warcraft 2 - Ballista_7
+    21300016: PC Computer - Warcraft 2 - Ballista_8
+    21300018: PC Computer - Warcraft 2 - Ballista_9
+    21300020: PC Computer - Warcraft 2 - Ballista_10
+    21300022: PC Computer - Warcraft 2 - Ballista_11
+    21300024: PC Computer - Warcraft 2 - Ballista_12
+    21300026: PC Computer - Warcraft 2 - Ballista_13
+    21300028: PC Computer - Warcraft 2 - Ballista_14
+    21300030: PC Computer - Warcraft 2 - Ballista_15
+    21300032: PC Computer - Warcraft 2 - Ballista_16
+    21300034: PC Computer - Warcraft 2 - Ballista_17
+    21300036: PC Computer - Warcraft 2 - Ballista_18
+    21300038: PC Computer - Warcraft 2 - Ballista_19
+    21300040: PC Computer - Warcraft 2 - Ballista_20
+  serializedVersion: 2
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 1
+    linearTexture: 0
+    correctGamma: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+  isReadable: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 0
+  cubemapConvolution: 0
+  cubemapConvolutionSteps: 7
+  cubemapConvolutionExponent: 1.5
+  seamlessCubemap: 0
+  textureFormat: -3
+  maxTextureSize: 2048
+  textureSettings:
+    filterMode: -1
+    aniso: 16
+    mipBias: -1
+    wrapMode: 1
+  nPOTScale: 0
+  lightmap: 0
+  rGBM: 0
+  compressionQuality: 50
+  allowsAlphaSplitting: 0
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spritePixelsToUnits: 25
+  alphaIsTransparency: 1
+  textureType: 8
+  buildTargetSettings: []
+  spriteSheet:
+    sprites:
+    - name: PC Computer - Warcraft 2 - Ballista_0
+      rect:
+        serializedVersion: 2
+        x: 3
+        y: 241
+        width: 58
+        height: 59
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: -29, y: 29.5}
+        - {x: -29, y: -27.5}
+        - {x: -26, y: -29.5}
+        - {x: 29, y: -29.5}
+        - {x: 29, y: 22.5}
+        - {x: 23, y: 29.5}
+    - name: PC Computer - Warcraft 2 - Ballista_1
+      rect:
+        serializedVersion: 2
+        x: 68
+        y: 239
+        width: 61
+        height: 60
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: -30.5, y: -28}
+        - {x: -28.5, y: -30}
+        - {x: 30.5, y: -30}
+        - {x: 30.5, y: 24}
+        - {x: 29.5, y: 30}
+        - {x: -24.5, y: 30}
+        - {x: -30.5, y: 25}
+    - name: PC Computer - Warcraft 2 - Ballista_2
+      rect:
+        serializedVersion: 2
+        x: 133
+        y: 245
+        width: 62
+        height: 54
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: -10, y: 27}
+        - {x: -31, y: 20}
+        - {x: -31, y: -27}
+        - {x: 31, y: -27}
+        - {x: 31, y: 25}
+        - {x: 26, y: 27}
+    - name: PC Computer - Warcraft 2 - Ballista_3
+      rect:
+        serializedVersion: 2
+        x: 200
+        y: 238
+        width: 62
+        height: 62
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: -26, y: 31}
+        - {x: -31, y: 28}
+        - {x: -31, y: -31}
+        - {x: 29, y: -31}
+        - {x: 31, y: -30}
+        - {x: 31, y: 25}
+        - {x: 7, y: 31}
+    - name: PC Computer - Warcraft 2 - Ballista_4
+      rect:
+        serializedVersion: 2
+        x: 269
+        y: 240
+        width: 55
+        height: 60
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: -23.5, y: 30}
+        - {x: -27.5, y: 18}
+        - {x: -27.5, y: -30}
+        - {x: 27.5, y: -30}
+        - {x: 27.5, y: 18}
+        - {x: 22.5, y: 30}
+    - name: PC Computer - Warcraft 2 - Ballista_5
+      rect:
+        serializedVersion: 2
+        x: 3
+        y: 176
+        width: 58
+        height: 58
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: 16, y: 29}
+        - {x: -21, y: 29}
+        - {x: -29, y: 19}
+        - {x: -29, y: -6}
+        - {x: -27, y: -21}
+        - {x: -20, y: -29}
+        - {x: 23, y: -29}
+        - {x: 29, y: -22}
+        - {x: 29, y: 19}
+        - {x: 24, y: 24}
+    - name: PC Computer - Warcraft 2 - Ballista_6
+      rect:
+        serializedVersion: 2
+        x: 68
+        y: 174
+        width: 61
+        height: 59
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: 29.5, y: 29.5}
+        - {x: -24.5, y: 29.5}
+        - {x: -30.5, y: 16.5}
+        - {x: -30.5, y: -18.5}
+        - {x: -27.5, y: -25.5}
+        - {x: -18.5, y: -29.5}
+        - {x: 8.5, y: -29.5}
+        - {x: 28.5, y: -21.5}
+        - {x: 30.5, y: -17.5}
+        - {x: 30.5, y: 25.5}
+    - name: PC Computer - Warcraft 2 - Ballista_7
+      rect:
+        serializedVersion: 2
+        x: 133
+        y: 179
+        width: 62
+        height: 54
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: -31, y: 27}
+        - {x: -31, y: -25}
+        - {x: -24, y: -27}
+        - {x: 31, y: -27}
+        - {x: 31, y: 27}
+    - name: PC Computer - Warcraft 2 - Ballista_8
+      rect:
+        serializedVersion: 2
+        x: 200
+        y: 172
+        width: 62
+        height: 62
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: -31, y: 31}
+        - {x: -31, y: -28}
+        - {x: -30, y: -30}
+        - {x: -26, y: -31}
+        - {x: 27, y: -31}
+        - {x: 31, y: -29}
+        - {x: 31, y: 31}
+    - name: PC Computer - Warcraft 2 - Ballista_9
+      rect:
+        serializedVersion: 2
+        x: 269
+        y: 174
+        width: 55
+        height: 60
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: -19.5, y: 30}
+        - {x: -27.5, y: 23}
+        - {x: -27.5, y: 20}
+        - {x: -21.5, y: 11}
+        - {x: -27.5, y: 4}
+        - {x: -27.5, y: -29}
+        - {x: -25.5, y: -30}
+        - {x: 26.5, y: -30}
+        - {x: 27.5, y: -28}
+        - {x: 27.5, y: 18}
+        - {x: 23.5, y: 30}
+    - name: PC Computer - Warcraft 2 - Ballista_10
+      rect:
+        serializedVersion: 2
+        x: 6
+        y: 110
+        width: 52
+        height: 57
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: -22, y: 28.5}
+        - {x: -26, y: 23.5}
+        - {x: -26, y: -22.5}
+        - {x: -21, y: -28.5}
+        - {x: 20, y: -28.5}
+        - {x: 26, y: -25.5}
+        - {x: 26, y: 23.5}
+        - {x: 22, y: 28.5}
+    - name: PC Computer - Warcraft 2 - Ballista_11
+      rect:
+        serializedVersion: 2
+        x: 68
+        y: 108
+        width: 61
+        height: 59
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: 21.5, y: 29.5}
+        - {x: -11.5, y: 29.5}
+        - {x: -30.5, y: 22.5}
+        - {x: -30.5, y: -29.5}
+        - {x: 23.5, y: -29.5}
+        - {x: 30.5, y: -20.5}
+        - {x: 30.5, y: 14.5}
+        - {x: 28.5, y: 23.5}
+    - name: PC Computer - Warcraft 2 - Ballista_12
+      rect:
+        serializedVersion: 2
+        x: 133
+        y: 113
+        width: 62
+        height: 52
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: -31, y: 26}
+        - {x: -31, y: -24}
+        - {x: -24, y: -26}
+        - {x: 31, y: -26}
+        - {x: 31, y: 26}
+    - name: PC Computer - Warcraft 2 - Ballista_13
+      rect:
+        serializedVersion: 2
+        x: 200
+        y: 106
+        width: 62
+        height: 62
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: -28, y: 31}
+        - {x: -31, y: 29}
+        - {x: -31, y: -2}
+        - {x: -19, y: -31}
+        - {x: 31, y: -31}
+        - {x: 31, y: 22}
+        - {x: 11, y: 31}
+    - name: PC Computer - Warcraft 2 - Ballista_14
+      rect:
+        serializedVersion: 2
+        x: 269
+        y: 109
+        width: 55
+        height: 59
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: -23.5, y: 29.5}
+        - {x: -27.5, y: 15.5}
+        - {x: -27.5, y: -29.5}
+        - {x: 27.5, y: -29.5}
+        - {x: 27.5, y: 24.5}
+        - {x: 26.5, y: 29.5}
+    - name: PC Computer - Warcraft 2 - Ballista_15
+      rect:
+        serializedVersion: 2
+        x: 2
+        y: 44
+        width: 60
+        height: 57
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: 30, y: 28.5}
+        - {x: -30, y: 28.5}
+        - {x: -30, y: -18.5}
+        - {x: -26, y: -28.5}
+        - {x: 24, y: -28.5}
+        - {x: 26, y: -21.5}
+        - {x: 27, y: -16.5}
+        - {x: 30, y: 2.5}
+    - name: PC Computer - Warcraft 2 - Ballista_16
+      rect:
+        serializedVersion: 2
+        x: 68
+        y: 42
+        width: 62
+        height: 60
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: -31, y: 30}
+        - {x: -31, y: -30}
+        - {x: 9, y: -30}
+        - {x: 31, y: -21}
+        - {x: 31, y: 14}
+        - {x: 16, y: 30}
+    - name: PC Computer - Warcraft 2 - Ballista_17
+      rect:
+        serializedVersion: 2
+        x: 133
+        y: 47
+        width: 62
+        height: 55
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: -11, y: 27.5}
+        - {x: -31, y: 18.5}
+        - {x: -31, y: -27.5}
+        - {x: 31, y: -27.5}
+        - {x: 31, y: 27.5}
+    - name: PC Computer - Warcraft 2 - Ballista_18
+      rect:
+        serializedVersion: 2
+        x: 200
+        y: 40
+        width: 62
+        height: 62
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: 3, y: 31}
+        - {x: -25, y: 31}
+        - {x: -31, y: 26}
+        - {x: -31, y: -1}
+        - {x: -29, y: -8}
+        - {x: -16, y: -31}
+        - {x: 26, y: -31}
+        - {x: 30, y: -28}
+        - {x: 31, y: -23}
+        - {x: 31, y: 22}
+    - name: PC Computer - Warcraft 2 - Ballista_19
+      rect:
+        serializedVersion: 2
+        x: 268
+        y: 43
+        width: 57
+        height: 59
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: 20.5, y: -3.5}
+        - {x: 26.5, y: 21.5}
+        - {x: 20.5, y: 29.5}
+        - {x: -27.5, y: 29.5}
+        - {x: -28.5, y: 28.5}
+        - {x: -28.5, y: -29.5}
+        - {x: 28.5, y: -29.5}
+        - {x: 28.5, y: -6.5}
+        - {x: 24.5, y: -4.5}
+    - name: PC Computer - Warcraft 2 - Ballista_20
+      rect:
+        serializedVersion: 2
+        x: 117
+        y: 2
+        width: 90
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: 45, y: 16}
+        - {x: 6, y: 16}
+        - {x: -45, y: 10}
+        - {x: -45, y: -16}
+        - {x: 45, y: -16}
+    outline: []
+  spritePackingTag: 
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

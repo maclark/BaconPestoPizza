@@ -232,11 +232,12 @@ public class Harpoon : MonoBehaviour {
 		recallDir.Normalize ();
 
 		if (harpooned) {
+			//TODO need to create a function AddEffectiveForcess or something for effective mass handling
 			harpooned.GetComponent<Rigidbody2D> ().AddForce (recallDir * recallMag);
 		} else {
-			//TODO would need to chceck if harpooner is harpooned and has an effective mass
 			rb.AddForce (recallDir * recallMag);
 		}
+		//TODO would need to chceck if harpooner is harpooned and has an effective mass
 		harpooner.GetComponent<Rigidbody2D> ().AddForce (-recallDir * recallMag);
 	}
 

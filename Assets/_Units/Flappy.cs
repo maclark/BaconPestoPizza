@@ -33,11 +33,11 @@ public class Flappy : Flyer {
 				target = other.transform;
 			}
 		} else if (other.tag == "PlayerBullet") {
-			TakeDamage (other.GetComponent<Projectile> ().damage);
+			TakeDamage (other.GetComponent<Projectile> ().damage, Color.red);
 			other.GetComponent<Bullet> ().Die ();
 		}
 		else if (other.tag == "Explosion") {
-			TakeDamage (other.GetComponent<Projectile> ().damage);
+			TakeDamage (other.GetComponent<Projectile> ().damage, Color.red);
 		}
 	}
 

@@ -16,6 +16,7 @@ public class Tetris : MonoBehaviour {
 	public GameObject invaderPrefab;
 	public GameObject invaderCarrierPrefab;
 	public GameObject pufferPrefab;
+	public GameObject hunterPairPrefab;
 
 	public float radius = 1000;
 	public float width;
@@ -25,6 +26,7 @@ public class Tetris : MonoBehaviour {
 	public int invaderAttempts;
 	public int invaderCarrierAttempts;
 	public int pufferAttempts;
+	public int hunterPairAttempts;
 
 
 	public enum TetrominoBasicShape {L, LINE, S, SQUARE, T}
@@ -162,7 +164,7 @@ public class Tetris : MonoBehaviour {
 		}
 	}
 
-	void SpawnEnemies (Vector2 botLeft, float fieldWidth, float fieldHeight, int invAttempts, int invCarAttempts, int puffAttempts) {
+	void SpawnEnemies (Vector2 botLeft, float fieldWidth, float fieldHeight, int invAttempts, int invCarAttempts, int puffAttempts, int hunterAttempts) {
 		for (int i = 0; i < invAttempts; i++) {
 			float x = Random.Range (botLeft.x, botLeft.x + fieldWidth);
 			float y = Random.Range (botLeft.y, botLeft.y+ fieldHeight);
@@ -183,6 +185,13 @@ public class Tetris : MonoBehaviour {
 			transform.position = new Vector2 (x, y);
 			SpawnGameObject (pufferPrefab);
 		}
+
+		for (int i = 0; i < hunterAttempts; i++) {
+			float x = Random.Range (botLeft.x, botLeft.x + fieldWidth);
+			float y = Random.Range (botLeft.y, botLeft.y+ fieldHeight);
+			transform.position = new Vector2 (x, y);
+			SpawnGameObject (hunterPairPrefab);
+		}
 	}
 
 	public void SpawnRectangleField (Vector2 botLeft, float fieldWidth, float fieldHeight, int attempts) {
@@ -197,13 +206,17 @@ public class Tetris : MonoBehaviour {
 		Spawn3Sides (botLeft, fieldWidth, fieldHeight);
 		int iAtts = Mathf.RoundToInt (Mathf.Log (invaderAttempts * difficultyMod * (gm.gatesBroken + 1)));
 		print ("iAtts: " + iAtts);
-		int icAtts = Mathf.RoundToInt (Mathf.Log (invaderCarrierAttempts * difficultyMod * (gm.gatesBroken + 1)));
+
+		int icAtts = Mathf.RoundToInt (Mathf.Log (invaderCarrierAttempts * difficultyMod * (gm.gatesBroken - 1)));
 		print ("icAtts: " + icAtts);
 
-		int pufAtts = Mathf.RoundToInt (Mathf.Log (pufferAttempts * difficultyMod *(gm.gatesBroken + 1)));
+		int pufAtts = Mathf.RoundToInt (Mathf.Log (pufferAttempts * difficultyMod * (gm.gatesBroken + 1)));
 		print ("pufAtts: " + pufAtts);
 
-		SpawnEnemies (botLeft, fieldWidth, fieldHeight, iAtts, icAtts, pufAtts);
+		int huntPairAtts = Mathf.RoundToInt (Mathf.Log (hunterPairAttempts * difficultyMod * (gm.gatesBroken + 1)));
+		print ("huntPairAtts: " + huntPairAtts);
+
+		SpawnEnemies (botLeft, fieldWidth, fieldHeight, iAtts, icAtts, pufAtts, huntPairAtts);
 	}
 
 	public void SpawnCircleField (Vector2 origin, float radius, float circleAttempts) {

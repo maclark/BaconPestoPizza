@@ -175,7 +175,7 @@ public class BigBird : MonoBehaviour {
 		return closestDock.bird;
 	}
 
-	void TakeDamage( int dam) {
+	public void TakeDamage( int dam) {
 		hp -= dam;
 		healthBar.AdjustHealth (hp);
 		if (hp <= 0) {

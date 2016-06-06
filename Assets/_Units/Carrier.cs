@@ -7,7 +7,6 @@ public class Carrier : Unit {
 	public int maxInterceptors = 8;
 	public List<Transform> interceptors = new List<Transform> ();
 	public float moveForceMagnitude = 75f;
-	public int hp = 1000;
 	public float spawnRate = .5f;
 	public GameObject enemyPrefab;
 
@@ -30,13 +29,13 @@ public class Carrier : Unit {
 
 	public void TriggerEnter2D (Collider2D other) {
 		if (other.tag == "PlayerBullet") {
-			TakeDamage (other.GetComponent<Bullet> ().damage);
+			TakeDamage (other.GetComponent<Bullet> ().damage, Color.red);
 			other.GetComponent<Bullet> ().Die ();
 		} else if (other.tag == "Explosion") {
 			if (hitExplosion)
 				return;
 			hitExplosion = true;
-			TakeDamage (other.GetComponent<Projectile> ().damage);
+			TakeDamage (other.GetComponent<Projectile> ().damage, Color.red);
 		}
 	}
 
@@ -45,7 +44,6 @@ public class Carrier : Unit {
 		if (interceptors.Count < maxInterceptors) {
 			GameObject enemyObj = Instantiate (enemyPrefab, GetComponentInChildren<Dock> ().transform.position, Quaternion.identity) as GameObject;
 			interceptors.Add (enemyObj.transform);
-			enemyObj.transform.parent = transform;
 		}
 
 		if (interceptors.Count >= maxInterceptors) {
@@ -61,17 +59,13 @@ public class Carrier : Unit {
 		}
 	}
 
-	protected void TakeDamage( int dam) {
-		hp -= dam;
-		if (hp <= 0) {
-			Die ();
-		} else
-			StartCoroutine (base.FlashRed (.1f));
+	public override void TakeDamage (int dam, Color c) {
+		base.TakeDamage (dam, c);
 	}
 
-	public void Die() {
+	public override void Die() {
 		CancelInvoke ();
-		Destroy (gameObject);
+		base.Die ();
 	}
 
 	protected void Webbed () {

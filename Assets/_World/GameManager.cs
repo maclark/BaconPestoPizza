@@ -31,11 +31,11 @@ public class GameManager : MonoBehaviour {
 	}
 
 	void Start () {
-		goldText.text = 0.ToString();
+		goldText.text = bigBird.transform.position.y.ToString();
 	}
 
 	void Update () {
-		goldText.text = gatesBroken.ToString ();
+		goldText.text = bigBird.transform.position.y.ToString();
 	}
 
 	public List<Transform> GetAlliedTransforms () {

@@ -8,6 +8,7 @@ public class Harpoonable : MonoBehaviour {
 
 	private GameObject destroyableObject;
 	private GameManager gm;
+	private Rigidbody2D rb;
 
 	void Start () {
 		if (GetComponent<Joint2D> ()) {
@@ -15,6 +16,7 @@ public class Harpoonable : MonoBehaviour {
 		}
 
 		gm = GameObject.FindObjectOfType<GameManager> ();
+		rb = GetComponent<Rigidbody2D> ();
 	}
 
 	void OnJointBreak2D (Joint2D brokenJoint) {
@@ -42,5 +44,19 @@ public class Harpoonable : MonoBehaviour {
 		} else if (GetComponentInChildren<SpriteRenderer> ()) {
 			GetComponentInChildren<SpriteRenderer> ().sortingLayerName = layerName;
 		}
+	}
+
+	public float GetEffectiveMass (Vector3 whalePosition, Vector3 pullingDirection) {
+		float totalMass = rb.mass;
+		/*foreach (Harpoon h in otherHarps) {
+			float m = h.GetHarpooner ().GetComponent<Bird> ().GetEffectiveMass ();
+			Vector3 v = whalePosition - transform.position;
+			float theta = Vector3.Angle (pullingDirection, v);
+			if (theta < 90f) {
+				theta = theta * Mathf.Deg2Rad;
+				totalMass += m * Mathf.Cos (theta);
+			}
+		}*/
+		return totalMass;
 	}
 }

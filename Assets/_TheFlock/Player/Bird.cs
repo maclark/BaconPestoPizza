@@ -339,7 +339,7 @@ public class Bird : MonoBehaviour {
 	/// flash duration is constant
 	/// </summary>
 	/// <param name="dam">Dam.</param> testing this
-	void TakeDamage( int dam) {
+	public void TakeDamage( int dam) {
 		if (damaged) {
 			//#TODO explodeee
 			Die ();
@@ -352,6 +352,10 @@ public class Bird : MonoBehaviour {
 			StartCoroutine (HitInvincibility (hitInvincibilityDuration));
 			StartCoroutine (FlashDamage (Time.time));
 		}
+	}
+
+	public void TakeOneShotKill () {
+		Die ();
 	}
 
 	void Die () {
@@ -724,5 +728,21 @@ public class Bird : MonoBehaviour {
 	void EnableHarpCollider () {
 		harp.GetComponent<BoxCollider2D> ().enabled = true;
 		throwingHarp = false;
+	}
+
+	public float GetEffectiveMass (Vector3 whalePosition, Vector3 pullingDirection) {
+		float totalMass = rb.mass;
+		foreach (Harpoon h in otherHarps) {
+			Vector3 thisBirdPullDir = transform.position - h.GetHarpooner ().transform.position;
+			thisBirdPullDir.Normalize ();
+			float m = h.GetHarpooner ().GetComponent<Bird> ().GetEffectiveMass (transform.position, thisBirdPullDir);
+			Vector3 v = whalePosition - transform.position;
+			float theta = Vector3.Angle (pullingDirection, v);
+			if (theta < 90f) {
+				theta = theta * Mathf.Deg2Rad;
+				totalMass += m * Mathf.Cos (theta);
+			}
+		}
+		return totalMass;
 	}
 }

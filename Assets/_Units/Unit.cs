@@ -3,11 +3,15 @@ using System.Collections;
 using System.Collections.Generic;
 
 public class Unit : MonoBehaviour {
+	public int hp;
 	protected SpriteRenderer sr;
 	public float wakeUpRange = 300f;
 
+	private Color color;
+
 	protected virtual void OnAwake () {
 		sr = GetComponent<SpriteRenderer> ();
+		color = sr.color;
 	}
 	protected virtual void OnStart () {
 	}
@@ -15,14 +19,25 @@ public class Unit : MonoBehaviour {
 	protected virtual void OnUpdate () {
 	}
 
-	public IEnumerator FlashRed (float flashLength) {
-		if (sr.color == Color.red) {
+	public virtual void TakeDamage (int dam, Color c) {
+		hp -= dam;
+		if (hp <= 0) {
+			Die ();
+		} else
+			StartCoroutine (Flash (.1f, c));
+	}
+
+	public virtual void Die () {
+		Destroy (gameObject);
+	}
+
+	public IEnumerator Flash (float flashLength, Color c) {
+		if (sr.color == c) {
 			yield break;
 		}
-		Color ogColor = sr.color;
-		sr.color = Color.red;
+		sr.color = c;
 		yield return new WaitForSeconds (flashLength);
-		sr.color = ogColor;
+		sr.color = color;
 	}
 
 	public virtual void PlayerIsNear (Transform p) {
