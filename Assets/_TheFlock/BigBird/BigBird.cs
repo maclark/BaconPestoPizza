@@ -22,10 +22,9 @@ public class BigBird : MonoBehaviour {
 	private Rigidbody2D rb;
 	private Component[] dockTransforms;
 	private Quaternion targetRotation = Quaternion.identity;
-	private float startScale;
 	private bool engineOn = false;
 	private bool landed = false;
-	private HealthBar healthBar;
+	private HealthBar[] healthBars = new HealthBar[2];
 	private Bird birdGettingRepairs = null;
 	private Bird birdGettingGas = null;
 	private Transform target = null;
@@ -44,13 +43,14 @@ public class BigBird : MonoBehaviour {
 		medkit = GetComponentInChildren<Medkit> ();
 		hold = GetComponentInChildren<CargoHold> ();
 		thrusters = GetComponentsInChildren<Thruster> ();
-		startScale = transform.localScale.x;
-		healthBar = gm.GetBigBirdHealthBar ();
+		healthBars = gm.GetBigBirdHealthBars ();
 	}
 
 	void Start () {
-		healthBar.max = hp;
-		healthBar.current = hp;
+		healthBars[0].max = hp;
+		healthBars[1].max = hp;
+		healthBars[0].current = hp;
+		healthBars[1].current = hp;
 	}
 
 	void FixedUpdate () {
@@ -72,9 +72,11 @@ public class BigBird : MonoBehaviour {
 			rb.AddTorque (turnSpeed * turn);
 
 			if (engineOn) {
-				SetCamera ();
+				//SetCamera ();
 			}
 		}
+		SetCamera ();
+
 	}
 
 	void OnTriggerEnter2D (Collider2D other) {
@@ -132,8 +134,6 @@ public class BigBird : MonoBehaviour {
 		if (other.name == "LandingPad") {
 			if (nearestPad == other.GetComponent<LandingPad> ()) {
 				nearestPad = null;
-				print ("turning off bc of landing pad? lol");
-				TurnEngineOff ();
 			}
 		}
 	}
@@ -182,7 +182,8 @@ public class BigBird : MonoBehaviour {
 
 	public void TakeDamage( int dam) {
 		hp -= dam;
-		healthBar.AdjustHealth (hp);
+		healthBars[0].AdjustHealth (hp);
+		healthBars[1].AdjustHealth (hp);
 		if (hp <= 0) {
 			Die ();
 		}
@@ -302,31 +303,38 @@ public class BigBird : MonoBehaviour {
 		}
 	}
 
-	public void SetDown (LandingPad pad) {
+	public void BigDock () {
 		landed = true;
 		TurnEngineOff ();
-
-		StartCoroutine (LandingApproach (pad));
-
-		rb.velocity = Vector3.zero;
-		rb.angularVelocity = 0f;
 		rb.Sleep ();
+		StartCoroutine (LandingApproach (nearestPad));
+		nearestPad.occupant = this.transform;
+
+		//rb.velocity = Vector3.zero;
+		//rb.angularVelocity = 0f;
+	
 	}
 
 	public void LiftOff () {
 		TurnEngineOn ();
 		transform.parent = null;
-		transform.localScale = new Vector3 (startScale, startScale, 1);
-		rb.WakeUp ();
+		nearestPad.occupant = null;
 		landed = false;
 	}
 
 	IEnumerator LandingApproach (LandingPad pad) {
 		yield return new WaitForSeconds (1f);
-		transform.localScale = new Vector3 (landedScale, landedScale, 1);
-		transform.position = pad.transform.position + pad.landingMarkOffset;
-		transform.rotation = pad.transform.rotation;
+		//transform.localScale = new Vector3 (landedScale, landedScale, 1);
+		transform.position = pad.transform.position;//+ pad.landingMarkOffset;
+		transform.rotation = Quaternion.LookRotation (transform.forward, -pad.transform.up);
 		transform.parent = pad.transform;
+		Player[] players = GetComponentsInChildren<Player> ();
+		for (int i = 0; i < players.Length; i++) {
+			if (players [i].isPlaying) {
+				players [i].Disembark (nearestPad.disembarkPoint);
+			}
+		}
+
 	}
 
 	public bool Landed {
@@ -365,7 +373,7 @@ public class BigBird : MonoBehaviour {
 	}
 
 	void SetCamera () {
-		Camera.main.GetComponent<CameraFollow> ().offsetDir = DirectionOfTravel ();
+		Camera.main.GetComponent<CameraFollow> ().offsetDir = transform.up;//DirectionOfTravel ();
 	}
 
 	public Vector3 DirectionOfTravel () {

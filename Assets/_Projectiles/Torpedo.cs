@@ -1,22 +1,22 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
 
-public class Cannonball : Projectile {
+public class Torpedo : Projectile {
 
-	public float cannonballAccel;
+	public float torpedoAccel;
 	public float maxDetonation = 4f;
 	public GameObject explosionPrefab;
-	public Cannon t;
+	public Turret t;
 
 	void Awake () {
 		base.OnAwake ();
 	}
 
 	void Start () {
-		//Invoke ("Detonate", maxDetonation);
+		Invoke ("Detonate", maxDetonation);
 		base.OnStart ();
 	}
-	
+
 	void Update () {
 		base.OnUpdate ();
 	}
@@ -26,12 +26,16 @@ public class Cannonball : Projectile {
 	}
 
 	public override void Fire (Vector3 start, Vector2 aim) {
-		forceMag = cannonballAccel;
+		forceMag = torpedoAccel;
 		base.Fire (start, aim);
 	}
 
+	public override void Die () {
+		Detonate ();
+	}
+
 	public void Detonate () {
-		t.RemoveBall (this);
+		t.RemoveTorp (this);
 		Instantiate (explosionPrefab, transform.position, transform.rotation);
 		CancelInvoke ();
 		Destroy (gameObject);

@@ -29,7 +29,7 @@ public class PlayerInput : MonoBehaviour {
 	public string leftClick = "empty";
 	public string rightClick = "empty";
 
-	public enum State {NEUTRAL, FLYING, CHANGING_STATIONS, DOCKED, ON_TURRET, PILOTING, NAVIGATING, IN_BUBBLE, IN_WEB, IN_HOLD, ON_PLATFORM}
+	public enum State {NEUTRAL, FLYING, CHANGING_STATIONS, DOCKED, ON_TURRET, PILOTING, NAVIGATING, IN_BUBBLE, IN_WEB, IN_HOLD, ON_PLATFORM, ON_FOOT}
 	public State state = State.DOCKED;
 	public State selectedState = State.NEUTRAL;
 
@@ -246,6 +246,90 @@ public class PlayerInput : MonoBehaviour {
 			HandleInHoldInput ();
 		} else if (state == State.ON_PLATFORM) {
 			HandleOnPlatformInput ();
+		} else if (state == State.ON_FOOT) {
+			HandleOnFootInput ();
+		}
+	}
+
+	//TODO this only good for leaving bigbird. need more instructions if
+	//going to use this for general station movement
+	public void AbandonStation () {
+		if (state == State.NEUTRAL) {
+		} else if (state == State.ON_TURRET) {
+			turret.transform.GetComponentInChildren<SpriteRenderer> ().color = Color.grey;
+		} else if (state == State.DOCKED) {
+			if (p.b) {
+				p.Debird (bigBird.transform);
+			}		
+		} else if (state == State.PILOTING) {
+			bigBird.turn = 0;
+			station.GetComponentInChildren<SpriteRenderer> ().color = Color.grey;
+		} else if (state == State.NAVIGATING) {
+			HandleNavigationInput ();
+		} else if (state == State.IN_HOLD) {
+			gm.bigBird.hold.Occupy (false);
+		} else if (state == State.ON_PLATFORM) {
+			gm.bigBird.hold.Occupy (false);
+		} else {
+			Debug.Log ("AbandoningStation????");
+		}
+
+		if (station) {
+			station.GetComponent<BoxCollider2D> ().enabled = true;
+		}
+	}
+
+	void HandleChangingStations () {
+		//TODO can get stuck in changing stations at start because of being in Neutral
+		if (Input.GetButtonUp(bCircleButton)) {
+			state = selectedState;
+			if (state == State.ON_TURRET) {
+				station.GetComponentInChildren<SpriteRenderer> ().color = p.color;
+			} else if (state == State.PILOTING) {
+				station.GetComponentInChildren<SpriteRenderer> ().color = p.color;
+			}
+			sr.enabled = false;
+			return;
+		} 
+
+		sr.enabled = true;
+
+		float horizontalness = 0f;
+		float verticalness = 0f;
+
+		if (Input.GetAxisRaw(LSHorizontal) != 0 || Input.GetAxisRaw(LSVertical) != 0) {
+			if (stationcasting == false) {
+				stationcasting = true;
+				timeOfStationcast = Time.time;
+				verticalness = Input.GetAxis(LSVertical);
+				horizontalness = Input.GetAxis(LSHorizontal);
+			} else if (Time.time > timeOfStationcast + moveCooldown) {
+				stationcasting =  false;
+			}
+
+		} else if (Input.GetAxisRaw(LSHorizontal) == 0 && Input.GetAxisRaw(LSVertical) == 0) {
+			stationcasting =  false;
+		} 
+
+		RaycastHit2D hit = Physics2D.Raycast (transform.position, new Vector2 (horizontalness, verticalness), Mathf.Infinity, mask);
+		if (hit) {
+			if (station) {
+				station.GetComponent<BoxCollider2D> ().enabled = true;
+			}
+			station = hit.collider.transform;
+			station.GetComponent<BoxCollider2D> ().enabled = false;
+			transform.position = station.position;
+
+			if (hit.collider.name == "Cockpit") {
+				selectedState = State.PILOTING;
+			} else if (hit.collider.name == "Dock") {
+				selectedState = State.DOCKED;
+			} else if (hit.collider.name == "Turret") {
+				turret = station.GetComponent<Turret> ();
+				selectedState = State.ON_TURRET;
+			} else if (hit.collider.name == "CargoPlatform") {
+				selectedState = State.ON_PLATFORM;
+			}
 		}
 	}
 
@@ -333,62 +417,6 @@ public class PlayerInput : MonoBehaviour {
 		}
 	}
 		
-
-
-	void HandleChangingStations () {
-		//TODO can get stuck in changing stations at start because of being in Neutral
-		if (Input.GetButtonUp(bCircleButton)) {
-			state = selectedState;
-			if (state == State.ON_TURRET) {
-				station.GetComponentInChildren<SpriteRenderer> ().color = p.color;
-			} else if (state == State.PILOTING) {
-				station.GetComponentInChildren<SpriteRenderer> ().color = p.color;
-			}
-			sr.enabled = false;
-			return;
-		} 
-
-		sr.enabled = true;
-
-		float horizontalness = 0f;
-		float verticalness = 0f;
-
-		if (Input.GetAxisRaw(LSHorizontal) != 0 || Input.GetAxisRaw(LSVertical) != 0) {
-			if (stationcasting == false) {
-				stationcasting = true;
-				timeOfStationcast = Time.time;
-				verticalness = Input.GetAxis(LSVertical);
-				horizontalness = Input.GetAxis(LSHorizontal);
-			} else if (Time.time > timeOfStationcast + moveCooldown) {
-				stationcasting =  false;
-			}
-
-		} else if (Input.GetAxisRaw(LSHorizontal) == 0 && Input.GetAxisRaw(LSVertical) == 0) {
-			stationcasting =  false;
-		} 
-
-		RaycastHit2D hit = Physics2D.Raycast (transform.position, new Vector2 (horizontalness, verticalness), Mathf.Infinity, mask);
-		if (hit) {
-			if (station) {
-				station.GetComponent<BoxCollider2D> ().enabled = true;
-			}
-			station = hit.collider.transform;
-			station.GetComponent<BoxCollider2D> ().enabled = false;
-			transform.position = station.position;
-
-			if (hit.collider.name == "Cockpit") {
-				selectedState = State.PILOTING;
-			} else if (hit.collider.name == "Dock") {
-				selectedState = State.DOCKED;
-			} else if (hit.collider.name == "Turret") {
-				turret = station.GetComponent<Turret> ();
-				selectedState = State.ON_TURRET;
-			} else if (hit.collider.name == "CargoPlatform") {
-				selectedState = State.ON_PLATFORM;
-			}
-		}
-	}
-
 	void HandleDockedInput () {
 		if (Input.GetButtonDown (bCircleButton)) {
 			if (p.b) {
@@ -450,7 +478,7 @@ public class PlayerInput : MonoBehaviour {
 
 		if (Input.GetButtonDown (aCrossButton)) {
 			if (bigBird.nearestPad) {
-				bigBird.SetDown (bigBird.nearestPad);
+				bigBird.BigDock ();
 				return;
 			}
 		}
@@ -522,6 +550,23 @@ public class PlayerInput : MonoBehaviour {
 			if (gm.bigBird.hold.platformCargo) {
 				gm.bigBird.hold.Dump (gm.bigBird.hold.platformCargo.transform);
 			}
+		}
+	}
+
+	void HandleOnFootInput () {
+		p.body.direction = new Vector2 (Input.GetAxis (LSHorizontal), Input.GetAxis (LSVertical));
+
+		Vector2 rightStick = new Vector2 (Input.GetAxis (RSHorizontal), Input.GetAxis (RSVertical));
+		if (rightStick != Vector2.zero) {
+			p.aim = rightStick;
+		} else if (p.aim == Vector3.zero) {
+			if (p.body.direction != Vector2.zero) {
+				p.aim = new Vector3 (p.body.direction.x, p.body.direction.y, 0);
+			}
+		}
+
+		if (Input.GetButtonUp (aCrossButton)) {
+			p.body.PressedA ();
 		}
 	}
 

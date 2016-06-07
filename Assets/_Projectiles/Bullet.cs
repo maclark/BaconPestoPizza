@@ -2,8 +2,6 @@
 using System.Collections;
 
 public class Bullet : Projectile {
-
-	public int bulletDamage = 100;
 	public Vector3 direction = Vector3.zero;
 
 	void Awake () {
@@ -11,7 +9,7 @@ public class Bullet : Projectile {
 	}
 
 	void Start () {
-		damage = bulletDamage;
+		base.OnStart ();
 	}
 
 	public void SetDirection (Vector3 dir) {

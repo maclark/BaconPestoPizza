@@ -205,16 +205,9 @@ public class Tetris : MonoBehaviour {
 		MoveGateSpaceSaver ();
 		Spawn3Sides (botLeft, fieldWidth, fieldHeight);
 		int iAtts = Mathf.RoundToInt (Mathf.Log (invaderAttempts * difficultyMod * (gm.gatesBroken + 1)));
-		print ("iAtts: " + iAtts);
-
 		int icAtts = Mathf.RoundToInt (Mathf.Log (invaderCarrierAttempts * difficultyMod * (gm.gatesBroken - 1)));
-		print ("icAtts: " + icAtts);
-
 		int pufAtts = Mathf.RoundToInt (Mathf.Log (pufferAttempts * difficultyMod * (gm.gatesBroken + 1)));
-		print ("pufAtts: " + pufAtts);
-
 		int huntPairAtts = Mathf.RoundToInt (Mathf.Log (hunterPairAttempts * difficultyMod * (gm.gatesBroken + 1)));
-		print ("huntPairAtts: " + huntPairAtts);
 
 		SpawnEnemies (botLeft, fieldWidth, fieldHeight, iAtts, icAtts, pufAtts, huntPairAtts);
 	}

@@ -6,9 +6,11 @@ using System.Collections.Generic;
 public class GameManager : MonoBehaviour {
 
 	public GameObject bubblePrefab;
-	public GameObject bigBirdHealthBar;
+	public GameObject bigBirdHealthBarLeft;
+	public GameObject bigBirdHealthBarRight;
 	public GameObject navPrefab;
 	public GameObject invisibleTarget;
+	public GameObject bodyPrefab;
 	public Vector3 birdScale = new Vector3 (1.25f, 1.25f, 1);
 	public Vector3 appointment1 = new Vector3 (100, 0, 0);
 	public float screenBuffer = 1;
@@ -27,7 +29,6 @@ public class GameManager : MonoBehaviour {
 		AddAlliedTransform (bigBird.transform);
 		MakeInvisibleTarget ();
 		tetrisGod = GameObject.FindObjectOfType<Tetris> ();
-
 	}
 
 	void Start () {
@@ -74,8 +75,11 @@ public class GameManager : MonoBehaviour {
 			return null;
 	}
 
-	public HealthBar GetBigBirdHealthBar () {
-		return bigBirdHealthBar.GetComponent<HealthBar> ();
+	public HealthBar[] GetBigBirdHealthBars () {
+		HealthBar[] hbs = new HealthBar[2];
+		hbs [0] = bigBirdHealthBarLeft.GetComponentInChildren<HealthBar> ();
+		hbs [1] = bigBirdHealthBarRight.GetComponentInChildren<HealthBar> ();
+		return hbs;
 	}
 
 	public void Navigate (float leftHorizontal, float leftVertical) {
@@ -121,5 +125,12 @@ public class GameManager : MonoBehaviour {
 		//spawn new level
 		gatesBroken++;
 		tetrisGod.SpawnRectangleField (new Vector2 (-tetrisGod.width / 2, tetrisGod.height * gatesBroken), tetrisGod.width, tetrisGod.height, tetrisGod.tetroAttempts);
+	}
+
+	public PlayerBody GetBody () {
+		GameObject obj = Instantiate (bodyPrefab, transform.position, Quaternion.identity) as GameObject;
+		obj.SetActive (false);
+		PlayerBody pBody = obj.GetComponent<PlayerBody> ();
+		return pBody;
 	}
 }

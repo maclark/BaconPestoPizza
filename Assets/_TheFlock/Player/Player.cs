@@ -3,6 +3,7 @@ using System.Collections;
 
 public class Player : MonoBehaviour {
 
+	public bool isPlaying = false;
 	public Color color;
 	public Vector3 ridingOffset;
 	public Bird b = null;
@@ -10,6 +11,7 @@ public class Player : MonoBehaviour {
 	public Weapon storedWeapon = null;
 	public Vector3 aim = Vector3.zero;
 	public Sprite[] sprites = new Sprite[2];
+	public PlayerBody body;
 
 	private bool holdingString = false;
 	private GameManager gm;
@@ -26,9 +28,11 @@ public class Player : MonoBehaviour {
 		bigBird = GameObject.FindObjectOfType<BigBird> ();
 		hol = new Holster (this);
 		color = sr.color;
+		body = gm.GetBody ();
 	}
 
 	public void StartPlayer () {
+		isPlaying = true;
 		sr.enabled = true;
 		pi.state = PlayerInput.State.NEUTRAL;
 	}
@@ -158,5 +162,29 @@ public class Player : MonoBehaviour {
 	public void MoveToPlatform () {
 		sr.enabled = false;
 		pi.state = PlayerInput.State.ON_PLATFORM;
+	}
+
+	public void ManifestFlesh (Vector3 descensionPosition) {
+		body.gameObject.SetActive (true);
+		body.transform.position = descensionPosition;
+		body.transform.rotation = Quaternion.identity;
+		transform.position = body.transform.position;// + body.playerOffset;
+		transform.rotation = body.transform.rotation;
+		transform.parent = body.transform;
+		pi.state = PlayerInput.State.ON_FOOT;
+	}
+
+	public void SpiritAway (Transform master, PlayerInput.State s) {
+		transform.position = master.position;
+		transform.parent = master;
+		body.gameObject.SetActive (false);
+		pi.state = s;
+	}
+
+	public void Disembark (Vector3 disembarkPoint) {
+		pi.AbandonStation ();
+		sr.enabled = true;
+		//pi.station = null;
+		ManifestFlesh (disembarkPoint);
 	}
 }

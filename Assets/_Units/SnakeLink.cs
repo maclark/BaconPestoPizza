@@ -28,7 +28,6 @@ public class SnakeLink : MonoBehaviour {
 
 	void Start () {
 		if (!initializedLink) {
-			print ("not initialized");
 			InitializeLink ();
 		}
 
@@ -60,11 +59,9 @@ public class SnakeLink : MonoBehaviour {
 		link.AddComponent<SnakeLink> ();
 		link.SetActive (false);
 		initializedLink = true;
-		print ("done with initalization");
 	}
 
 	void SpawnLilBro () {
-		print (transform.name + " is spawning lilbro w lst: ");
 		GameObject newLink = Instantiate (linkPrefab, transform.position, Quaternion.identity) as GameObject;
 		SnakeLink slink = newLink.GetComponent <SnakeLink> ();
 		slink.isHead = false;
@@ -73,8 +70,10 @@ public class SnakeLink : MonoBehaviour {
 	}
 
 	public void Spawn (SnakeLink bigBro, SnakeLink lilBro, Sprite scale, int linksLeftToSpawn) {
-		gameObject.SetActive (true);
+		num++;
 		gameObject.transform.name = "snake" + num.ToString ();
+
+		gameObject.SetActive (true);
 		bigBrother = bigBro;
 		littleBrother = lilBro;
 

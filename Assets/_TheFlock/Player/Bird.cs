@@ -133,8 +133,6 @@ public class Bird : MonoBehaviour {
 			HandleFlying ();
 		}
 
-
-
 		//check if just boosted
 		if (!canBoost) {
 			forceMag = startForceMag;
