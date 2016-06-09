@@ -18,6 +18,8 @@ public class GameManager : MonoBehaviour {
 	public List<Transform> appointments = new List<Transform> ();
 	public BigBird bigBird;
 	public int gatesBroken;
+	public Transform exitContainer;
+	public Transform wallContainer;
 
 	private List<Transform> alliedTransforms = new List<Transform> (); 
 	private bool paused = false;
@@ -29,6 +31,10 @@ public class GameManager : MonoBehaviour {
 		AddAlliedTransform (bigBird.transform);
 		MakeInvisibleTarget ();
 		tetrisGod = GameObject.FindObjectOfType<Tetris> ();
+		exitContainer = new GameObject ().transform;
+		exitContainer.transform.name = "ZoneExits";
+		wallContainer = new GameObject ().transform;
+		wallContainer.transform.name = "BoundaryWalls";
 	}
 
 	void Start () {

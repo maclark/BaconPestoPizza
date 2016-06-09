@@ -10,6 +10,11 @@ public class Tetris : MonoBehaviour {
 	public GameObject SQUARE;
 	public GameObject T;
 	public GameObject Z;
+	public GameObject megaL;
+	public GameObject megaLINE;
+	public GameObject megaS;
+	public GameObject megaSQUARE;
+	public GameObject megaT;	
 	public GameObject littleJ;
 	public GameObject littleLINE;
 	public GameObject littleS;
@@ -28,6 +33,7 @@ public class Tetris : MonoBehaviour {
 	public float width;
 	public float height;
 	public int tetroAttempts;
+	public int megaAttempts;
 	public int destrutibleSpots;
 	public int destrutibleAttsPerSpot;
 	public int difficultyMod = 2;
@@ -47,6 +53,7 @@ public class Tetris : MonoBehaviour {
 	public enum TetrominoBasicShape {L, LINE, S, SQUARE, T}
 	public enum TetrominoShape {J, L, LINE, S, SQUARE, T, Z}
 	public enum LittleTetrominoShape {littleJ, littleLINE, littleS, littleSQUARE, littleT}
+	public enum MegaTetrominoShape {megaL, megaLINE, megaS, megaSQUARE, megaT}
 
 	private float gateWidth;
 	private GameObject gateSpaceSaver;
@@ -61,15 +68,19 @@ public class Tetris : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
-		spelunkyGod = new Spelunky (origin, columns, rows, roomWidth, roomHeight);
+		spelunkyGod = new Spelunky (origin, columns, rows, roomWidth, roomHeight, gateSpaceSaverPrefab, wallPrefab, 10f, this);
 		spelunkyGod.BuildCave ();
-		spelunkyGod.PrintDetails ();
-		foreach (Room r in spelunkyGod.rooms) {
-			FillRoom (r);
-		}
-		SpawnBoundaries (origin, columns * roomWidth, rows * roomHeight);
+		spelunkyGod.SaveCaveExits ();
+		spelunkyGod.FillOffTrail ();
+		SpawnRectangleField (origin, columns * roomWidth, rows * roomHeight, tetroAttempts);
+		spelunkyGod.OutlineCave ();
+
+		//spawn rectangle field
+		//LayTetros ();
+		//LayDestructibles ();
+		//LayEnemies ();
+
 		//MakeGateSpaceSaver ();
-		//SpawnRectangleField (new Vector2 (-width / 2, 0), width, height, tetroAttempts);
 		//SpawnCircleField (Vector2.zero, radius, attempts);
 	}
 	
@@ -88,6 +99,31 @@ public class Tetris : MonoBehaviour {
 		} else if (Input.GetKeyDown (KeyCode.T)) {
 			SpawnTetromino (T);
 		} 
+	}
+
+	public GameObject GetRandomMegaTetromino () {
+		MegaTetrominoShape mtt = (MegaTetrominoShape)Random.Range (0, 5);
+
+		switch (mtt) {
+		case MegaTetrominoShape.megaL:
+			return megaL;
+			//break;
+		case MegaTetrominoShape.megaLINE:
+			return megaLINE;
+			//break;
+		case MegaTetrominoShape.megaS:
+			return megaS;
+			//break;
+		case MegaTetrominoShape.megaSQUARE:
+			return megaSQUARE;
+			//break;
+		case MegaTetrominoShape.megaT:
+			return megaT;
+			//break;
+		default:
+			return null;
+			//break;
+		}
 	}
 
 	public GameObject GetRandomTetromino () {
@@ -190,9 +226,27 @@ public class Tetris : MonoBehaviour {
 		ChangeColor (tetro.transform, Color.clear, true);
 		tetro.transform.rotation = GetRandomTetrominoRotation ();
 		BoxCollider2D[] colliders = tetro.GetComponentsInChildren<BoxCollider2D> ();
+		if (colliders == null) {
+			print ("this tetro has no colliders");
+		}
 		if (CheckSpaceClear (colliders, buffer)) {
 			GameObject instance = Instantiate (tetro, transform.position, tetro.transform.rotation) as GameObject;
 			instance.transform.parent = transform.parent;
+		}
+	}
+
+	public void SpawnMegaTetromino (GameObject megaTetro) {
+		if (!megaTetro) {
+			megaTetro = GetRandomMegaTetromino ();
+		}
+		ChangeColor (megaTetro.transform, Color.clear, true);
+		megaTetro.transform.rotation = GetRandomTetrominoRotation ();
+		BoxCollider2D[] colliders = megaTetro.GetComponentsInChildren<BoxCollider2D> ();
+		if (CheckSpaceClear (colliders, buffer)) {
+			GameObject instance = Instantiate (megaTetro, transform.position, megaTetro.transform.rotation) as GameObject;
+			instance.transform.parent = transform.parent;
+		} else {
+			Debug.Log ("space not clear for mega");
 		}
 	}
 
@@ -275,8 +329,6 @@ public class Tetris : MonoBehaviour {
 			transform.position = new Vector2 (x, y);
 			SpawnTetromino (null);
 		}
-
-		MoveGateSpaceSaver (); 
 	
 		int iAtts = Mathf.RoundToInt (Mathf.Log (invaderAttempts * difficultyMod * (gm.gatesBroken + 1)));
 		int icAtts = Mathf.RoundToInt (Mathf.Log (invaderCarrierAttempts * difficultyMod * (gm.gatesBroken - 1)));
@@ -313,74 +365,6 @@ public class Tetris : MonoBehaviour {
 		}
 	}
 
-	void Spawn3Sides (Vector2 botLeft, float fieldWidth, float fieldHeight) {
-		Vector3 leftWallSpawn = new Vector3 (botLeft.x, botLeft.y + fieldHeight / 2, 0);
-		GameObject leftWall = Instantiate (wallPrefab, leftWallSpawn, Quaternion.identity) as GameObject;
-		leftWall.transform.localScale = new Vector3 (5f, fieldHeight, 0);
-		leftWall.transform.parent = transform.parent;
-
-		Vector3 rightWallSpawn = new Vector3 (botLeft.x + fieldWidth, botLeft.y + fieldHeight / 2, 0);
-		GameObject rightWall = Instantiate (wallPrefab, rightWallSpawn, Quaternion.identity) as GameObject;
-		rightWall.transform.localScale = new Vector3 (5f, fieldHeight, 0);
-		rightWall.transform.parent = transform.parent;
-
-		Vector3 topLeftSpawn = new Vector3 (botLeft.x + (fieldWidth - gateWidth) / 4, botLeft.y + fieldHeight * 5 / 6);
-		GameObject topLeftWall = Instantiate (wallPrefab, topLeftSpawn, Quaternion.identity) as GameObject;
-		topLeftWall.transform.localScale = new Vector3 ((fieldWidth - gateWidth) / 2, 5f, 0);
-		topLeftWall.transform.parent = transform.parent;
-
-		Vector3 topRightSpawn = new Vector3 (botLeft.x + fieldWidth - (fieldWidth - gateWidth) / 4, botLeft.y + fieldHeight * 5 / 6);
-		GameObject topRightWall = Instantiate (wallPrefab, topRightSpawn, Quaternion.identity) as GameObject;
-		topRightWall.transform.localScale = new Vector3 ((fieldWidth - gateWidth) / 2, 5f, 0);
-		topRightWall.transform.parent = transform.parent;
-
-		Vector3 gateSpawn = new Vector3 (botLeft.x + fieldWidth / 2, botLeft.y + fieldHeight * 5 / 6, 0);
-		GameObject gate = Instantiate (gatePrefab, gateSpawn, Quaternion.identity) as GameObject;
-		gate.transform.parent = transform.parent;
-	}
-
-	void SpawnBoundaries (Vector2 botLeft, float fieldWidth, float fieldHeight) {
-		Vector3 bottomWallSpawn = new Vector3 (botLeft.x + fieldWidth / 2, botLeft.y, 0);
-		GameObject bottomWall = Instantiate (wallPrefab, bottomWallSpawn, Quaternion.identity) as GameObject;
-		bottomWall.transform.localScale = new Vector3 (fieldWidth, 5f, 0);
-		bottomWall.transform.parent = transform.parent;
-
-		Vector3 leftWallSpawn = new Vector3 (botLeft.x, botLeft.y + fieldHeight / 2, 0);
-		GameObject leftWall = Instantiate (wallPrefab, leftWallSpawn, Quaternion.identity) as GameObject;
-		leftWall.transform.localScale = new Vector3 (5f, fieldHeight, 0);
-		leftWall.transform.parent = transform.parent;
-
-		Vector3 rightWallSpawn = new Vector3 (botLeft.x + fieldWidth, botLeft.y + fieldHeight / 2, 0);
-		GameObject rightWall = Instantiate (wallPrefab, rightWallSpawn, Quaternion.identity) as GameObject;
-		rightWall.transform.localScale = new Vector3 (5f, fieldHeight, 0);
-		rightWall.transform.parent = transform.parent;
-
-		Vector3 topLeftSpawn = new Vector3 (botLeft.x + (fieldWidth - gateWidth) / 4, botLeft.y + fieldHeight);
-		GameObject topLeftWall = Instantiate (wallPrefab, topLeftSpawn, Quaternion.identity) as GameObject;
-		topLeftWall.transform.localScale = new Vector3 ((fieldWidth - gateWidth) / 2, 5f, 0);
-		topLeftWall.transform.parent = transform.parent;
-
-		Vector3 topRightSpawn = new Vector3 (botLeft.x + fieldWidth - (fieldWidth - gateWidth) / 4, botLeft.y + fieldHeight);
-		GameObject topRightWall = Instantiate (wallPrefab, topRightSpawn, Quaternion.identity) as GameObject;
-		topRightWall.transform.localScale = new Vector3 ((fieldWidth - gateWidth) / 2, 5f, 0);
-		topRightWall.transform.parent = transform.parent;
-
-		//Vector3 gateSpawn = new Vector3 (botLeft.x + fieldWidth / 2, botLeft.y + fieldHeight * 5 / 6, 0);
-		//GameObject gate = Instantiate (gatePrefab, gateSpawn, Quaternion.identity) as GameObject;
-		//gate.transform.parent = transform.parent;
-	}
-
-		
-	//TODO this is temporaray
-	void MakeGateSpaceSaver () {
-		gateSpaceSaver = Instantiate (gateSpaceSaverPrefab, new Vector3 (0, height * 5 / 6, 0), Quaternion.identity) as GameObject;
-		gateSpaceSaver.transform.localScale = new Vector2 (gateWidth, gateWidth);
-		gateSpaceSaver.transform.parent = transform.parent;
-	}
-	void MoveGateSpaceSaver () {
-		//gateSpaceSaver.transform.position = new Vector3 (0, gateSpaceSaver.transform.position.y + height, 0);
-	}
-
 	private Vector2 GetVectorFromAngleAndMag (float theta, float mag) {
 		float x = Mathf.Cos (theta);
 		float y = Mathf.Sin (theta);
@@ -400,6 +384,5 @@ public class Tetris : MonoBehaviour {
 			SpawnObstacleField (r.botLeft, r.width, r.height);			
 		}
 	}
-
 }
 

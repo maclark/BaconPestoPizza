@@ -14,25 +14,22 @@ public class Room {
 	private RoomExits exits;
 	private List<Vector2> exitVectors;
 	private List<RoomExits> allowedExits;
+	private Spelunky cave;
 
-	public Room (Vector2 bLeft, float w, float h) {
+	public Room (Vector2 bLeft, float w, float h, Spelunky c) {
 		botLeft = bLeft;
 		width = w;
 		height = h;
+		cave = c;
 		exitVectors = new List<Vector2> ();
 		allowedExits = new List<RoomExits> ();
-	}
-
-	public void PrintDetails () {
-		if (onTrail) {
-		} else {
-		}
 	}
 
 	public RoomExits GetExits () {
 		return exits;
 	}
 
+	/*
 	public void SetExits (RoomExits re) {
 		exits = re;
 		exitsSet = true;
@@ -42,9 +39,9 @@ public class Room {
 		exits = allowedExits [i];
 		exitsSet = true;
 	}
+*/
 
-
-	public void PickExits () {
+	public void PickExits (bool zoneTopRoom=false, bool movingRightRoom=false, bool movingLeftRoom=false, bool movingDownRoom=false) {
 		int max = allowedExits.Count;
 		if (!onTrail) {
 			AddAllAllowedExits ();
@@ -55,8 +52,12 @@ public class Room {
 		}
 		int index = Random.Range (0, max);
 		exits = allowedExits [index];
-		ReserveExits ();
+		ReserveExits (zoneTopRoom, movingRightRoom, movingLeftRoom, movingDownRoom);
 		exitsSet = true;
+	}
+
+	public List<Vector2> GetExitVectors () {
+		return exitVectors;
 	}
 
 	public void AddAllowedExit (RoomExits re) {
@@ -86,71 +87,71 @@ public class Room {
 		allowedExits.Remove (re);
 	}
 
-	public void ReserveExits () {
+	public void ReserveExits (bool zoneTopRoom, bool movingRightRoom, bool movingLeftRoom, bool movingDownRoom) {
 		switch (exits) {
 		case RoomExits.NONE: 
 			break;
 		case RoomExits.T:
-			ReserveAnExit ("T");
+			ReserveAnExit ("T", zoneTopRoom, movingRightRoom, movingLeftRoom, movingDownRoom);
 			break;
 		case RoomExits.TB: 
-			ReserveAnExit ("T");
-			ReserveAnExit ("B");
+			ReserveAnExit ("T", zoneTopRoom, movingRightRoom, movingLeftRoom, movingDownRoom);
+			ReserveAnExit ("B", zoneTopRoom, movingRightRoom, movingLeftRoom, movingDownRoom);
 			break; 
 		case RoomExits.TL:
-			ReserveAnExit ("T");
-			ReserveAnExit ("L");
+			ReserveAnExit ("T", zoneTopRoom, movingRightRoom, movingLeftRoom, movingDownRoom);
+			ReserveAnExit ("L", zoneTopRoom, movingRightRoom, movingLeftRoom, movingDownRoom);
 			break;
 		case RoomExits.TR:
-			ReserveAnExit ("T");
-			ReserveAnExit ("R");
+			ReserveAnExit ("T", zoneTopRoom, movingRightRoom, movingLeftRoom, movingDownRoom);
+			ReserveAnExit ("R", zoneTopRoom, movingRightRoom, movingLeftRoom, movingDownRoom);
 			break; 
 		case RoomExits.TBL:
-			ReserveAnExit ("T");
-			ReserveAnExit ("B");
-			ReserveAnExit ("L");
+			ReserveAnExit ("T", zoneTopRoom, movingRightRoom, movingLeftRoom, movingDownRoom);
+			ReserveAnExit ("B", zoneTopRoom, movingRightRoom, movingLeftRoom, movingDownRoom);
+			ReserveAnExit ("L", zoneTopRoom, movingRightRoom, movingLeftRoom, movingDownRoom);
 			break;
 		case RoomExits.TBR:
-			ReserveAnExit ("T");
-			ReserveAnExit ("B");
-			ReserveAnExit ("R");
+			ReserveAnExit ("T", zoneTopRoom, movingRightRoom, movingLeftRoom, movingDownRoom);
+			ReserveAnExit ("B", zoneTopRoom, movingRightRoom, movingLeftRoom, movingDownRoom);
+			ReserveAnExit ("R", zoneTopRoom, movingRightRoom, movingLeftRoom, movingDownRoom);
 			break;
 		case RoomExits.TLR:
-			ReserveAnExit ("T");
-			ReserveAnExit ("L");
-			ReserveAnExit ("R");
+			ReserveAnExit ("T", zoneTopRoom, movingRightRoom, movingLeftRoom, movingDownRoom);
+			ReserveAnExit ("L", zoneTopRoom, movingRightRoom, movingLeftRoom, movingDownRoom);
+			ReserveAnExit ("R", zoneTopRoom, movingRightRoom, movingLeftRoom, movingDownRoom);
 			break;
 		case RoomExits.TBLR:
-			ReserveAnExit ("T");
-			ReserveAnExit ("B");
-			ReserveAnExit ("L");
-			ReserveAnExit ("R");
+			ReserveAnExit ("T", zoneTopRoom, movingRightRoom, movingLeftRoom, movingDownRoom);
+			ReserveAnExit ("B", zoneTopRoom, movingRightRoom, movingLeftRoom, movingDownRoom);
+			ReserveAnExit ("L", zoneTopRoom, movingRightRoom, movingLeftRoom, movingDownRoom);
+			ReserveAnExit ("R", zoneTopRoom, movingRightRoom, movingLeftRoom, movingDownRoom);
 			break;
 		case RoomExits.B:
-			ReserveAnExit ("B");
+			ReserveAnExit ("B", zoneTopRoom, movingRightRoom, movingLeftRoom, movingDownRoom);
 			break;
 		case RoomExits.BL:
-			ReserveAnExit ("B");
-			ReserveAnExit ("L");
+			ReserveAnExit ("B", zoneTopRoom, movingRightRoom, movingLeftRoom, movingDownRoom);
+			ReserveAnExit ("L", zoneTopRoom, movingRightRoom, movingLeftRoom, movingDownRoom);
 			break;
 		case RoomExits.BR:
-			ReserveAnExit ("B");
-			ReserveAnExit ("R");
+			ReserveAnExit ("B", zoneTopRoom, movingRightRoom, movingLeftRoom, movingDownRoom);
+			ReserveAnExit ("R", zoneTopRoom, movingRightRoom, movingLeftRoom, movingDownRoom);
 			break;
 		case RoomExits.BLR:
-			ReserveAnExit ("B");
-			ReserveAnExit ("L");
-			ReserveAnExit ("R");
+			ReserveAnExit ("B", zoneTopRoom, movingRightRoom, movingLeftRoom, movingDownRoom);
+			ReserveAnExit ("L", zoneTopRoom, movingRightRoom, movingLeftRoom, movingDownRoom);
+			ReserveAnExit ("R", zoneTopRoom, movingRightRoom, movingLeftRoom, movingDownRoom);
 			break;
 		case RoomExits.L:
-			ReserveAnExit ("L");
+			ReserveAnExit ("L", zoneTopRoom, movingRightRoom, movingLeftRoom, movingDownRoom);
 			break;
 		case RoomExits.LR:
-			ReserveAnExit ("L");
-			ReserveAnExit ("R");
+			ReserveAnExit ("L", zoneTopRoom, movingRightRoom, movingLeftRoom, movingDownRoom);
+			ReserveAnExit ("R", zoneTopRoom, movingRightRoom, movingLeftRoom, movingDownRoom);
 			break;
 		case RoomExits.R:
-			ReserveAnExit ("R");
+			ReserveAnExit ("R", zoneTopRoom, movingRightRoom, movingLeftRoom, movingDownRoom);
 			break;
 		default:
 			Debug.LogError ("not known RoomExit");
@@ -158,7 +159,7 @@ public class Room {
 		}
 	}
 
-	void ReserveAnExit (string side) {
+	void ReserveAnExit (string side, bool zoneTopRoom, bool movingRightRoom, bool movingLeftRoom, bool movingDownRoom) {
 		Vector2 ex;
 		float x;
 		float y;
@@ -166,18 +167,30 @@ public class Room {
 		case "T":
 			x = Random.Range (botLeft.x, botLeft.x + width);
 			y = botLeft.y + height;
+			if (zoneTopRoom) {
+				cave.caveExitVectors.Add (new Vector2 (x, y));
+			}
 			break;
 		case "B":
 			x = Random.Range (botLeft.x, botLeft.x + width);
 			y = botLeft.y;
+			if (movingDownRoom) {
+				cave.caveExitVectors.Add (new Vector2 (x, y));
+			}
 			break;
 		case "L":
 			x = botLeft.x;
 			y = Random.Range (botLeft.y, botLeft.y + height);
+			if (movingLeftRoom) {
+				cave.caveExitVectors.Add (new Vector2 (x, y));
+			}
 			break;
 		case "R":
 			x = botLeft.x + width;
 			y = Random.Range (botLeft.y, botLeft.y + height);
+			if (movingRightRoom) {
+				cave.caveExitVectors.Add (new Vector2 (x, y));
+			}
 			break;
 		default:
 			Debug.LogError ("not known side");
