@@ -13,6 +13,15 @@ public class Cargo : MonoBehaviour {
 	}
 
 	void OnCollision2D (Collision2D coll) {
+		if (coll.transform.tag == "Player") {
+			Bird birdie = coll.transform.GetComponent<Bird> ();
+			if (cargoType == Cargo.CargoType.SHIELD) {
+				if (!birdie.Shield.gameObject.activeSelf) {
+					birdie.Shield.ActivateShield ();
+					Destroy (gameObject);
+				}
+			}
+		}
 	}
 
 	void OnTriggerEnter2D (Collider2D other) {

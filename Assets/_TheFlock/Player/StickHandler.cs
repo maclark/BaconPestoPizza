@@ -5,9 +5,9 @@ public class StickHandler{
 	//TODO make player input not use these
 	public bool verticalStickInUse = false;
 	public bool horizontalStickInUse = false;
-
-
-
+	/// <summary>
+	/// //////////////////////
+	/// </summary>
 
 	public float moveCooldown = .2f;
 	public bool LStickInUse = false;
@@ -47,6 +47,22 @@ public class StickHandler{
 			}
 		} else {
 			LStickInUse = false;
+		}
+	}
+
+
+	public void HandleOnPlatformSticks (Player p, string LSVertical, string LSHorizontal) {
+		Vector3 dir = new Vector3 (Input.GetAxis (LSHorizontal), Input.GetAxis (LSVertical), 0);
+		float upness = Vector3.Dot (dir, gm.bigBird.transform.up);
+		float overness = Vector3.Dot (dir, gm.bigBird.transform.right);
+		if (Mathf.Abs (upness) > Mathf.Abs (overness)) {
+			//move up/down relative to player
+			if (upness > 0) {
+				LStickInUse = true;
+				timeOfLastStickUse = Time.time;
+				p.GetComponent<PlayerInput> ().state = PlayerInput.State.IN_HOLD;
+				gm.bigBird.hold.SelectorStep (p.transform, 0, 1);
+			}
 		}
 	}
 }

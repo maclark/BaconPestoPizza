@@ -48,32 +48,34 @@ public class Harpoon : MonoBehaviour {
 		tetherLength = tetherVector.magnitude;
 		if (tetherLength > maxTetherLength) {
 			SetGripping (false);
-			Destroy (gameObject);
+			//Destroy (gameObject);
 			Debug.Log ("snapped harp off");
 		} else {
 			HandleTether ();
 		}
 	}
 
-	void OnTriggerEnter2D (Collider2D other) {
-		if (other.name == "BirdTrigger") {
-			Bird pBird = other.transform.parent.GetComponent<Bird> ();
-			if (harpooner.name == pBird.name) {
+	void OnTriggerEnter2D (Collider2D other) { 
+		Bird pBird = other.transform.GetComponent<Bird> ();
+		if (!pBird) {
+			if (other.transform.parent) {
+				pBird = other.transform.parent.GetComponent<Bird> ();
+			}
+		}
+		if (pBird) {
+			if (harpooner.transform == pBird.transform) {
 				if (!pBird.aimingHarp && !pBird.swingingHarp && !pBird.throwingHarp) {
 					pBird.hurledHarp = false;
 					pBird.catchingHarp = true;
 					Destroy (gameObject);
 				}
 			} else {
-				//implement linking
 				if (gripping) {
 					HarpoonObject (pBird.gameObject);
 					pBird.otherHarps.Add (this);
 				}
 			}
-		}
-
-		else if (other.tag == "Harpoonable") {
+		} else if (other.GetComponent<Harpoonable> ()) {
 			if (gripping) {
 				HarpoonObject (other.gameObject);
 				other.GetComponent<Harpoonable> ().SetSortingLayer ("Birds");
@@ -89,6 +91,7 @@ public class Harpoon : MonoBehaviour {
 	}
 
 	public void Die () {
+		SetGripping (false);
 		Destroy (gameObject);
 	}
 
@@ -139,11 +142,10 @@ public class Harpoon : MonoBehaviour {
 		if (harpoonRecipient.tag == "Player") {
 			linkedBirds.Clear ();
 			AttemptWeb (harpooner.GetComponent<Bird> ());
-		} else if (harpoonRecipient.tag == "Harpoonable") {
-			harpoonRecipient.GetComponent<Harpoonable> ().harp = this;
+		} else {
+			harpoonRecipient.SendMessage ("BeenHarpooned", this, SendMessageOptions.DontRequireReceiver);
 		}
 
-		harpoonRecipient.SendMessage ("BeenHarpooned", null, SendMessageOptions.DontRequireReceiver);
 	}
 
 	public void ToggleRecalling () {
@@ -177,7 +179,7 @@ public class Harpoon : MonoBehaviour {
 				if (harpooned != null) {
 					if (harpooned.tag == "Player") {
 						harpooned.GetComponent<Bird> ().RemoveHarp (this);
-					} else if (harpooned.tag == "Harpoonable") {
+					} else {
 						harpooned.SendMessage ("HarpoonReleased", null, SendMessageOptions.DontRequireReceiver);
 					}
 					harpooned = null;
@@ -232,12 +234,12 @@ public class Harpoon : MonoBehaviour {
 
 		if (harpooned) {
 			//TODO need to create a function AddEffectiveForcess or something for effective mass handling
-			harpooned.GetComponent<Rigidbody2D> ().AddForce (recallDir * recallMag);
+			harpooned.GetComponent<Harpoonable> ().RiBo ().AddForce (recallDir * recallMag);
 		} else {
 			rb.AddForce (recallDir * recallMag);
 		}
 		//TODO would need to chceck if harpooner is harpooned and has an effective mass
-		harpooner.GetComponent<Rigidbody2D> ().AddForce (-recallDir * recallMag);
+		harpooner.GetComponent<Harpoonable> ().RiBo ().AddForce (-recallDir * recallMag);
 	}
 
 	void SetTautLength (float newLength) {
@@ -255,9 +257,9 @@ public class Harpoon : MonoBehaviour {
 			if (!harpooned) {
 				rb.AddForce (springForce);
 			} else {
-				harpooned.GetComponent<Rigidbody2D> ().AddForce (springForce);
+				harpooned.GetComponent<Harpoonable> ().RiBo ().AddForce (springForce);
 			}
-			harpooner.GetComponent<Rigidbody2D> ().AddForce (-springForce);
+			harpooner.GetComponent<Harpoonable> ().RiBo ().AddForce (-springForce);
 		}
 
 		if (recalling) {

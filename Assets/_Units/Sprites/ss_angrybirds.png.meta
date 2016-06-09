@@ -1,6 +1,6 @@
 fileFormatVersion: 2
 guid: e60839b392ac55649a54ea3af6081e96
-timeCreated: 1464327963
+timeCreated: 1465405540
 licenseType: Free
 TextureImporter:
   fileIDToRecycleName:
@@ -55,6 +55,57 @@ TextureImporter:
     21300096: angry-birds-sprite_48
     21300098: angry-birds-sprite_49
     21300100: angry-birds-sprite_50
+    21300102: ss_angrybirds_0
+    21300104: ss_angrybirds_1
+    21300106: ss_angrybirds_2
+    21300108: ss_angrybirds_3
+    21300110: ss_angrybirds_4
+    21300112: ss_angrybirds_5
+    21300114: ss_angrybirds_6
+    21300116: ss_angrybirds_7
+    21300118: ss_angrybirds_8
+    21300120: ss_angrybirds_9
+    21300122: ss_angrybirds_10
+    21300124: ss_angrybirds_11
+    21300126: ss_angrybirds_12
+    21300128: ss_angrybirds_13
+    21300130: ss_angrybirds_14
+    21300132: ss_angrybirds_15
+    21300134: ss_angrybirds_16
+    21300136: ss_angrybirds_17
+    21300138: ss_angrybirds_18
+    21300140: ss_angrybirds_19
+    21300142: ss_angrybirds_20
+    21300144: ss_angrybirds_21
+    21300146: ss_angrybirds_22
+    21300148: ss_angrybirds_23
+    21300150: ss_angrybirds_24
+    21300152: ss_angrybirds_25
+    21300154: ss_angrybirds_26
+    21300156: ss_angrybirds_27
+    21300158: ss_angrybirds_28
+    21300160: ss_angrybirds_29
+    21300162: ss_angrybirds_30
+    21300164: ss_angrybirds_31
+    21300166: ss_angrybirds_32
+    21300168: ss_angrybirds_33
+    21300170: ss_angrybirds_34
+    21300172: ss_angrybirds_35
+    21300174: ss_angrybirds_36
+    21300176: ss_angrybirds_37
+    21300178: ss_angrybirds_38
+    21300180: ss_angrybirds_39
+    21300182: ss_angrybirds_40
+    21300184: ss_angrybirds_41
+    21300186: ss_angrybirds_42
+    21300188: ss_angrybirds_43
+    21300190: ss_angrybirds_44
+    21300192: ss_angrybirds_45
+    21300194: ss_angrybirds_46
+    21300196: ss_angrybirds_47
+    21300198: ss_angrybirds_48
+    21300200: ss_angrybirds_49
+    21300202: ss_angrybirds_50
   serializedVersion: 2
   mipmaps:
     mipMapMode: 0
@@ -101,7 +152,7 @@ TextureImporter:
   buildTargetSettings: []
   spriteSheet:
     sprites:
-    - name: angry-birds-sprite_0
+    - name: ss_angrybirds_0
       rect:
         serializedVersion: 2
         x: 0
@@ -123,7 +174,7 @@ TextureImporter:
         - {x: 88, y: -67}
         - {x: 88, y: 36}
         - {x: 62, y: 72}
-    - name: angry-birds-sprite_1
+    - name: ss_angrybirds_1
       rect:
         serializedVersion: 2
         x: 180
@@ -141,7 +192,7 @@ TextureImporter:
         - {x: 22, y: -25.5}
         - {x: 22, y: 17.5}
         - {x: 11, y: 25.5}
-    - name: angry-birds-sprite_2
+    - name: ss_angrybirds_2
       rect:
         serializedVersion: 2
         x: 228
@@ -159,7 +210,7 @@ TextureImporter:
         - {x: 22, y: -25}
         - {x: 22, y: 18}
         - {x: 12, y: 25}
-    - name: angry-birds-sprite_3
+    - name: ss_angrybirds_3
       rect:
         serializedVersion: 2
         x: 274
@@ -178,7 +229,7 @@ TextureImporter:
         - {x: 22.5, y: -19.5}
         - {x: 22.5, y: 5.5}
         - {x: 12.5, y: 23.5}
-    - name: angry-birds-sprite_4
+    - name: ss_angrybirds_4
       rect:
         serializedVersion: 2
         x: 323
@@ -197,7 +248,7 @@ TextureImporter:
         - {x: 17, y: -19.5}
         - {x: 17, y: 18.5}
         - {x: 11, y: 22.5}
-    - name: angry-birds-sprite_5
+    - name: ss_angrybirds_5
       rect:
         serializedVersion: 2
         x: 181
@@ -216,7 +267,7 @@ TextureImporter:
         - {x: 21.5, y: -24}
         - {x: 21.5, y: 18}
         - {x: 9.5, y: 25}
-    - name: angry-birds-sprite_6
+    - name: ss_angrybirds_6
       rect:
         serializedVersion: 2
         x: 226
@@ -234,7 +285,7 @@ TextureImporter:
         - {x: 23, y: -23.5}
         - {x: 23, y: 7.5}
         - {x: 16, y: 23.5}
-    - name: angry-birds-sprite_7
+    - name: ss_angrybirds_7
       rect:
         serializedVersion: 2
         x: 281
@@ -252,7 +303,7 @@ TextureImporter:
         - {x: 17.5, y: -18.5}
         - {x: 17.5, y: 15.5}
         - {x: 9.5, y: 28.5}
-    - name: angry-birds-sprite_8
+    - name: ss_angrybirds_8
       rect:
         serializedVersion: 2
         x: 323
@@ -270,7 +321,7 @@ TextureImporter:
         - {x: 17, y: -22.5}
         - {x: 17, y: 14.5}
         - {x: 12, y: 22.5}
-    - name: angry-birds-sprite_9
+    - name: ss_angrybirds_9
       rect:
         serializedVersion: 2
         x: 178
@@ -289,7 +340,7 @@ TextureImporter:
         - {x: 17, y: -12}
         - {x: 17, y: 12}
         - {x: 12, y: 19}
-    - name: angry-birds-sprite_10
+    - name: ss_angrybirds_10
       rect:
         serializedVersion: 2
         x: 226
@@ -309,7 +360,7 @@ TextureImporter:
         - {x: 13, y: -19}
         - {x: 17, y: -14}
         - {x: 17, y: 4}
-    - name: angry-birds-sprite_11
+    - name: ss_angrybirds_11
       rect:
         serializedVersion: 2
         x: 273
@@ -331,7 +382,7 @@ TextureImporter:
         - {x: 17.5, y: -10}
         - {x: 17.5, y: 1}
         - {x: 14.5, y: 4}
-    - name: angry-birds-sprite_12
+    - name: ss_angrybirds_12
       rect:
         serializedVersion: 2
         x: 316
@@ -342,7 +393,7 @@ TextureImporter:
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
-    - name: angry-birds-sprite_13
+    - name: ss_angrybirds_13
       rect:
         serializedVersion: 2
         x: 3
@@ -360,7 +411,7 @@ TextureImporter:
         - {x: 21.5, y: -25}
         - {x: 21.5, y: 10}
         - {x: 10.5, y: 25}
-    - name: angry-birds-sprite_14
+    - name: ss_angrybirds_14
       rect:
         serializedVersion: 2
         x: 51
@@ -380,7 +431,7 @@ TextureImporter:
         - {x: 26, y: -21}
         - {x: 26, y: 11}
         - {x: 21, y: 24}
-    - name: angry-birds-sprite_15
+    - name: ss_angrybirds_15
       rect:
         serializedVersion: 2
         x: 107
@@ -399,7 +450,7 @@ TextureImporter:
         - {x: 26, y: -23.5}
         - {x: 26, y: 21.5}
         - {x: 12, y: 25.5}
-    - name: angry-birds-sprite_16
+    - name: ss_angrybirds_16
       rect:
         serializedVersion: 2
         x: 160
@@ -419,7 +470,7 @@ TextureImporter:
         - {x: 11, y: 16.5}
         - {x: -12, y: 16.5}
         - {x: -26, y: 9.5}
-    - name: angry-birds-sprite_17
+    - name: ss_angrybirds_17
       rect:
         serializedVersion: 2
         x: 217
@@ -443,7 +494,7 @@ TextureImporter:
         - {x: 26, y: -16.5}
         - {x: 26, y: -5.5}
         - {x: 23, y: -4.5}
-    - name: angry-birds-sprite_18
+    - name: ss_angrybirds_18
       rect:
         serializedVersion: 2
         x: 273
@@ -462,7 +513,7 @@ TextureImporter:
         - {x: 27.5, y: -12}
         - {x: 27.5, y: 11}
         - {x: 12.5, y: 16}
-    - name: angry-birds-sprite_19
+    - name: ss_angrybirds_19
       rect:
         serializedVersion: 2
         x: 332
@@ -473,7 +524,7 @@ TextureImporter:
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
-    - name: angry-birds-sprite_20
+    - name: ss_angrybirds_20
       rect:
         serializedVersion: 2
         x: 331
@@ -484,7 +535,7 @@ TextureImporter:
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
-    - name: angry-birds-sprite_21
+    - name: ss_angrybirds_21
       rect:
         serializedVersion: 2
         x: 1
@@ -503,7 +554,7 @@ TextureImporter:
         - {x: 17.5, y: -19}
         - {x: 17.5, y: 13}
         - {x: 11.5, y: 22}
-    - name: angry-birds-sprite_22
+    - name: ss_angrybirds_22
       rect:
         serializedVersion: 2
         x: 51
@@ -522,7 +573,7 @@ TextureImporter:
         - {x: 26, y: -18.5}
         - {x: 26, y: 8.5}
         - {x: 14, y: 25.5}
-    - name: angry-birds-sprite_23
+    - name: ss_angrybirds_23
       rect:
         serializedVersion: 2
         x: 107
@@ -540,7 +591,7 @@ TextureImporter:
         - {x: 26, y: -25.5}
         - {x: 26, y: 13.5}
         - {x: 7, y: 25.5}
-    - name: angry-birds-sprite_24
+    - name: ss_angrybirds_24
       rect:
         serializedVersion: 2
         x: 160
@@ -565,7 +616,7 @@ TextureImporter:
         - {x: 22.5, y: -16}
         - {x: 27.5, y: -12}
         - {x: 27.5, y: -7}
-    - name: angry-birds-sprite_25
+    - name: ss_angrybirds_25
       rect:
         serializedVersion: 2
         x: 217
@@ -584,7 +635,7 @@ TextureImporter:
         - {x: 18, y: -21.5}
         - {x: 18, y: 14.5}
         - {x: 0, y: 21.5}
-    - name: angry-birds-sprite_26
+    - name: ss_angrybirds_26
       rect:
         serializedVersion: 2
         x: 256
@@ -603,7 +654,7 @@ TextureImporter:
         - {x: 17.5, y: -21}
         - {x: 17.5, y: 18}
         - {x: 16.5, y: 23}
-    - name: angry-birds-sprite_27
+    - name: ss_angrybirds_27
       rect:
         serializedVersion: 2
         x: 294
@@ -621,7 +672,7 @@ TextureImporter:
         - {x: 14, y: -22.5}
         - {x: 17, y: -21.5}
         - {x: 17, y: 22.5}
-    - name: angry-birds-sprite_28
+    - name: ss_angrybirds_28
       rect:
         serializedVersion: 2
         x: 332
@@ -632,7 +683,7 @@ TextureImporter:
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
-    - name: angry-birds-sprite_29
+    - name: ss_angrybirds_29
       rect:
         serializedVersion: 2
         x: 332
@@ -643,7 +694,7 @@ TextureImporter:
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
-    - name: angry-birds-sprite_30
+    - name: ss_angrybirds_30
       rect:
         serializedVersion: 2
         x: 0
@@ -660,7 +711,7 @@ TextureImporter:
         - {x: 18, y: -21.5}
         - {x: 18, y: 15.5}
         - {x: 11, y: 21.5}
-    - name: angry-birds-sprite_31
+    - name: ss_angrybirds_31
       rect:
         serializedVersion: 2
         x: 51
@@ -678,7 +729,7 @@ TextureImporter:
         - {x: 26, y: -24}
         - {x: 26, y: 11}
         - {x: 11, y: 24}
-    - name: angry-birds-sprite_32
+    - name: ss_angrybirds_32
       rect:
         serializedVersion: 2
         x: 104
@@ -698,7 +749,7 @@ TextureImporter:
         - {x: 13, y: 16}
         - {x: -14, y: 16}
         - {x: -26, y: 9}
-    - name: angry-birds-sprite_33
+    - name: ss_angrybirds_33
       rect:
         serializedVersion: 2
         x: 160
@@ -717,7 +768,7 @@ TextureImporter:
         - {x: 26.5, y: -15.5}
         - {x: 26.5, y: 11.5}
         - {x: 11.5, y: 16.5}
-    - name: angry-birds-sprite_34
+    - name: ss_angrybirds_34
       rect:
         serializedVersion: 2
         x: 218
@@ -736,7 +787,7 @@ TextureImporter:
         - {x: 17.5, y: -22.5}
         - {x: 17.5, y: 11.5}
         - {x: 7.5, y: 22.5}
-    - name: angry-birds-sprite_35
+    - name: ss_angrybirds_35
       rect:
         serializedVersion: 2
         x: 259
@@ -747,7 +798,7 @@ TextureImporter:
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
-    - name: angry-birds-sprite_36
+    - name: ss_angrybirds_36
       rect:
         serializedVersion: 2
         x: 294
@@ -758,7 +809,7 @@ TextureImporter:
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
-    - name: angry-birds-sprite_37
+    - name: ss_angrybirds_37
       rect:
         serializedVersion: 2
         x: 321
@@ -769,7 +820,7 @@ TextureImporter:
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
-    - name: angry-birds-sprite_38
+    - name: ss_angrybirds_38
       rect:
         serializedVersion: 2
         x: 160
@@ -788,7 +839,7 @@ TextureImporter:
         - {x: 1.5, y: -24}
         - {x: 22.5, y: -24}
         - {x: 22.5, y: 24}
-    - name: angry-birds-sprite_39
+    - name: ss_angrybirds_39
       rect:
         serializedVersion: 2
         x: 218
@@ -805,7 +856,7 @@ TextureImporter:
         - {x: 17.5, y: -23}
         - {x: 17.5, y: 16}
         - {x: 9.5, y: 23}
-    - name: angry-birds-sprite_40
+    - name: ss_angrybirds_40
       rect:
         serializedVersion: 2
         x: 256
@@ -816,7 +867,7 @@ TextureImporter:
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
-    - name: angry-birds-sprite_41
+    - name: ss_angrybirds_41
       rect:
         serializedVersion: 2
         x: 293
@@ -827,7 +878,7 @@ TextureImporter:
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
-    - name: angry-birds-sprite_42
+    - name: ss_angrybirds_42
       rect:
         serializedVersion: 2
         x: 323
@@ -838,7 +889,7 @@ TextureImporter:
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
-    - name: angry-birds-sprite_43
+    - name: ss_angrybirds_43
       rect:
         serializedVersion: 2
         x: 6
@@ -849,7 +900,7 @@ TextureImporter:
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
-    - name: angry-birds-sprite_44
+    - name: ss_angrybirds_44
       rect:
         serializedVersion: 2
         x: 54
@@ -860,7 +911,7 @@ TextureImporter:
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
-    - name: angry-birds-sprite_45
+    - name: ss_angrybirds_45
       rect:
         serializedVersion: 2
         x: 109
@@ -871,7 +922,7 @@ TextureImporter:
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
-    - name: angry-birds-sprite_46
+    - name: ss_angrybirds_46
       rect:
         serializedVersion: 2
         x: 260
@@ -882,7 +933,7 @@ TextureImporter:
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
-    - name: angry-birds-sprite_47
+    - name: ss_angrybirds_47
       rect:
         serializedVersion: 2
         x: 294
@@ -893,7 +944,7 @@ TextureImporter:
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
-    - name: angry-birds-sprite_48
+    - name: ss_angrybirds_48
       rect:
         serializedVersion: 2
         x: 312
@@ -904,7 +955,7 @@ TextureImporter:
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
-    - name: angry-birds-sprite_49
+    - name: ss_angrybirds_49
       rect:
         serializedVersion: 2
         x: 293
@@ -915,7 +966,7 @@ TextureImporter:
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
-    - name: angry-birds-sprite_50
+    - name: ss_angrybirds_50
       rect:
         serializedVersion: 2
         x: 313

@@ -2,24 +2,28 @@
 using System.Collections;
 
 public class Pump : MonoBehaviour {
-	public bool update = true;
+	public Sprite pulledSprite;
+	public Sprite coiledSprite;
 
-	private GameManager gm;
 	private LineRenderer lr;
-	private bool reset = false;
+	private SpriteRenderer sr;
+	private SpriteRenderer srCoil;
+	private bool recoil = false;
 	private bool moveToBird = false;
 	private Vector3 birdPos = Vector3.zero;
 	private Vector3[] positions = new Vector3[2];
-	private float yOffset;
-	private float xOffset;
+
+	void Awake () {
+		lr = GetComponent<LineRenderer> ();	
+		sr = GetComponent<SpriteRenderer> ();
+		srCoil = transform.parent.GetComponent<SpriteRenderer> ();	
+	}
 
 	void Start () {
-		gm = GameObject.FindObjectOfType<GameManager> ();
-		lr = GetComponent<LineRenderer> ();	
-		lr.sortingLayerName = "BigBird";
-		lr.sortingOrder = 3;
-		xOffset = transform.localPosition.x;
-		yOffset = transform.localPosition.y;
+		lr.sortingLayerName = srCoil.sortingLayerName;
+		lr.sortingOrder = srCoil.sortingOrder;
+		sr.enabled = false;
+		srCoil.sprite = coiledSprite;
 	}
 	
 	void Update () {
@@ -28,27 +32,27 @@ public class Pump : MonoBehaviour {
 		//would have to adjust how the birdGettingGas variable works however.
 		if (moveToBird) {
 			transform.position = birdPos;
+			srCoil.sprite = pulledSprite;
+			sr.enabled = true;
 			moveToBird = false;
 		}
-		else if (reset) {
-			Vector3 rightOffset = gm.bigBird.transform.right * xOffset * gm.bigBird.transform.localScale.x;
-			Vector3 upOffset = gm.bigBird.transform.up * yOffset * gm.bigBird.transform.localScale.y;
-			transform.position = gm.bigBird.transform.position + rightOffset + upOffset;
-			reset = false;
+		else if (recoil) {
+			transform.position = transform.parent.position;
+			sr.enabled = false;
+			recoil = false;
 		}
 		DrawPumpHose ();
 	}
 
 	void DrawPumpHose () {
-		Vector3 upOffset = gm.bigBird.transform.up * yOffset * gm.bigBird.transform.localScale.y;
-		Vector3 rightOffset = gm.bigBird.transform.right * xOffset * gm.bigBird.transform.localScale.x;
 		positions [0] = transform.position;
-		positions [1] = gm.bigBird.transform.position + rightOffset + upOffset;
+		positions [1] = transform.parent.position;
 		lr.SetPositions (positions);
 	}
 
-	public void ResetHose () {
-		reset = true;
+	public void RecoilHose () {
+		srCoil.sprite = coiledSprite;
+		recoil = true;
 	}
 
 	public void MoveToBirdPos (Vector3 pos) {

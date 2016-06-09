@@ -171,6 +171,8 @@ public class Player : MonoBehaviour {
 		transform.position = body.transform.position;// + body.playerOffset;
 		transform.rotation = body.transform.rotation;
 		transform.parent = body.transform;
+		sr.sortingLayerName = "Buildings";
+		sr.sortingOrder = 2;
 		pi.state = PlayerInput.State.ON_FOOT;
 	}
 
@@ -178,13 +180,16 @@ public class Player : MonoBehaviour {
 		transform.position = master.position;
 		transform.parent = master;
 		body.gameObject.SetActive (false);
+		if (master == bigBird.transform) {
+			sr.sortingLayerName = "Birds";
+			sr.sortingOrder = 0;
+		}
 		pi.state = s;
 	}
 
 	public void Disembark (Vector3 disembarkPoint) {
 		pi.AbandonStation ();
 		sr.enabled = true;
-		//pi.station = null;
 		ManifestFlesh (disembarkPoint);
 	}
 }

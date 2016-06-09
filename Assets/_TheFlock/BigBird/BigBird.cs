@@ -24,7 +24,8 @@ public class BigBird : MonoBehaviour {
 	private Quaternion targetRotation = Quaternion.identity;
 	private bool engineOn = false;
 	private bool landed = false;
-	private HealthBar[] healthBars = new HealthBar[2];
+	private HealthBar waterTank;
+	private HealthBar energyTank;
 	private Bird birdGettingRepairs = null;
 	private Bird birdGettingGas = null;
 	private Transform target = null;
@@ -43,14 +44,15 @@ public class BigBird : MonoBehaviour {
 		medkit = GetComponentInChildren<Medkit> ();
 		hold = GetComponentInChildren<CargoHold> ();
 		thrusters = GetComponentsInChildren<Thruster> ();
-		healthBars = gm.GetBigBirdHealthBars ();
+		waterTank = gm.GetBigBirdWaterTank ();
+		energyTank = gm.GetBigBirdEnergyTank ();
 	}
 
 	void Start () {
-		healthBars[0].max = hp;
-		healthBars[1].max = hp;
-		healthBars[0].current = hp;
-		healthBars[1].current = hp;
+		waterTank.max = hp;
+		energyTank.max = hp;
+		waterTank.current = hp;
+		energyTank.current = hp;
 	}
 
 	void FixedUpdate () {
@@ -120,11 +122,7 @@ public class BigBird : MonoBehaviour {
 			TakeDamage (coll.transform.GetComponent<Flyer> ().kamikazeDamage);
 			coll.transform.gameObject.GetComponent<Flyer> ().Die ();
 		} else if (coll.gameObject.tag == "Harpoonable") {
-			if (coll.gameObject.GetComponent<Harpoonable> ().isGold) {
-				gold++;
-				gm.goldText.text = gold.ToString ();
-				coll.transform.GetComponent<Harpoonable> ().Die ();
-			} else if (coll.gameObject.GetComponent<Cargo> ()) {
+			if (coll.gameObject.GetComponent<Cargo> ()) {
 				hold.Load (coll.transform);
 			}
 		}
@@ -182,8 +180,7 @@ public class BigBird : MonoBehaviour {
 
 	public void TakeDamage( int dam) {
 		hp -= dam;
-		healthBars[0].AdjustHealth (hp);
-		healthBars[1].AdjustHealth (hp);
+		energyTank.AdjustHealth (hp);
 		if (hp <= 0) {
 			Die ();
 		}
@@ -281,7 +278,7 @@ public class BigBird : MonoBehaviour {
 
 	IEnumerator FillBirdTank (Bird b) {
 		if (b == null) {
-			pump.ResetHose ();
+			pump.RecoilHose ();
 			yield break;
 		}
 		pump.MoveToBirdPos (b.transform.position);
@@ -296,7 +293,7 @@ public class BigBird : MonoBehaviour {
 				StartCoroutine (FillBirdTank (nextInLine));
 			} else {
 				birdGettingGas = null;
-				pump.ResetHose ();
+				pump.RecoilHose ();
 			}
 		} else {
 			StartCoroutine (FillBirdTank (birdGettingGas));
@@ -326,11 +323,12 @@ public class BigBird : MonoBehaviour {
 		yield return new WaitForSeconds (1f);
 		//transform.localScale = new Vector3 (landedScale, landedScale, 1);
 		transform.position = pad.transform.position;//+ pad.landingMarkOffset;
-		transform.rotation = Quaternion.LookRotation (transform.forward, -pad.transform.up);
+		transform.rotation = Quaternion.LookRotation (transform.forward, pad.transform.up);
 		transform.parent = pad.transform;
 		Player[] players = GetComponentsInChildren<Player> ();
 		for (int i = 0; i < players.Length; i++) {
 			if (players [i].isPlaying) {
+				print (players [i].name + " is playing");
 				players [i].Disembark (nearestPad.disembarkPoint);
 			}
 		}

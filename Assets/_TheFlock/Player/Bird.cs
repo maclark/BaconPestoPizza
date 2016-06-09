@@ -194,22 +194,10 @@ public class Bird : MonoBehaviour {
 					//coll.gameObject.GetComponent<Flyer> ().Die ();
 				}
 			}
-		} else if (coll.transform.tag == "Harpoonable") {
-			Cargo otherC = coll.transform.GetComponent<Cargo> ();
-			if (otherC) {
-				if (otherC.cargoType == Cargo.CargoType.SHIELD) {
-					if (!shield.gameObject.activeSelf) {
-						shield.ActivateShield ();
-						Destroy (coll.transform.gameObject);
-					}
-				}
-			}
-		}
+		} 
 	}
 
 	void OnCollisionExit2D (Collision2D coll) {
-		if (coll.gameObject.name == "BigBird") {
-		}
 	}
 
 	void HandleFlying () {
@@ -295,7 +283,7 @@ public class Bird : MonoBehaviour {
 		Rigidbody2D rbOther;
 		float totalMass = rb.mass;
 		if (harp.GetHarpooned () != null) {
-			rbOther = harp.GetHarpooned ().GetComponent<Rigidbody2D> ();
+			rbOther = harp.GetHarpooned ().GetComponent<Harpoonable> ().RiBo ();
 			totalMass += rbOther.mass;
 		} else {
 			rbOther = harp.GetComponent<Rigidbody2D> ();
@@ -361,6 +349,9 @@ public class Bird : MonoBehaviour {
 	void Die () {
 		gm.RemoveAlliedTransform (transform);
 		DetachOtherHarps ();
+		if (harp) {
+			harp.Die ();
+		}
 		if (p) {
 			p.Bubble (rb.velocity);
 		}
@@ -646,8 +637,12 @@ public class Bird : MonoBehaviour {
 			////Offset harp so it doesn't immediately collide with ship
 			releaseHarpPosition = p.transform.position + p.aim * harpHurlOffset;
 
-
+			//simple launch (not swinging or winding up)
 			swingingHarp = true;
+			harp.transform.position = releaseHarpPosition;
+			//harp.Fire (harp.transform, hurlAim);
+			//harp.GetComponent<BoxCollider2D> ().enabled = true;
+
 			hurledHarp = true;
 			aimingHarp = false;
 			harpLoaded = false;

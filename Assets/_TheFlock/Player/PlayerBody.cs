@@ -23,13 +23,8 @@ public class PlayerBody : MonoBehaviour {
 	}
 
 	void OnTriggerEnter2D (Collider2D other) {
-		print (other.name);
 		if (other.name == "BoardingZone") {
-			print ("hit zone");
-			pad = other.transform.parent.GetComponent<LandingPad> ();
-			if (pad) {
-				print ("got pad");
-			}
+			pad = other.transform.GetComponentInChildren<LandingPad> ();
 		}
 	}
 
@@ -43,14 +38,11 @@ public class PlayerBody : MonoBehaviour {
 
 	public void PressedA () {
 		if (pad) {
-			print ("pad exists");
 			if (pad.occupant) {
-				print ("pad occupant exists");
 				if (pad.occupant == gm.bigBird.transform) {
 					GetComponentInChildren<Player> ().SpiritAway (gm.bigBird.transform, PlayerInput.State.NEUTRAL);
 				} 
 			}
-		} else {
 		}
 	}
 }

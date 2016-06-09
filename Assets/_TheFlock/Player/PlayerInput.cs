@@ -270,8 +270,6 @@ public class PlayerInput : MonoBehaviour {
 			gm.bigBird.hold.Occupy (false);
 		} else if (state == State.ON_PLATFORM) {
 			gm.bigBird.hold.Occupy (false);
-		} else {
-			Debug.Log ("AbandoningStation????");
 		}
 
 		if (station) {
@@ -279,16 +277,25 @@ public class PlayerInput : MonoBehaviour {
 		}
 	}
 
+	void ManStation () {
+		state = selectedState;
+		if (state == State.ON_TURRET) {
+			station.GetComponentInChildren<SpriteRenderer> ().color = p.color;
+		} else if (state == State.PILOTING) {
+			station.GetComponentInChildren<SpriteRenderer> ().color = p.color;
+		} else if (state == State.ON_FOOT) {
+			p.Disembark (station.transform.position);
+			return;
+		}
+
+		sr.enabled = false;
+	
+	}
+
 	void HandleChangingStations () {
 		//TODO can get stuck in changing stations at start because of being in Neutral
 		if (Input.GetButtonUp(bCircleButton)) {
-			state = selectedState;
-			if (state == State.ON_TURRET) {
-				station.GetComponentInChildren<SpriteRenderer> ().color = p.color;
-			} else if (state == State.PILOTING) {
-				station.GetComponentInChildren<SpriteRenderer> ().color = p.color;
-			}
-			sr.enabled = false;
+			ManStation ();
 			return;
 		} 
 
@@ -313,6 +320,10 @@ public class PlayerInput : MonoBehaviour {
 
 		RaycastHit2D hit = Physics2D.Raycast (transform.position, new Vector2 (horizontalness, verticalness), Mathf.Infinity, mask);
 		if (hit) {
+			if (hit.collider.name == "BoardingZone" && !bigBird.Landed) {
+				return;
+			}
+
 			if (station) {
 				station.GetComponent<BoxCollider2D> ().enabled = true;
 			}
@@ -329,6 +340,8 @@ public class PlayerInput : MonoBehaviour {
 				selectedState = State.ON_TURRET;
 			} else if (hit.collider.name == "CargoPlatform") {
 				selectedState = State.ON_PLATFORM;
+			} else if (hit.collider.name == "BoardingZone") {
+				selectedState = State.ON_FOOT;
 			}
 		}
 	}
@@ -542,9 +555,7 @@ public class PlayerInput : MonoBehaviour {
 			gm.bigBird.hold.Occupy (true);
 		}
 
-		if (Input.GetAxis (LSVertical) > 0) {
-			state = State.IN_HOLD;
-		}
+		sh.HandleOnPlatformSticks (p, LSVertical, LSHorizontal);
 
 		if (Input.GetButtonDown (aCrossButton)) {
 			if (gm.bigBird.hold.platformCargo) {

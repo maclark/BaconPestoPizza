@@ -6,8 +6,8 @@ using System.Collections.Generic;
 public class GameManager : MonoBehaviour {
 
 	public GameObject bubblePrefab;
-	public GameObject bigBirdHealthBarLeft;
-	public GameObject bigBirdHealthBarRight;
+	public GameObject bigBirdWaterTank;
+	public GameObject bigBirdEnergyTank;
 	public GameObject navPrefab;
 	public GameObject invisibleTarget;
 	public GameObject bodyPrefab;
@@ -75,11 +75,12 @@ public class GameManager : MonoBehaviour {
 			return null;
 	}
 
-	public HealthBar[] GetBigBirdHealthBars () {
-		HealthBar[] hbs = new HealthBar[2];
-		hbs [0] = bigBirdHealthBarLeft.GetComponentInChildren<HealthBar> ();
-		hbs [1] = bigBirdHealthBarRight.GetComponentInChildren<HealthBar> ();
-		return hbs;
+	public HealthBar GetBigBirdWaterTank () {
+		return bigBirdWaterTank.GetComponentInChildren<HealthBar> ();
+	}
+
+	public HealthBar GetBigBirdEnergyTank () {
+		return bigBirdEnergyTank.GetComponentInChildren<HealthBar> ();
 	}
 
 	public void Navigate (float leftHorizontal, float leftVertical) {
@@ -123,8 +124,8 @@ public class GameManager : MonoBehaviour {
 
 	public void BrokeGate () {
 		//spawn new level
-		gatesBroken++;
-		tetrisGod.SpawnRectangleField (new Vector2 (-tetrisGod.width / 2, tetrisGod.height * gatesBroken), tetrisGod.width, tetrisGod.height, tetrisGod.tetroAttempts);
+		//gatesBroken++;
+		//tetrisGod.SpawnRectangleField (new Vector2 (-tetrisGod.width / 2, tetrisGod.height * gatesBroken), tetrisGod.width, tetrisGod.height, tetrisGod.tetroAttempts);
 	}
 
 	public PlayerBody GetBody () {
