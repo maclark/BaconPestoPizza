@@ -14,7 +14,7 @@ public class ObjectPooler : MonoBehaviour
 	private Color color = Color.magenta;
 
 	void Start ()	{
-		container = new GameObject (pooledObject.name + "Container" + "_" + name);
+		container = new GameObject (pooledObject.name + "Container");
 
 		pooledObjects = new List<GameObject>();
 		for(int i = 0; i < pooledAmount; i++)

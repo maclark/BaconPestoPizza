@@ -28,6 +28,7 @@ public class Tetris : MonoBehaviour {
 	public GameObject pufferPrefab;
 	public GameObject hunterPairPrefab;
 	public GameObject alakazamPrefab;
+	public GameObject waterPrefab;
 
 	public float radius = 1000;
 	public float width;
@@ -36,12 +37,13 @@ public class Tetris : MonoBehaviour {
 	public int megaAttempts;
 	public int destructibleSpots;
 	public int destructibleAttsPerSpot;
-	public int difficultyMod = 2;
+	public int difficultyMod;
 	public int invaderAttempts;
 	public int invaderCarrierAttempts;
 	public int pufferAttempts;
 	public int hunterPairAttempts;
 	public int alakazamAttempts;
+	public int waterAttempts;
 
 	public Vector2 origin;
 	public int columns;
@@ -69,12 +71,16 @@ public class Tetris : MonoBehaviour {
 		spelunkyGod = new Spelunky (origin, columns, rows, roomWidth, roomHeight, gateSpaceSaverPrefab, wallPrefab, 10f);
 		spelunkyGod.BuildCave ();
 		spelunkyGod.SaveCaveExits ();
-		SpawnMegaTetrosField ();
+		SpawnMegaTetrosOffTrail ();
+		//SpawnBuildingField ();
+		SpawnWaterField 				(origin, columns * roomWidth, rows * roomHeight, waterAttempts);
 		SpawnRectangleField 			(origin, columns * roomWidth, rows * roomHeight, tetroAttempts);
 		SpawnEnemyField 				(origin, columns * roomWidth, rows * roomHeight);
 		SpawnDestructibles				(origin, columns * roomWidth, rows * roomHeight, destructibleSpots, destructibleAttsPerSpot);
 		spelunkyGod.OutlineCave ();
-		//spelunkyGod.DestroySpaceSavers ();
+		spelunkyGod.DestroySpaceSavers ();
+		spelunkyGod.PlaceWarp ();
+		gm.StartCoroutine (gm.WarpBigBird (spelunkyGod.bottomExitVector));
 
 
 		//MakeGateSpaceSaver ();
@@ -229,6 +235,8 @@ public class Tetris : MonoBehaviour {
 		if (CheckSpaceClear (colliders, buffer)) {
 			GameObject instance = Instantiate (tetro, transform.position, tetro.transform.rotation) as GameObject;
 			instance.transform.parent = transform.parent;
+		} else {
+			print ("tetro failed");
 		}
 	}
 
@@ -324,7 +332,16 @@ public class Tetris : MonoBehaviour {
 			transform.position = new Vector2 (x, y);
 			SpawnTetromino (null);
 		}
+	}
 
+	void SpawnWaterField (Vector2 botLeft, float fieldWidth, float fieldHeight, int attempts) {
+		for (int i = 0; i < attempts; i++) {
+			float x = Random.Range (botLeft.x, botLeft.x + fieldWidth);
+			float y = Random.Range (botLeft.y, botLeft.y+ fieldHeight);
+			transform.position = new Vector2 (x, y);
+			GameObject instance = Instantiate (waterPrefab, transform.position, Quaternion.identity) as GameObject;
+			instance.transform.parent = transform.parent;
+		}
 	}
 
 	void SpawnEnemyField (Vector2 botLeft, float fieldWidth, float fieldHeight) {
@@ -368,7 +385,7 @@ public class Tetris : MonoBehaviour {
 		return Quaternion.Euler (0, 0, zRot);	
 	}
 
-	public void SpawnMegaTetrosField () {
+	public void SpawnMegaTetrosOffTrail () {
 		foreach (Room r in spelunkyGod.rooms) {
 			if (!r.onTrail) {
 				for (int i = 0; i < megaAttempts; i++) {
@@ -380,7 +397,6 @@ public class Tetris : MonoBehaviour {
 			}
 		}
 	}
-
 
 
 }

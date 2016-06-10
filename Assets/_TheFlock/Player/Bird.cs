@@ -125,7 +125,9 @@ public class Bird : MonoBehaviour {
 				AileronRoll ();
 			}
 		}
-		transform.position = gm.ClampToScreen (transform.position);
+		if (!docked) {
+			transform.position = gm.ClampToScreen (transform.position);
+		}
 	}
 
 	void FixedUpdate () {

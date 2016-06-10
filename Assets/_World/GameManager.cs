@@ -13,27 +13,34 @@ public class GameManager : MonoBehaviour {
 	public GameObject bodyPrefab;
 	public Vector3 birdScale = new Vector3 (1.25f, 1.25f, 1);
 	public Vector3 appointment1 = new Vector3 (100, 0, 0);
-	public float screenBuffer = 1;
+	public float screenClampBuffer = 1;
 	public Text goldText;
 	public List<Transform> appointments = new List<Transform> ();
 	public BigBird bigBird;
 	public int gatesBroken;
 	public Transform exitContainer;
 	public Transform wallContainer;
+	public Transform bodyContainer;
 	public float gallonsPerSquareUnit = 14;
+	public float warpDelay = 2f;
 
 	private List<Transform> alliedTransforms = new List<Transform> (); 
 	private bool paused = false;
 	private NavPointer nav;
 
 	void Awake () {
-		bigBird = GameObject.FindGameObjectWithTag ("BigBird").GetComponent<BigBird> ();
+		bigBird = GameObject.FindObjectOfType<BigBird> ();
 		AddAlliedTransform (bigBird.transform);
 		MakeInvisibleTarget ();
 		exitContainer = new GameObject ().transform;
 		exitContainer.transform.name = "ZoneExits";
+		exitContainer.transform.parent = transform;
 		wallContainer = new GameObject ().transform;
 		wallContainer.transform.name = "BoundaryWalls";
+		wallContainer.transform.parent = transform;
+		bodyContainer = new GameObject ().transform;
+		bodyContainer.transform.name = "Bodies";
+		bodyContainer.transform.parent = transform;
 	}
 
 	void Start () {
@@ -122,8 +129,8 @@ public class GameManager : MonoBehaviour {
 			topRight.y - bottomLeft.y);
 		
 		return new Vector3 (
-			Mathf.Clamp(position.x, cameraRect.xMin + screenBuffer, cameraRect.xMax - screenBuffer),
-			Mathf.Clamp(position.y, cameraRect.yMin + screenBuffer, cameraRect.yMax - screenBuffer),
+			Mathf.Clamp(position.x, cameraRect.xMin + screenClampBuffer, cameraRect.xMax - screenClampBuffer),
+			Mathf.Clamp(position.y, cameraRect.yMin + screenClampBuffer, cameraRect.yMax - screenClampBuffer),
 			transform.position.z);
 	}
 
@@ -136,7 +143,14 @@ public class GameManager : MonoBehaviour {
 	public PlayerBody GetBody () {
 		GameObject obj = Instantiate (bodyPrefab, transform.position, Quaternion.identity) as GameObject;
 		obj.SetActive (false);
+		obj.transform.parent = bodyContainer;
 		PlayerBody pBody = obj.GetComponent<PlayerBody> ();
 		return pBody;
 	}
+
+	public IEnumerator WarpBigBird (Vector3 warpExit) {
+		yield return new WaitForSeconds (warpDelay);
+		bigBird.transform.position = warpExit;
+	}
+
 }

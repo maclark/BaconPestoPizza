@@ -5,6 +5,8 @@ using System.Collections.Generic;
 public class Spelunky {
 	public Room[,] rooms;
 	public List<Vector2> caveExitVectors;
+	public Vector3 topExitVector = Vector3.zero;
+	public Vector3 bottomExitVector = Vector3.zero;
 
 	private int columns;
 	private int rows;
@@ -16,8 +18,7 @@ public class Spelunky {
 	private GameObject boundaryPrefab;
 	private float exitWidth;
 	private GameManager gm;
-	private Vector3 bottomExitVector = Vector3.zero;
-	private Vector3 topExitVector = Vector3.zero;
+
 
 	public Spelunky (Vector2 bottomLeft, int c, int r, float rWidth, float rHeight, GameObject ss, GameObject wallPrefab, float exWidth) {
 		botLeft = bottomLeft;
@@ -48,7 +49,6 @@ public class Spelunky {
 			downRooms [i] = col;
 		}
 		BlazeRoomTrail ();
-		Debug.Log ("finished room trail");
 		DefineOtherRoomsExits ();
 	}
 
@@ -199,11 +199,20 @@ public class Spelunky {
 	}
 
 	public void DestroySpaceSavers () {
+		//This grabs the parent transfrom too, which doesn't have a boxcollider on it.
 		Transform[] spaceSavers = gm.exitContainer.GetComponentsInChildren<Transform> ();
 		for (int i = 0; i < spaceSavers.Length; i++) {
-			GameObject.Destroy (spaceSavers [i].gameObject);
+			if (spaceSavers [i].position == topExitVector) {
+				spaceSavers [i].name = "TopExit";
+				spaceSavers [i].GetComponent<BoxCollider2D> ().isTrigger = true;
+			} else if (spaceSavers [i].position == bottomExitVector) {
+				spaceSavers [i].name = "BottomExit";
+				spaceSavers [i].GetComponent<BoxCollider2D> ().isTrigger = true;
+			}
 		}
 	}
+
+
 	void SpawnBoundaries (Vector2 botLeft, float boundaryWidth, float boundaryHeight) {
 		Vector3 bottomLeftSpawn = new Vector3 ((botLeft.x + bottomExitVector.x - exitWidth / 2) / 2, botLeft.y, 0);
 		GameObject bottomLeftWall = GameObject.Instantiate (boundaryPrefab, bottomLeftSpawn, Quaternion.identity) as GameObject;
@@ -234,5 +243,9 @@ public class Spelunky {
 		GameObject topRightWall = GameObject.Instantiate (boundaryPrefab, topRightSpawn, Quaternion.identity) as GameObject;
 		topRightWall.transform.localScale = new Vector3 (botLeft.x + boundaryWidth - (topExitVector.x + exitWidth / 2), 5f, 0);
 		topRightWall.transform.parent = gm.wallContainer;
+	}
+
+	public void PlaceWarp () {
+	
 	}
 }
