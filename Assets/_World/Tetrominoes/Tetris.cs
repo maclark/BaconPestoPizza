@@ -34,8 +34,8 @@ public class Tetris : MonoBehaviour {
 	public float height;
 	public int tetroAttempts;
 	public int megaAttempts;
-	public int destrutibleSpots;
-	public int destrutibleAttsPerSpot;
+	public int destructibleSpots;
+	public int destructibleAttsPerSpot;
 	public int difficultyMod = 2;
 	public int invaderAttempts;
 	public int invaderCarrierAttempts;
@@ -55,30 +55,27 @@ public class Tetris : MonoBehaviour {
 	public enum LittleTetrominoShape {littleJ, littleLINE, littleS, littleSQUARE, littleT}
 	public enum MegaTetrominoShape {megaL, megaLINE, megaS, megaSQUARE, megaT}
 
-	private float gateWidth;
-	private GameObject gateSpaceSaver;
+	private GameObject spaceSaverPrefab;
 	private GameManager gm;
 	private Spelunky spelunkyGod;
 
 	void Awake () {
-		gateWidth = gatePrefab.transform.localScale.x; 
 		gm = GameObject.FindObjectOfType<GameManager> ();
 	}
 
 
 	// Use this for initialization
 	void Start () {
-		spelunkyGod = new Spelunky (origin, columns, rows, roomWidth, roomHeight, gateSpaceSaverPrefab, wallPrefab, 10f, this);
+		spelunkyGod = new Spelunky (origin, columns, rows, roomWidth, roomHeight, gateSpaceSaverPrefab, wallPrefab, 10f);
 		spelunkyGod.BuildCave ();
 		spelunkyGod.SaveCaveExits ();
-		spelunkyGod.FillOffTrail ();
-		SpawnRectangleField (origin, columns * roomWidth, rows * roomHeight, tetroAttempts);
+		SpawnMegaTetrosField ();
+		SpawnRectangleField 			(origin, columns * roomWidth, rows * roomHeight, tetroAttempts);
+		SpawnEnemyField 				(origin, columns * roomWidth, rows * roomHeight);
+		SpawnDestructibles				(origin, columns * roomWidth, rows * roomHeight, destructibleSpots, destructibleAttsPerSpot);
 		spelunkyGod.OutlineCave ();
+		//spelunkyGod.DestroySpaceSavers ();
 
-		//spawn rectangle field
-		//LayTetros ();
-		//LayDestructibles ();
-		//LayEnemies ();
 
 		//MakeGateSpaceSaver ();
 		//SpawnCircleField (Vector2.zero, radius, attempts);
@@ -245,8 +242,6 @@ public class Tetris : MonoBehaviour {
 		if (CheckSpaceClear (colliders, buffer)) {
 			GameObject instance = Instantiate (megaTetro, transform.position, megaTetro.transform.rotation) as GameObject;
 			instance.transform.parent = transform.parent;
-		} else {
-			Debug.Log ("space not clear for mega");
 		}
 	}
 
@@ -329,20 +324,17 @@ public class Tetris : MonoBehaviour {
 			transform.position = new Vector2 (x, y);
 			SpawnTetromino (null);
 		}
-	
+
+	}
+
+	void SpawnEnemyField (Vector2 botLeft, float fieldWidth, float fieldHeight) {
 		int iAtts = Mathf.RoundToInt (Mathf.Log (invaderAttempts * difficultyMod * (gm.gatesBroken + 1)));
 		int icAtts = Mathf.RoundToInt (Mathf.Log (invaderCarrierAttempts * difficultyMod * (gm.gatesBroken - 1)));
 		int pufAtts = Mathf.RoundToInt (Mathf.Log (pufferAttempts * difficultyMod * (gm.gatesBroken + 1)));
 		int huntPairAtts = Mathf.RoundToInt (Mathf.Log (hunterPairAttempts * difficultyMod * (gm.gatesBroken + 1)));
 		int alkAtts = Mathf.RoundToInt (Mathf.Log (alakazamAttempts * difficultyMod * (gm.gatesBroken + 1)));
 
-		SpawnDestructibles (botLeft, fieldWidth, fieldHeight, destrutibleSpots, destrutibleAttsPerSpot);
-
 		SpawnEnemies (botLeft, fieldWidth, fieldHeight, iAtts, icAtts, pufAtts, huntPairAtts, alkAtts);
-	}
-
-	public void SpawnObstacleField (Vector2 botLeft, float fieldWidth, float fieldHeight) {
-		
 	}
 
 	public void SpawnCircleField (Vector2 origin, float radius, float circleAttempts) {
@@ -375,14 +367,21 @@ public class Tetris : MonoBehaviour {
 		float zRot = Random.Range (0f, 360f);
 		return Quaternion.Euler (0, 0, zRot);	
 	}
-	public int roomsFilled = 0;
-	public void FillRoom (Room r) {
-		if (r.onTrail) {
-			roomsFilled++;
-			SpawnRectangleField (r.botLeft, r.width, r.height, Mathf.RoundToInt (tetroAttempts / (columns * rows)));
-		} else {
-			SpawnObstacleField (r.botLeft, r.width, r.height);			
+
+	public void SpawnMegaTetrosField () {
+		foreach (Room r in spelunkyGod.rooms) {
+			if (!r.onTrail) {
+				for (int i = 0; i < megaAttempts; i++) {
+					float x = Random.Range (r.botLeft.x, r.botLeft.x + roomWidth);
+					float y = Random.Range (r.botLeft.y, r.botLeft.y + roomHeight);
+					transform.position = new Vector2 (x, y);
+					SpawnMegaTetromino (null);
+				}
+			}
 		}
 	}
+
+
+
 }
 

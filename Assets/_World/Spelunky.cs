@@ -18,10 +18,8 @@ public class Spelunky {
 	private GameManager gm;
 	private Vector3 bottomExitVector = Vector3.zero;
 	private Vector3 topExitVector = Vector3.zero;
-	private Tetris tetrisLord;
 
-
-	public Spelunky (Vector2 bottomLeft, int c, int r, float rWidth, float rHeight, GameObject ss, GameObject wallPrefab, float exWidth, Tetris tetris) {
+	public Spelunky (Vector2 bottomLeft, int c, int r, float rWidth, float rHeight, GameObject ss, GameObject wallPrefab, float exWidth) {
 		botLeft = bottomLeft;
 		columns = c;
 		rows = r;
@@ -30,7 +28,6 @@ public class Spelunky {
 		spaceSaverPrefab = ss;
 		boundaryPrefab = wallPrefab;
 		exitWidth = exWidth;
-		tetrisLord = tetris;
 
 		caveExitVectors = new List<Vector2> ();
 		rooms = new Room[columns, rows];
@@ -71,14 +68,14 @@ public class Spelunky {
 				}
 				if (u < downRooms [v]) {
 					//moving right
-					AllowRightExits (rooms[u,v]);
+					AllowRightExits (rooms[u,v], zoneTopRoom);
 					movingRightRoom = true;
 					rooms [u, v].onTrail = true;
 					rooms [u, v].PickExits (zoneTopRoom, movingRightRoom, movingLeftRoom, movingDownRoom);
 					u++;
 				} else if (u > downRooms [v]) {
 					//moving left
-					AllowLeftExits (rooms[u,v]);
+					AllowLeftExits (rooms[u,v], zoneTopRoom);
 					movingLeftRoom = true;
 					rooms [u, v].onTrail = true;
 					rooms [u, v].PickExits (zoneTopRoom, movingRightRoom, movingLeftRoom, movingDownRoom);
@@ -86,7 +83,7 @@ public class Spelunky {
 				} else if (u == downRooms [v]) {
 					//set room with bottom exit
 					movingDownRoom = true;
-					AllowBottomExits(rooms[u,v]);
+					AllowBottomExits(rooms[u,v], zoneTopRoom);
 					rooms [u, v].onTrail = true;
 					rooms [u, v].PickExits (zoneTopRoom, movingRightRoom, movingLeftRoom, movingDownRoom);
 					foundDownRoom = true;
@@ -101,7 +98,7 @@ public class Spelunky {
 		}
 	}
 
-	void AllowRightExits (Room r) {
+	void AllowRightExits (Room r, bool zoneTopRoom) {
 		r.AddAllowedExit (Room.RoomExits.R);
 		r.AddAllowedExit (Room.RoomExits.TR);
 		r.AddAllowedExit (Room.RoomExits.LR);
@@ -110,9 +107,15 @@ public class Spelunky {
 		r.AddAllowedExit (Room.RoomExits.TLR);
 		r.AddAllowedExit (Room.RoomExits.BLR);
 		r.AddAllowedExit (Room.RoomExits.TBLR);
-	}
+		if (zoneTopRoom) {
+			r.RemoveAllowedExit (Room.RoomExits.R);
+			r.RemoveAllowedExit (Room.RoomExits.LR);
+			r.RemoveAllowedExit (Room.RoomExits.BR);
+			r.RemoveAllowedExit (Room.RoomExits.BL);
+			r.RemoveAllowedExit (Room.RoomExits.BLR);
+		}}
 
-	void AllowLeftExits (Room r) {
+	void AllowLeftExits (Room r, bool zoneTopRoom) {
 		r.AddAllowedExit (Room.RoomExits.L);
 		r.AddAllowedExit (Room.RoomExits.TL);
 		r.AddAllowedExit (Room.RoomExits.LR);
@@ -121,9 +124,16 @@ public class Spelunky {
 		r.AddAllowedExit (Room.RoomExits.TLR);
 		r.AddAllowedExit (Room.RoomExits.BLR);
 		r.AddAllowedExit (Room.RoomExits.TBLR);
+		if (zoneTopRoom) {
+			r.RemoveAllowedExit (Room.RoomExits.L);
+			r.RemoveAllowedExit (Room.RoomExits.TL);
+			r.RemoveAllowedExit (Room.RoomExits.LR);
+			r.RemoveAllowedExit (Room.RoomExits.BL);
+			r.RemoveAllowedExit (Room.RoomExits.BLR);
+		}
 	}
 
-	void AllowBottomExits (Room r) {
+	void AllowBottomExits (Room r, bool zoneTopRoom) {
 		r.AddAllowedExit (Room.RoomExits.B);
 		r.AddAllowedExit (Room.RoomExits.BL);
 		r.AddAllowedExit (Room.RoomExits.BR);
@@ -132,11 +142,17 @@ public class Spelunky {
 		r.AddAllowedExit (Room.RoomExits.TBR);
 		r.AddAllowedExit (Room.RoomExits.BLR);
 		r.AddAllowedExit (Room.RoomExits.TBLR);
-	}
+		if (zoneTopRoom) {
+			r.RemoveAllowedExit (Room.RoomExits.B);
+			r.RemoveAllowedExit (Room.RoomExits.BL);
+			r.RemoveAllowedExit (Room.RoomExits.BR);
+			r.RemoveAllowedExit (Room.RoomExits.BL);
+			r.RemoveAllowedExit (Room.RoomExits.BLR);
+		}}
 
 	void DefineOtherRoomsExits () {
-		for (int i = 0; i < rows; i++) {
-			for (int j = 0; j < columns; j++) {
+		for (int i = 0; i < columns; i++) {
+			for (int j = 0; j < rows; j++) {
 				if (rooms [i, j].exitsSet == false) {
 					rooms [i, j].PickExits (false, false);
 				}
@@ -182,6 +198,12 @@ public class Spelunky {
 		}
 	}
 
+	public void DestroySpaceSavers () {
+		Transform[] spaceSavers = gm.exitContainer.GetComponentsInChildren<Transform> ();
+		for (int i = 0; i < spaceSavers.Length; i++) {
+			GameObject.Destroy (spaceSavers [i].gameObject);
+		}
+	}
 	void SpawnBoundaries (Vector2 botLeft, float boundaryWidth, float boundaryHeight) {
 		Vector3 bottomLeftSpawn = new Vector3 ((botLeft.x + bottomExitVector.x - exitWidth / 2) / 2, botLeft.y, 0);
 		GameObject bottomLeftWall = GameObject.Instantiate (boundaryPrefab, bottomLeftSpawn, Quaternion.identity) as GameObject;
@@ -212,28 +234,5 @@ public class Spelunky {
 		GameObject topRightWall = GameObject.Instantiate (boundaryPrefab, topRightSpawn, Quaternion.identity) as GameObject;
 		topRightWall.transform.localScale = new Vector3 (botLeft.x + boundaryWidth - (topExitVector.x + exitWidth / 2), 5f, 0);
 		topRightWall.transform.parent = gm.wallContainer;
-	}
-
-	public void FillOffTrail () {
-		foreach (Room r in rooms) {
-			if (!r.onTrail) {
-				for (int i = 0; i < tetrisLord.megaAttempts; i++) {
-					float x = Random.Range (r.botLeft.x, r.botLeft.x + roomWidth);
-					float y = Random.Range (r.botLeft.y, r.botLeft.y + roomHeight);
-					tetrisLord.transform.position = new Vector2 (x, y);
-					tetrisLord.SpawnMegaTetromino (null);
-				}
-			}
-		}
-	}
-
-	public void MarkTrail () {
-		GameObject trailMarkers = new GameObject ();
-		foreach (Room r in rooms) {
-			if (r.onTrail) {
-				tetrisLord.transform.position = new Vector2 (r.botLeft.x + roomWidth / 2, r.botLeft.y + roomHeight / 2);
-				tetrisLord.SpawnTetromino (null);
-			}
-		}
 	}
 }

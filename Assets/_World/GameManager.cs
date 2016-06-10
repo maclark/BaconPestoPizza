@@ -20,17 +20,16 @@ public class GameManager : MonoBehaviour {
 	public int gatesBroken;
 	public Transform exitContainer;
 	public Transform wallContainer;
+	public float gallonsPerSquareUnit = 14;
 
 	private List<Transform> alliedTransforms = new List<Transform> (); 
 	private bool paused = false;
 	private NavPointer nav;
-	private Tetris tetrisGod;
 
 	void Awake () {
 		bigBird = GameObject.FindGameObjectWithTag ("BigBird").GetComponent<BigBird> ();
 		AddAlliedTransform (bigBird.transform);
 		MakeInvisibleTarget ();
-		tetrisGod = GameObject.FindObjectOfType<Tetris> ();
 		exitContainer = new GameObject ().transform;
 		exitContainer.transform.name = "ZoneExits";
 		wallContainer = new GameObject ().transform;
@@ -81,12 +80,12 @@ public class GameManager : MonoBehaviour {
 			return null;
 	}
 
-	public HealthBar GetBigBirdWaterTank () {
-		return bigBirdWaterTank.GetComponentInChildren<HealthBar> ();
+	public ResourceBar GetBigBirdWaterTank () {
+		return bigBirdWaterTank.GetComponentInChildren<ResourceBar> ();
 	}
 
-	public HealthBar GetBigBirdEnergyTank () {
-		return bigBirdEnergyTank.GetComponentInChildren<HealthBar> ();
+	public ResourceBar GetBigBirdEnergyTank () {
+		return bigBirdEnergyTank.GetComponentInChildren<ResourceBar> ();
 	}
 
 	public void Navigate (float leftHorizontal, float leftVertical) {

@@ -6,6 +6,10 @@ public class BigBird : MonoBehaviour {
 
 	public float forceMag = 75f;
 	public int hp = 1000;
+	public float waterTankCapacity = 10000f;
+	public float sweatRate = 10f;
+	public float drinkRate = 100f;
+	public bool drinking = false;
 	public int turn = 0;
 	public float turnSpeed = 200f;
 	public float halfSecFill = 5f;
@@ -24,13 +28,15 @@ public class BigBird : MonoBehaviour {
 	private Quaternion targetRotation = Quaternion.identity;
 	private bool engineOn = false;
 	private bool landed = false;
-	private HealthBar waterTank;
-	private HealthBar energyTank;
+	private ResourceBar waterTank;
+	private ResourceBar energyTank;
+	private float water;
 	private Bird birdGettingRepairs = null;
 	private Bird birdGettingGas = null;
 	private Transform target = null;
 	private Pump pump;
 	private Medkit medkit;
+	private WaterSource localWater;
 	private Thruster[] thrusters;
 	private List<Bird> dockedBirds = new List<Bird> ();
 	private List<Bird> gasLine = new List<Bird> ();
@@ -49,8 +55,9 @@ public class BigBird : MonoBehaviour {
 	}
 
 	void Start () {
-		waterTank.max = hp;
-		energyTank.max = hp;
+		waterTank.capacity = waterTankCapacity;
+		waterTank.SetResource (waterTankCapacity);
+		energyTank.capacity = hp;
 		waterTank.current = hp;
 		energyTank.current = hp;
 	}
@@ -67,6 +74,7 @@ public class BigBird : MonoBehaviour {
 					TurnEngineOff ();
 				}
 			}
+			Sweat ();
 			rb.AddForce (transform.up * forceMag);
 		}
 
@@ -77,6 +85,11 @@ public class BigBird : MonoBehaviour {
 				//SetCamera ();
 			}
 		}
+
+		if (drinking) {
+			Drink ();
+		}
+
 		SetCamera ();
 
 	}
@@ -180,7 +193,7 @@ public class BigBird : MonoBehaviour {
 
 	public void TakeDamage( int dam) {
 		hp -= dam;
-		energyTank.AdjustHealth (hp);
+		energyTank.SetResource (hp);
 		if (hp <= 0) {
 			Die ();
 		}
@@ -385,5 +398,43 @@ public class BigBird : MonoBehaviour {
 			dot = Vector3.zero;
 	
 		return dot;
+	}
+
+	public void AtWaterSource (WaterSource s) {
+		drinking = true;
+		localWater = s;
+	}
+
+	public void LeftWaterSource (WaterSource s) {
+		if (localWater == s) {
+			drinking = false;
+			localWater = null;
+		}
+	}
+
+	public void Drink () {
+		if (waterTank.full || localWater.dry) {
+			return;
+		} else {
+			float thisGulp;
+			if (localWater.gallons < drinkRate) {
+				thisGulp = localWater.gallons;
+			} else {
+				thisGulp = drinkRate;
+			}
+			waterTank.IncreaseResource (localWater.Gulp (thisGulp));
+		}
+	}
+
+	public void Sweat () {
+		waterTank.DecreaseResource (sweatRate);
+
+		if (waterTank.empty) {
+			Dehydrated ();
+		}
+	}
+
+	void Dehydrated () {
+		Debug.Log ("do dehydration");
 	}
 }
