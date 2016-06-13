@@ -5,6 +5,7 @@ using System.Collections.Generic;
 
 public class Bird : MonoBehaviour {
 
+	public LayerMask releaseMask;
 	public Player p;
 	public int health = 100;
 	public int maxHealth = 100;
@@ -40,10 +41,13 @@ public class Bird : MonoBehaviour {
 	public bool windingUp = false;
 	public bool throwingHarp = false;
 	public bool catchingHarp = false;
+	public bool pregnant = false;
+	public bool inHeat = false;
 
 	public Transform body;
 	public GameObject harpoonPrefab;
 	public GameObject gasLightPrefab;
+	public GameObject eggPrefab;
 	public OrbWeb webTrap;
 	public List<Bird> linkedBirds;
 	public List<Harpoon> otherHarps;
@@ -196,7 +200,12 @@ public class Bird : MonoBehaviour {
 					//coll.gameObject.GetComponent<Flyer> ().Die ();
 				}
 			}
-		} 
+		} else if (coll.transform.tag == "Player") {
+			if (inHeat) {
+				pregnant = true;
+				inHeat = false;
+			}
+		}
 	}
 
 	void OnCollisionExit2D (Collision2D coll) {
@@ -408,12 +417,25 @@ public class Bird : MonoBehaviour {
 			Debug.Log ("Can't undock unhealthy bird.");
 			return;
 		}
+
+		Vector3 releaseDirection = transform.position - bigBird.transform.position;
+		releaseDirection.Normalize ();
+		RaycastHit2D hit = Physics2D.Raycast (dock.transform.position, releaseDirection, 6f, releaseMask);
+		if (hit.transform != null) {
+			print ("undock blocked by " + hit.transform.name);
+			return;
+		}
+
 		if (dock.transform.parent == bigBird.transform) {
 			bigBird.RemoveFromDockedBirds (this);
+			if (pregnant) {
+				LayEgg ();
+			} else {
+				dock.gameObject.layer = LayerMask.NameToLayer ("Default");
+			}
 		}
 
 		dock.GetComponent<BoxCollider2D> ().enabled = true;
-		dock.gameObject.layer = LayerMask.NameToLayer ("Default");
 		docked = false;
 		dock.bird = null;
 		dock = null;
@@ -421,8 +443,7 @@ public class Bird : MonoBehaviour {
 		transform.parent = null;
 		transform.rotation = Quaternion.identity;
 		rb.WakeUp ();
-		Vector3 releaseDirection = transform.position - bigBird.transform.position;
-		releaseDirection.Normalize ();
+
 		rb.AddForce (releaseDirection * boostForceMag);
 		Invoke ("EnableColliders", .5f);
 		sr.sortingLayerName = "Birds";
@@ -742,4 +763,19 @@ public class Bird : MonoBehaviour {
 		}
 		return totalMass;
 	}
+
+	public void LayEgg () {
+		print ("laid an egg");
+		GameObject eggObj = Instantiate (eggPrefab, transform.position, Quaternion.identity) as GameObject;
+		//eggObj.transform.parent = dock.transform;
+		eggObj.name = "EGG";
+		//dock.egg = eggObj.GetComponent<Egg> ();
+		pregnant = false;
+	}
+
+	public void EatGreens () {
+		print ("ate greens, in heat");
+		inHeat = true;
+	}
+
 }

@@ -21,7 +21,7 @@ public class Tetris : MonoBehaviour {
 	public GameObject littleSQUARE;
 	public GameObject littleT;
 	public GameObject wallPrefab;
-	public GameObject gatePrefab;
+	public GameObject portalPrefab;
 	public GameObject gateSpaceSaverPrefab;
 	public GameObject invaderPrefab;
 	public GameObject invaderCarrierPrefab;
@@ -44,6 +44,7 @@ public class Tetris : MonoBehaviour {
 	public int hunterPairAttempts;
 	public int alakazamAttempts;
 	public int waterAttempts;
+	public int shopAttempts;
 
 	public Vector2 origin;
 	public int columns;
@@ -68,29 +69,14 @@ public class Tetris : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
-		spelunkyGod = new Spelunky (origin, columns, rows, roomWidth, roomHeight, gateSpaceSaverPrefab, wallPrefab, 10f);
-		spelunkyGod.BuildCave ();
-		spelunkyGod.SaveCaveExits ();
-		SpawnMegaTetrosOffTrail ();
-		//SpawnBuildingField ();
-		SpawnWaterField 				(origin, columns * roomWidth, rows * roomHeight, waterAttempts);
-		SpawnRectangleField 			(origin, columns * roomWidth, rows * roomHeight, tetroAttempts);
-		SpawnEnemyField 				(origin, columns * roomWidth, rows * roomHeight);
-		SpawnDestructibles				(origin, columns * roomWidth, rows * roomHeight, destructibleSpots, destructibleAttsPerSpot);
-		spelunkyGod.OutlineCave ();
-		spelunkyGod.DestroySpaceSavers ();
-		spelunkyGod.PlaceWarp ();
+		SpawnNewZone ();
 		gm.StartCoroutine (gm.WarpBigBird (spelunkyGod.bottomExitVector));
-
-
-		//MakeGateSpaceSaver ();
-		//SpawnCircleField (Vector2.zero, radius, attempts);
 	}
 	
 	// Update is called once per frame
 	void Update () {
 		if (Input.GetKeyDown (KeyCode.Space)) {
-			SpawnTetromino (null);
+			SpawnShopField (origin, columns * roomWidth, rows * roomHeight, shopAttempts);
 		} else if (Input.GetKeyDown (KeyCode.L)) {
 			SpawnTetromino (L);
 		} else if (Input.GetKeyDown (KeyCode.I)) {
@@ -102,6 +88,22 @@ public class Tetris : MonoBehaviour {
 		} else if (Input.GetKeyDown (KeyCode.T)) {
 			SpawnTetromino (T);
 		} 
+	}
+
+	public void SpawnNewZone () {
+		spelunkyGod = new Spelunky (origin, columns, rows, roomWidth, roomHeight, gateSpaceSaverPrefab, wallPrefab, 10f, portalPrefab);
+		spelunkyGod.BuildCave ();
+		spelunkyGod.SaveCaveExits ();
+		spelunkyGod.PlacePortal ();
+		spelunkyGod.PlaceTunnel ();
+		SpawnMegaTetrosOffTrail ();
+		SpawnWaterField (origin, columns * roomWidth, rows * roomHeight, waterAttempts);
+		SpawnRectangleField (origin, columns * roomWidth, rows * roomHeight, tetroAttempts);
+		spelunkyGod.OutlineCave ();
+		SpawnShopField (origin, columns * roomWidth, rows * roomHeight, shopAttempts);
+		SpawnEnemyField (origin, columns * roomWidth, rows * roomHeight);
+		SpawnDestructibles (origin, columns * roomWidth, rows * roomHeight, destructibleSpots, destructibleAttsPerSpot);
+		spelunkyGod.DestroySpaceSavers ();
 	}
 
 	public GameObject GetRandomMegaTetromino () {
@@ -210,13 +212,15 @@ public class Tetris : MonoBehaviour {
 			BoxCollider2D col = possibleColliders [i];
 			Vector2 boxSize = new Vector2 (col.transform.localScale.x + buff * 2, col.transform.localScale.y + buff * 2);
 			Vector2 spawnPosition = transform.position + col.transform.position;
+			//Debug.Log (possibleColliders [i].transform.name + " at " + spawnPosition + " with boxSize: " + boxSize);
 			float angle = 0f;
 			if (col.transform.parent) {
 				angle = col.transform.parent.rotation.eulerAngles.z;
 			}
 			RaycastHit2D hit = Physics2D.BoxCast (spawnPosition, boxSize, angle, Vector2.zero, 0f); 
 			if (hit.transform != null) {
-				return false;
+				//Debug.Log (possibleColliders [i].transform.name + " hit " + hit.transform.name);
+				return false;  
 			}
 		}
 		return true;
@@ -236,7 +240,6 @@ public class Tetris : MonoBehaviour {
 			GameObject instance = Instantiate (tetro, transform.position, tetro.transform.rotation) as GameObject;
 			instance.transform.parent = transform.parent;
 		} else {
-			print ("tetro failed");
 		}
 	}
 
@@ -266,18 +269,20 @@ public class Tetris : MonoBehaviour {
 		}
 	}
 
-	void SpawnGameObject (GameObject obj) {
+	void SpawnObject (GameObject obj, Transform parent) {
 		BoxCollider2D[] colls = obj.GetComponentsInChildren<BoxCollider2D> ();
 		if (colls.Length > 0) {
 			if (CheckSpaceClear(colls, 0f)) {
-				Instantiate(obj, transform.position, transform.rotation);
+				GameObject go = Instantiate(obj, transform.position, transform.rotation) as GameObject;
+				go.transform.parent = parent;
 			}
 		}
 
 		CircleCollider2D cc = obj.GetComponent<CircleCollider2D> ();
 		if (cc) {
 			if (CheckSpaceClear(cc, 0f)) {
-				Instantiate(obj, transform.position, transform.rotation);
+				GameObject go = Instantiate(obj, transform.position, transform.rotation) as GameObject;
+				go.transform.parent = gm.enemyContainer;
 			}
 		}
 	}
@@ -287,35 +292,35 @@ public class Tetris : MonoBehaviour {
 			float x = Random.Range (botLeft.x, botLeft.x + fieldWidth);
 			float y = Random.Range (botLeft.y, botLeft.y+ fieldHeight);
 			transform.position = new Vector2 (x, y);
-			SpawnGameObject (invaderPrefab);
+			SpawnObject (invaderPrefab, gm.enemyContainer);
 		}
 
 		for (int i = 0; i < invCarAttempts; i++) {
 			float x = Random.Range (botLeft.x, botLeft.x + fieldWidth);
 			float y = Random.Range (botLeft.y, botLeft.y+ fieldHeight);
 			transform.position = new Vector2 (x, y);
-			SpawnGameObject (invaderCarrierPrefab);
+			SpawnObject (invaderCarrierPrefab, gm.enemyContainer);
 		}
 
 		for (int i = 0; i < puffAttempts; i++) {
 			float x = Random.Range (botLeft.x, botLeft.x + fieldWidth);
 			float y = Random.Range (botLeft.y, botLeft.y+ fieldHeight);
 			transform.position = new Vector2 (x, y);
-			SpawnGameObject (pufferPrefab);
+			SpawnObject (pufferPrefab, gm.enemyContainer);
 		}
 
 		for (int i = 0; i < hunterAttempts; i++) {
 			float x = Random.Range (botLeft.x, botLeft.x + fieldWidth);
 			float y = Random.Range (botLeft.y, botLeft.y+ fieldHeight);
 			transform.position = new Vector2 (x, y);
-			SpawnGameObject (hunterPairPrefab);
+			SpawnObject (hunterPairPrefab, gm.enemyContainer);
 		}
 
 		for (int i = 0; i < alkAtts; i++) {
 			float x = Random.Range (botLeft.x, botLeft.x + fieldWidth);
 			float y = Random.Range (botLeft.y, botLeft.y+ fieldHeight);
 			transform.position = new Vector2 (x, y);
-			SpawnGameObject (alakazamPrefab);
+			SpawnObject (alakazamPrefab, gm.enemyContainer);
 		}
 	}
 
@@ -328,16 +333,29 @@ public class Tetris : MonoBehaviour {
 
 		for (int i = 0; i < attempts; i++) {
 			float x = Random.Range (botLeft.x, botLeft.x + fieldWidth);
-			float y = Random.Range (botLeft.y, botLeft.y+ fieldHeight);
+			float y = Random.Range (botLeft.y, botLeft.y + fieldHeight);
 			transform.position = new Vector2 (x, y);
 			SpawnTetromino (null);
+		}
+	}
+
+	void SpawnShopField (Vector2 botLeft, float fieldWidth, float fieldHeight, int attempts) {
+		for (int i = 0; i < attempts; i++) {
+			float x = Random.Range (botLeft.x, botLeft.x + fieldWidth);
+			float y = Random.Range (botLeft.y, botLeft.y + fieldHeight);
+			transform.position = new Vector2 (x, y);	
+			BoxCollider2D[] colls = gm.shopPrefab.GetComponent<Shop> ().GetColliderChild ();
+			if (CheckSpaceClear(colls, 0f)) {
+				GameObject go = Instantiate (gm.shopPrefab, transform.position, transform.rotation) as GameObject;
+				go.transform.parent = gm.buildingContainer;
+			}
 		}
 	}
 
 	void SpawnWaterField (Vector2 botLeft, float fieldWidth, float fieldHeight, int attempts) {
 		for (int i = 0; i < attempts; i++) {
 			float x = Random.Range (botLeft.x, botLeft.x + fieldWidth);
-			float y = Random.Range (botLeft.y, botLeft.y+ fieldHeight);
+			float y = Random.Range (botLeft.y, botLeft.y + fieldHeight);
 			transform.position = new Vector2 (x, y);
 			GameObject instance = Instantiate (waterPrefab, transform.position, Quaternion.identity) as GameObject;
 			instance.transform.parent = transform.parent;
@@ -345,11 +363,11 @@ public class Tetris : MonoBehaviour {
 	}
 
 	void SpawnEnemyField (Vector2 botLeft, float fieldWidth, float fieldHeight) {
-		int iAtts = Mathf.RoundToInt (Mathf.Log (invaderAttempts * difficultyMod * (gm.gatesBroken + 1)));
-		int icAtts = Mathf.RoundToInt (Mathf.Log (invaderCarrierAttempts * difficultyMod * (gm.gatesBroken - 1)));
-		int pufAtts = Mathf.RoundToInt (Mathf.Log (pufferAttempts * difficultyMod * (gm.gatesBroken + 1)));
-		int huntPairAtts = Mathf.RoundToInt (Mathf.Log (hunterPairAttempts * difficultyMod * (gm.gatesBroken + 1)));
-		int alkAtts = Mathf.RoundToInt (Mathf.Log (alakazamAttempts * difficultyMod * (gm.gatesBroken + 1)));
+		int iAtts = Mathf.RoundToInt (Mathf.Log (invaderAttempts * difficultyMod * (gm.zoneNumber + 1)));
+		int icAtts = Mathf.RoundToInt (Mathf.Log (invaderCarrierAttempts * difficultyMod * (gm.zoneNumber - 1)));
+		int pufAtts = Mathf.RoundToInt (Mathf.Log (pufferAttempts * difficultyMod * (gm.zoneNumber + 1)));
+		int huntPairAtts = Mathf.RoundToInt (Mathf.Log (hunterPairAttempts * difficultyMod * (gm.zoneNumber + 1)));
+		int alkAtts = Mathf.RoundToInt (Mathf.Log (alakazamAttempts * difficultyMod * (gm.zoneNumber + 1)));
 
 		SpawnEnemies (botLeft, fieldWidth, fieldHeight, iAtts, icAtts, pufAtts, huntPairAtts, alkAtts);
 	}

@@ -2,7 +2,7 @@
 using System.Collections;
 
 public class Cargo : MonoBehaviour {
-	public enum CargoType {POWERBIRD, AUTOTURRET, SHIELD, GOLD}
+	public enum CargoType {POWERBIRD, AUTOTURRET, SHIELD, GOLD, GREENS}
 	public CargoType cargoType;
 
 	private SpriteRenderer sr;
@@ -12,7 +12,9 @@ public class Cargo : MonoBehaviour {
 		RandomType ();
 	}
 
-	void OnCollision2D (Collision2D coll) {
+	void OnCollisionEnter2D (Collision2D coll) {
+		print (coll.transform.tag);
+		print ("collision");
 		if (coll.transform.tag == "Player") {
 			Bird birdie = coll.transform.GetComponent<Bird> ();
 			if (cargoType == Cargo.CargoType.SHIELD) {
@@ -20,15 +22,20 @@ public class Cargo : MonoBehaviour {
 					birdie.Shield.ActivateShield ();
 					Destroy (gameObject);
 				}
+			} else if (cargoType == Cargo.CargoType.GREENS) {
+				birdie.EatGreens ();
+				Destroy (gameObject);
 			}
 		}
 	}
 
 	void OnTriggerEnter2D (Collider2D other) {
+		print (other.transform.tag + " trigger");
+
 	}
 
 	public void RandomType () {
-		cargoType = (CargoType) Random.Range (0, 4);
+		cargoType = (CargoType) Random.Range (0, 5);
 
 		switch (cargoType) 
 		{
@@ -43,6 +50,9 @@ public class Cargo : MonoBehaviour {
 			break;
 		case CargoType.GOLD:
 			sr.color = Color.yellow;
+			break;
+		case CargoType.GREENS:
+			sr.color = Color.green;
 			break;
 		default:
 			break;

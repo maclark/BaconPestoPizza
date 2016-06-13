@@ -16,11 +16,12 @@ public class Spelunky {
 	private int[] downRooms;
 	private GameObject spaceSaverPrefab;
 	private GameObject boundaryPrefab;
+	private GameObject portalPrefab;
 	private float exitWidth;
 	private GameManager gm;
 
 
-	public Spelunky (Vector2 bottomLeft, int c, int r, float rWidth, float rHeight, GameObject ss, GameObject wallPrefab, float exWidth) {
+	public Spelunky (Vector2 bottomLeft, int c, int r, float rWidth, float rHeight, GameObject ss, GameObject wallPrefab, float exWidth, GameObject portPrefab) {
 		botLeft = bottomLeft;
 		columns = c;
 		rows = r;
@@ -28,6 +29,7 @@ public class Spelunky {
 		roomHeight = rHeight;
 		spaceSaverPrefab = ss;
 		boundaryPrefab = wallPrefab;
+		portalPrefab = portPrefab;
 		exitWidth = exWidth;
 
 		caveExitVectors = new List<Vector2> ();
@@ -173,8 +175,6 @@ public class Spelunky {
 
 	public void OutlineCave () {
 		SpawnBoundaries (botLeft, columns * roomWidth, rows * roomHeight);
-		//LayBuildings ();
-		//LayMegaTetros ();
 	}
 
 	public void SaveCaveExits () {
@@ -208,6 +208,8 @@ public class Spelunky {
 			} else if (spaceSavers [i].position == bottomExitVector) {
 				spaceSavers [i].name = "BottomExit";
 				spaceSavers [i].GetComponent<BoxCollider2D> ().isTrigger = true;
+			} else if (spaceSavers [i].GetComponent<BoxCollider2D> ()) {
+				spaceSavers [i].GetComponent<BoxCollider2D> ().isTrigger = true;
 			}
 		}
 	}
@@ -217,35 +219,51 @@ public class Spelunky {
 		Vector3 bottomLeftSpawn = new Vector3 ((botLeft.x + bottomExitVector.x - exitWidth / 2) / 2, botLeft.y, 0);
 		GameObject bottomLeftWall = GameObject.Instantiate (boundaryPrefab, bottomLeftSpawn, Quaternion.identity) as GameObject;
 		bottomLeftWall.transform.localScale = new Vector3 ((bottomExitVector.x - exitWidth / 2 - botLeft.x), 5f, 0);
-		bottomLeftWall.transform.parent = gm.wallContainer;
+		bottomLeftWall.transform.parent = gm.boundaryContainer;
 
 		Vector3 bottomRightSpawn = new Vector3 ((botLeft.x + boundaryWidth + bottomExitVector.x + exitWidth / 2) / 2, botLeft.y, 0);
 		GameObject bottomRightWall = GameObject.Instantiate (boundaryPrefab, bottomRightSpawn, Quaternion.identity) as GameObject;
 		bottomRightWall.transform.localScale = new Vector3 (botLeft.x + boundaryWidth - (bottomExitVector.x + exitWidth / 2), 5f, 0);
-		bottomRightWall.transform.parent = gm.wallContainer;
+		bottomRightWall.transform.parent = gm.boundaryContainer;
 
 		Vector3 leftWallSpawn = new Vector3 (botLeft.x, botLeft.y + boundaryHeight / 2, 0);
 		GameObject leftWall = GameObject.Instantiate (boundaryPrefab, leftWallSpawn, Quaternion.identity) as GameObject;
 		leftWall.transform.localScale = new Vector3 (5f, boundaryHeight, 0);
-		leftWall.transform.parent = gm.wallContainer;
+		leftWall.transform.parent = gm.boundaryContainer;
 
 		Vector3 rightWallSpawn = new Vector3 (botLeft.x + boundaryWidth, botLeft.y + boundaryHeight / 2, 0);
 		GameObject rightWall = GameObject.Instantiate (boundaryPrefab, rightWallSpawn, Quaternion.identity) as GameObject;
 		rightWall.transform.localScale = new Vector3 (5f, boundaryHeight, 0);
-		rightWall.transform.parent = gm.wallContainer;
+		rightWall.transform.parent = gm.boundaryContainer;
 
 		Vector3 topLeftSpawn = new Vector3 ((botLeft.x + topExitVector.x - exitWidth / 2) / 2, botLeft.y + boundaryHeight);
 		GameObject topLeftWall = GameObject.Instantiate (boundaryPrefab, topLeftSpawn, Quaternion.identity) as GameObject;
 		topLeftWall.transform.localScale = new Vector3 ((topExitVector.x - exitWidth / 2 - botLeft.x), 5f, 0);
-		topLeftWall.transform.parent = gm.wallContainer;
+		topLeftWall.transform.parent = gm.boundaryContainer;
 
 		Vector3 topRightSpawn = new Vector3 ((botLeft.x + boundaryWidth + topExitVector.x + exitWidth / 2) / 2, botLeft.y + boundaryHeight);
 		GameObject topRightWall = GameObject.Instantiate (boundaryPrefab, topRightSpawn, Quaternion.identity) as GameObject;
 		topRightWall.transform.localScale = new Vector3 (botLeft.x + boundaryWidth - (topExitVector.x + exitWidth / 2), 5f, 0);
-		topRightWall.transform.parent = gm.wallContainer;
+		topRightWall.transform.parent = gm.boundaryContainer;
 	}
 
-	public void PlaceWarp () {
-	
+	public void PlacePortal () {
+		if (gm.nextPortal) {
+			gm.lastPortalPosition = gm.nextPortal.transform.position;
+		}
+		gm.nextPortal = GameObject.Instantiate (portalPrefab, topExitVector, Quaternion.identity) as GameObject;
+		gm.nextPortal.transform.parent = gm.boundaryContainer;
+	}
+
+	public void PlaceTunnel () {
+		if (gm.lastPortalPosition != Vector3.zero) {
+			Vector3 endOfPortalTail = gm.lastPortalPosition + gm.endOfPortalTailOffset;
+			float distance = Vector3.Distance (bottomExitVector, endOfPortalTail);
+			Vector3 spawnPoint = (bottomExitVector + endOfPortalTail) / 2;
+			Quaternion tunnelRot = Quaternion.LookRotation (gm.transform.forward, bottomExitVector - endOfPortalTail);
+			GameObject tunnel = GameObject.Instantiate (gm.tunnelPrefab, spawnPoint, tunnelRot) as GameObject;
+			tunnel.transform.localScale = new Vector3 (tunnel.transform.localScale.x, distance, 1);
+			tunnel.transform.parent = gm.boundaryContainer;
+		}
 	}
 }

@@ -6,6 +6,7 @@ public class Room {
 	public Vector2 botLeft;
 	public float width;
 	public float height;
+	public float exitBuffer = 5f;
 	public enum RoomExits {NONE, T, TB, TL, TR, TBL, TBR, TLR, TBLR, B, BL, BR, BLR, L, LR, R}
 	public bool exitsSet = false;
 	public bool zoneExit = false;
@@ -165,14 +166,14 @@ public class Room {
 		float y;
 		switch (side) {
 		case "T":
-			x = Random.Range (botLeft.x, botLeft.x + width);
+			x = Random.Range (botLeft.x + exitBuffer, botLeft.x + width - exitBuffer);
 			y = botLeft.y + height;
 			if (zoneTopRoom) {
 				cave.caveExitVectors.Add (new Vector2 (x, y));
 			}
 			break;
 		case "B":
-			x = Random.Range (botLeft.x, botLeft.x + width);
+			x = Random.Range (botLeft.x + exitBuffer, botLeft.x + width - exitBuffer);
 			y = botLeft.y;
 			if (movingDownRoom) {
 				cave.caveExitVectors.Add (new Vector2 (x, y));

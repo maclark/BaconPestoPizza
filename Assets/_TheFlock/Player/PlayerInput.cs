@@ -29,7 +29,7 @@ public class PlayerInput : MonoBehaviour {
 	public string leftClick = "empty";
 	public string rightClick = "empty";
 
-	public enum State {NEUTRAL, FLYING, CHANGING_STATIONS, DOCKED, ON_TURRET, PILOTING, NAVIGATING, IN_BUBBLE, IN_WEB, IN_HOLD, ON_PLATFORM, ON_FOOT}
+	public enum State {NEUTRAL, FLYING, CHANGING_STATIONS, DOCKED, ON_TURRET, PILOTING, NAVIGATING, IN_BUBBLE, IN_WEB, IN_HOLD, ON_PLATFORM, IN_COOP, ON_FOOT}
 	public State state = State.DOCKED;
 	public State selectedState = State.NEUTRAL;
 
@@ -227,8 +227,7 @@ public class PlayerInput : MonoBehaviour {
 
 		if (state == State.NEUTRAL) {
 			HandleNeutralInput ();
-		} 
-		else if (state == State.FLYING) {
+		} else if (state == State.FLYING) {
 			HandleFlyingInput ();
 		} else if (state == State.CHANGING_STATIONS) {
 			HandleChangingStations ();
@@ -246,6 +245,8 @@ public class PlayerInput : MonoBehaviour {
 			HandleInHoldInput ();
 		} else if (state == State.ON_PLATFORM) {
 			HandleOnPlatformInput ();
+		} else if (state == State.IN_COOP) {
+			HandleInCoopInput ();
 		} else if (state == State.ON_FOOT) {
 			HandleOnFootInput ();
 		}
@@ -340,6 +341,8 @@ public class PlayerInput : MonoBehaviour {
 				selectedState = State.ON_TURRET;
 			} else if (hit.collider.name == "CargoPlatform") {
 				selectedState = State.ON_PLATFORM;
+			} else if (hit.collider.name == "Coop") {
+				selectedState = State.IN_COOP;
 			} else if (hit.collider.name == "BoardingZone") {
 				selectedState = State.ON_FOOT;
 			}
@@ -437,6 +440,12 @@ public class PlayerInput : MonoBehaviour {
 			}		
 			state = State.CHANGING_STATIONS;
 			return;
+		}
+
+		if (Input.GetButtonDown (xSquareButton)) {
+			if (station.GetComponent<Dock> ().egg) {
+				print ("pick up egg");
+			}
 		}
 
 		if (p.b == null && station.GetComponent<Dock> ().bird) {
@@ -561,6 +570,13 @@ public class PlayerInput : MonoBehaviour {
 			if (gm.bigBird.hold.platformCargo) {
 				gm.bigBird.hold.Dump (gm.bigBird.hold.platformCargo.transform);
 			}
+		}
+	}
+
+	void HandleInCoopInput () {
+		if (Input.GetButtonDown (bCircleButton)) {
+			state = State.CHANGING_STATIONS;
+			return;
 		}
 	}
 
