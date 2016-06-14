@@ -284,6 +284,11 @@ public class PlayerInput : MonoBehaviour {
 			station.GetComponentInChildren<SpriteRenderer> ().color = p.color;
 		} else if (state == State.PILOTING) {
 			station.GetComponentInChildren<SpriteRenderer> ().color = p.color;
+		} else if (state == State.IN_COOP) {
+			sr.enabled = true;
+			p.ManifestFlesh (transform.position, "BigBird", 1);
+			p.body.transform.parent = station.transform;
+			return;
 		} else if (state == State.ON_FOOT) {
 			p.Disembark (station.transform.position);
 			return;
@@ -299,7 +304,6 @@ public class PlayerInput : MonoBehaviour {
 			ManStation ();
 			return;
 		} 
-
 		sr.enabled = true;
 
 		float horizontalness = 0f;
@@ -312,7 +316,7 @@ public class PlayerInput : MonoBehaviour {
 				verticalness = Input.GetAxis(LSVertical);
 				horizontalness = Input.GetAxis(LSHorizontal);
 			} else if (Time.time > timeOfStationcast + moveCooldown) {
-				stationcasting =  false;
+				stationcasting =  false; 
 			}
 
 		} else if (Input.GetAxisRaw(LSHorizontal) == 0 && Input.GetAxisRaw(LSVertical) == 0) {
@@ -443,8 +447,11 @@ public class PlayerInput : MonoBehaviour {
 		}
 
 		if (Input.GetButtonDown (xSquareButton)) {
-			if (station.GetComponent<Dock> ().egg) {
-				print ("pick up egg");
+			if (station.GetComponent<Dock> ().item) {
+				p.itemTouching = station.GetComponent<Dock> ().item;
+				p.PickUpItem ();
+			} else if (!station.GetComponent<Dock> ().item && p.itemHeld) {
+				p.DropItem ();
 			}
 		}
 
@@ -456,6 +463,38 @@ public class PlayerInput : MonoBehaviour {
 			p.b.Undock ();
 			if (!p.b.docked) {
 				state = State.FLYING;
+			}
+		}
+	}
+
+	void HandleInCoopInput () {
+		if (Input.GetButtonDown (bCircleButton)) {
+			print ("pressed b in coop");
+			p.transform.parent = station;
+			p.body.gameObject.SetActive (false);
+			print ("body inactive");
+
+			state = State.CHANGING_STATIONS;
+			return;
+		}
+
+		p.body.direction = new Vector2 (Input.GetAxis (LSHorizontal), Input.GetAxis (LSVertical));
+
+		Vector2 rightStick = new Vector2 (Input.GetAxis (RSHorizontal), Input.GetAxis (RSVertical));
+		if (rightStick != Vector2.zero) {
+			p.aim = rightStick;
+		} else if (p.aim == Vector3.zero) {
+			if (p.body.direction != Vector2.zero) {
+				p.aim = new Vector3 (p.body.direction.x, p.body.direction.y, 0);
+			}
+		}
+
+
+		if (Input.GetButtonDown (xSquareButton)) {
+			if (p.itemHeld) {
+				p.DropItem ();
+			} else if (p.itemTouching) {
+				p.PickUpItem ();
 			}
 		}
 	}
@@ -570,13 +609,6 @@ public class PlayerInput : MonoBehaviour {
 			if (gm.bigBird.hold.platformCargo) {
 				gm.bigBird.hold.Dump (gm.bigBird.hold.platformCargo.transform);
 			}
-		}
-	}
-
-	void HandleInCoopInput () {
-		if (Input.GetButtonDown (bCircleButton)) {
-			state = State.CHANGING_STATIONS;
-			return;
 		}
 	}
 

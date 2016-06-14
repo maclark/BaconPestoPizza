@@ -12,6 +12,8 @@ public class Player : MonoBehaviour {
 	public Vector3 aim = Vector3.zero;
 	public Sprite[] sprites = new Sprite[2];
 	public PlayerBody body;
+	public Transform itemHeld;
+	public Transform itemTouching;
 
 	private bool holdingString = false;
 	private GameManager gm;
@@ -164,16 +166,15 @@ public class Player : MonoBehaviour {
 		pi.state = PlayerInput.State.ON_PLATFORM;
 	}
 
-	public void ManifestFlesh (Vector3 descensionPosition) {
+	public void ManifestFlesh (Vector3 descensionPosition, string sortingLayer, int sortingOrd) {
 		body.gameObject.SetActive (true);
 		body.transform.position = descensionPosition;
 		body.transform.rotation = Quaternion.identity;
 		transform.position = body.transform.position;// + body.playerOffset;
 		transform.rotation = body.transform.rotation;
 		transform.parent = body.transform;
-		sr.sortingLayerName = "Buildings";
-		sr.sortingOrder = 2;
-		pi.state = PlayerInput.State.ON_FOOT;
+		sr.sortingLayerName = sortingLayer;
+		sr.sortingOrder = sortingOrd;
 	}
 
 	public void SpiritAway (Transform master, PlayerInput.State s) {
@@ -190,6 +191,55 @@ public class Player : MonoBehaviour {
 	public void Disembark (Vector3 disembarkPoint) {
 		pi.AbandonStation ();
 		sr.enabled = true;
-		ManifestFlesh (disembarkPoint);
+		ManifestFlesh (disembarkPoint, "Buildings", 2);
+		pi.state = PlayerInput.State.ON_FOOT;
+	}
+
+	public void DropItem () {
+		if (pi.state == PlayerInput.State.IN_COOP) {
+			Coop coo = pi.station.GetComponent<Coop> ();
+			if (!coo.full) {
+				coo.AddOccupant (itemHeld);
+				itemHeld.GetComponent<SpriteRenderer> ().sortingLayerName = bigBird.GetComponent<SpriteRenderer> ().sortingLayerName;
+				itemHeld.GetComponent<SpriteRenderer> ().sortingOrder = bigBird.GetComponent<SpriteRenderer> ().sortingOrder + 1;
+				itemHeld.transform.parent = pi.station;
+				itemTouching = itemHeld;
+				itemHeld = null;
+			}
+		} else if (pi.state == PlayerInput.State.DOCKED) {
+			Dock dock = pi.station.GetComponent<Dock> ();
+			if (!dock.item) {
+				itemHeld.GetComponent<SpriteRenderer> ().sortingLayerName = bigBird.GetComponent<SpriteRenderer> ().sortingLayerName;
+				itemHeld.GetComponent<SpriteRenderer> ().sortingOrder = bigBird.GetComponent<SpriteRenderer> ().sortingOrder + 1;
+				dock.item = itemHeld;
+				itemHeld.transform.parent = pi.station;
+				itemHeld = null;
+			}
+		}
+	}
+
+	public void PickUpItem () {
+		if (!itemTouching) {
+			return;
+		}
+
+		if (itemHeld) {
+			DropItem ();
+		}
+
+		if (!itemHeld) {
+			if (pi.state == PlayerInput.State.IN_COOP) {
+				pi.station.GetComponent<Coop> ().RemoveOccupant (itemTouching);
+			} else if (pi.state == PlayerInput.State.DOCKED) {
+				pi.station.GetComponent<Dock> ().item = null;
+			}
+				
+			itemHeld = itemTouching;
+			itemTouching = null;
+			itemHeld.transform.position = transform.position;
+			itemHeld.transform.parent = transform;
+			itemHeld.GetComponent<SpriteRenderer> ().sortingLayerName = sr.sortingLayerName;
+			itemHeld.GetComponent<SpriteRenderer> ().sortingOrder = sr.sortingOrder + 1;
+		}
 	}
 }

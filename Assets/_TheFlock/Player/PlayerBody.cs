@@ -29,7 +29,6 @@ public class PlayerBody : MonoBehaviour {
 	}
 
 	void OnTriggerExit2D (Collider2D other) {
-		print (other.name);
 		if (other.name == "BoardingZone") {
 			pad = null;
 		}

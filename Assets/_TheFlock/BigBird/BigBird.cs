@@ -17,6 +17,8 @@ public class BigBird : MonoBehaviour {
 	public int gold = 0;
 	public LandingPad nearestPad = null;
 	public float landedScale = 15f;
+	public float coopWidth;
+	public float coopHeight;
 	public CargoHold hold;
 	public GameObject cannonballPrefab;
 	public List<Transform> rightCans;

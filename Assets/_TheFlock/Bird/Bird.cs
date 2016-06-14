@@ -101,6 +101,7 @@ public class Bird : MonoBehaviour {
 		startForceMag = forceMag;
 
 		DockOnBigBird ();
+		LayEgg ();
 		gm.AddAlliedTransform (transform);
 	}
 
@@ -767,9 +768,8 @@ public class Bird : MonoBehaviour {
 	public void LayEgg () {
 		print ("laid an egg");
 		GameObject eggObj = Instantiate (eggPrefab, transform.position, Quaternion.identity) as GameObject;
-		//eggObj.transform.parent = dock.transform;
-		eggObj.name = "EGG";
-		//dock.egg = eggObj.GetComponent<Egg> ();
+		eggObj.transform.parent = dock.transform;
+		dock.item = eggObj.GetComponent<Egg> ().transform;
 		pregnant = false;
 	}
 

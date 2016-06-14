@@ -26,8 +26,12 @@ public class Hatchling : MonoBehaviour {
 		}
 	}
 
-	void OnTriggerEnter2D (Collider2D other) {
-		
+	public void OnTriggerEnter2D (Collider2D other) {
+		print ("hatchling is touching: " + other.tag);
+		if (other.tag == "Player") {
+			print ("hatchling is now itemTouching");
+			other.GetComponentInChildren<Player> ().itemTouching = transform;
+		}
 	}
 
 	void Mature () {
