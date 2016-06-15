@@ -362,9 +362,6 @@ public class PlayerInput : MonoBehaviour {
 
 	void HandleFlyingInput () {
 		p.b.direction = new Vector2 (Input.GetAxis (LSHorizontal), Input.GetAxis (LSVertical));
-		if (p.b.gas <= 0) {
-			p.b.direction = Vector2.zero;
-		}
 
 		Vector2 rightStick = new Vector2 (Input.GetAxis (RSHorizontal), Input.GetAxis (RSVertical));
 		if (rightStick != Vector2.zero) {
@@ -446,7 +443,7 @@ public class PlayerInput : MonoBehaviour {
 			return;
 		}
 
-		if (Input.GetButtonDown (xSquareButton)) {
+		if (Input.GetButtonDown (aCrossButton)) {
 			if (station.GetComponent<Dock> ().item) {
 				p.itemTouching = station.GetComponent<Dock> ().item;
 				p.PickUpItem ();
@@ -459,7 +456,7 @@ public class PlayerInput : MonoBehaviour {
 			p.BoardBird (station.GetComponent<Dock> ().bird);
 		}
 
-		if (Input.GetButtonDown (aCrossButton)) {
+		if (Input.GetButtonDown (LB)) {
 			p.b.Undock ();
 			if (!p.b.docked) {
 				state = State.FLYING;
@@ -469,11 +466,8 @@ public class PlayerInput : MonoBehaviour {
 
 	void HandleInCoopInput () {
 		if (Input.GetButtonDown (bCircleButton)) {
-			print ("pressed b in coop");
 			p.transform.parent = station;
 			p.body.gameObject.SetActive (false);
-			print ("body inactive");
-
 			state = State.CHANGING_STATIONS;
 			return;
 		}
@@ -490,7 +484,7 @@ public class PlayerInput : MonoBehaviour {
 		}
 
 
-		if (Input.GetButtonDown (xSquareButton)) {
+		if (Input.GetButtonDown (aCrossButton)) {
 			if (p.itemHeld) {
 				p.DropItem ();
 			} else if (p.itemTouching) {

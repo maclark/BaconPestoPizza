@@ -18,11 +18,27 @@ public class Flappy : Flyer {
 		}
 	}
 
-	void OnCollision2D (Collision2D coll) {
+	void OnCollisionEnter2D (Collision2D coll) {
+		print ("flappy collided");
+
+		if (coll.transform.tag == "Bird") {
+			print ("flappy collided with bird");
+			coll.transform.GetComponent<Bird> ().TakeDamage (kamikazeDamage);
+			Die ();
+		} else if (coll.transform.GetComponent<Flyer> ()) {
+			if (!coll.transform.GetComponent<Flappy> ()) {
+				coll.transform.GetComponent<Flyer> ().TakeDamage (kamikazeDamage, Color.red);
+				Die ();
+			}
+		}
 	}
 
 	void OnTriggerEnter2D (Collider2D other) {
-		if (other.tag == "Player") {
+		print ("flappy triggered");
+
+		if (other.tag == "Bird") {
+			print ("flappy triggered with bird");
+
 			if (target != null) {
 				float pDist = Vector3.Distance (other.transform.position, transform.position);
 				float tDist = Vector3.Distance (target.transform.position, transform.position);
@@ -33,8 +49,10 @@ public class Flappy : Flyer {
 				target = other.transform;
 			}
 		} else if (other.tag == "PlayerBullet") {
-			TakeDamage (other.GetComponent<Projectile> ().damage, Color.red);
-			other.GetComponent<Projectile> ().Die ();
+			Projectile pro = other.GetComponent<Projectile> ();
+			attacker = pro.owner;
+			TakeDamage (pro.damage, Color.red);
+			pro.Die ();
 		}
 		else if (other.tag == "Explosion") {
 			TakeDamage (other.GetComponent<Projectile> ().damage, Color.red);

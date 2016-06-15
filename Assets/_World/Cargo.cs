@@ -14,8 +14,7 @@ public class Cargo : MonoBehaviour {
 
 	void OnCollisionEnter2D (Collision2D coll) {
 		print (coll.transform.tag);
-		print ("collision");
-		if (coll.transform.tag == "Player") {
+		if (coll.transform.tag == "Bird") {
 			Bird birdie = coll.transform.GetComponent<Bird> ();
 			if (cargoType == Cargo.CargoType.SHIELD) {
 				if (!birdie.Shield.gameObject.activeSelf) {
@@ -30,8 +29,6 @@ public class Cargo : MonoBehaviour {
 	}
 
 	void OnTriggerEnter2D (Collider2D other) {
-		print (other.transform.tag + " trigger");
-
 	}
 
 	public void RandomType () {

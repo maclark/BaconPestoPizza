@@ -10,10 +10,13 @@ public class Bird : MonoBehaviour {
 	public int health = 100;
 	public int maxHealth = 100;
 	public float forceMag = 60f;
+	public float hydratedForceMag = 100f;
+	public float dehydratedForceMag = 60f;
 
 	public float boostForceMag = 60f;
 	public float flashGap = 1f;
 	public float flashDuration = .15f;
+	public float damageDuration = 10f;
 	public float flashDampener = .1f;
 	public float hitInvincibilityDuration = .25f;
 	public float boostCooldown = 2f;
@@ -24,6 +27,7 @@ public class Bird : MonoBehaviour {
 	public float gasPerSecond = 1f;
 	public float gasPerBoost = 2f;
 	public float gasLightDelay = .2f;
+	public float gasLightOffset = 5f;
 	public float harpHurlOffset = 1f;
 	public float swingSpeed = 3f;
 	public float windUpTime = 1f;
@@ -32,6 +36,7 @@ public class Bird : MonoBehaviour {
 	public float rollDuration = 1f;
 	public float rerollDelay = 1f;
 	public float rollSpeed = 1f;
+	public Vector3 pupOffset;
 
 	public bool docked = false;
 	public bool webbed = false;
@@ -43,12 +48,15 @@ public class Bird : MonoBehaviour {
 	public bool catchingHarp = false;
 	public bool pregnant = false;
 	public bool inHeat = false;
+	public bool ranOutOfGas = false;
+	public bool colorSet = false;
 
 	public Transform body;
 	public GameObject harpoonPrefab;
 	public GameObject gasLightPrefab;
 	public GameObject eggPrefab;
 	public OrbWeb webTrap;
+	public Hatchling pup;
 	public List<Bird> linkedBirds;
 	public List<Harpoon> otherHarps;
 
@@ -77,7 +85,6 @@ public class Bird : MonoBehaviour {
 	private float windUpStartTime;
 	private float theta;
 	private float releaseTheta;
-	private bool ranOutOfGas = false;
 	private bool gasLightFlashing = false;
 	private bool swingStarted = false;
 	private bool windUpStarted = false;
@@ -93,7 +100,10 @@ public class Bird : MonoBehaviour {
 	}
 
 	void Start () {
-		color = sr.color;
+		if (!colorSet) {
+			color = sr.color;
+			colorSet = true;
+		}
 
 		otherHarps = new List<Harpoon> ();
 		linkedBirds = new List<Bird> ();
@@ -114,6 +124,7 @@ public class Bird : MonoBehaviour {
 						LowOnGas ();
 					} else if (gas <= 0) {
 						ranOutOfGas = true;
+						forceMag = dehydratedForceMag;
 					}
 				}
 			}
@@ -201,7 +212,7 @@ public class Bird : MonoBehaviour {
 					//coll.gameObject.GetComponent<Flyer> ().Die ();
 				}
 			}
-		} else if (coll.transform.tag == "Player") {
+		} else if (coll.transform.tag == "Bird") {
 			if (inHeat) {
 				pregnant = true;
 				inHeat = false;
@@ -284,7 +295,7 @@ public class Bird : MonoBehaviour {
 		else {
 			//Check if harp is moving away from bird
 			if (harp.GetComponent<Rigidbody2D> ().velocity != Vector2.zero) {
-				TetherHarp ();
+				//TetherHarp ();
 			}
 			//Ship is not pulling on harp, so it moves normally
 			rb.AddForce (direction * forceMag);
@@ -311,46 +322,24 @@ public class Bird : MonoBehaviour {
 		rb.AddForce (orthoPullDir * orthoPullMag);
 	}
 
-	void TetherHarp () {
-		/*//determine direction of tether and orthogonal axis to that
-		Vector2 directionOfTether = harp.transform.position - harp.GetHarpooner ().transform.position;
-		directionOfTether.Normalize ();
-		Vector2 orthoDirectionOfTether = new Vector2 (directionOfTether.y, -directionOfTether.x);
-
-		//find components of velocity along new axes
-		Vector2 harpVel = harp.GetComponent<Rigidbody2D> ().velocity;
-		float harpVelTetherComponent = Vector2.Dot (harpVel, directionOfTether);
-
-		float harpVelOrthoComponent = Vector2.Dot (harpVel, orthoDirectionOfTether);
-
-		//if harpoon still moving away from harpooner, stop it
-		if (harpVelTetherComponent > 0) {
-			harpVelTetherComponent = .95f * harpVelTetherComponent;
-		}
-
-		//Add components of velocity to find resultant velocity vector of harpoon
-		Vector2 resultantHarpVel = (directionOfTether * harpVelTetherComponent) + (orthoDirectionOfTether * harpVelOrthoComponent);
-		harp.GetComponent<Rigidbody2D> ().velocity = resultantHarpVel;
-		*/
-	}
-
 	/// <summary>
 	/// flag gap increases linearly
 	/// flash duration is constant
 	/// </summary>
 	/// <param name="dam">Dam.</param> testing this
-	public void TakeDamage( int dam) {
+	public void TakeDamage (int dam) {
+		if (pup) {
+			pup.Die ();
+			pup = null;
+		}
 		if (damaged) {
 			//#TODO explodeee
 			Die ();
 		} else {
-			health -= dam;
-			if (health < 0) {
-				health = 0;
-			}
+			health = 0;
 			damaged = true;
 			StartCoroutine (HitInvincibility (hitInvincibilityDuration));
-			StartCoroutine (FlashDamage (Time.time));
+			StartCoroutine (Flash (Time.time));
 		}
 	}
 
@@ -372,9 +361,31 @@ public class Bird : MonoBehaviour {
 			
 	public bool DockOnBigBird () {
 		dock = bigBird.GetNearestOpenDock (transform.position);
+
 		if (!dock) {
 			docked = false;
 			return docked;
+		}
+
+		if (dock.item) {
+			Hatchling h = dock.item.GetComponent<Hatchling> ();
+			if (h && pup) {
+				docked = false;
+				return docked;
+			}
+		}
+
+		if (pup) {
+			pup.transform.position = dock.transform.position;
+			pup.transform.rotation = dock.transform.rotation;
+			pup.transform.parent = dock.transform;
+			pup.flying = false;
+			dock.item = pup.transform;
+			pup = null;
+		}
+
+		if (dock.item) {
+			p.itemTouching = dock.item;
 		}
 
 		if (rolling) {
@@ -382,14 +393,17 @@ public class Bird : MonoBehaviour {
 			rolling = false;
 			canRoll = true;
 		}
+
 		if (harp) {
 			harp.SetGripping (false);
 			harp.SetRecalling (true);
 			Destroy (harp.gameObject);
 			hurledHarp = false;
 		}
+
 		DetachOtherHarps ();
 		transform.position = dock.transform.position;
+		transform.rotation = dock.transform.rotation;
 		transform.parent = dock.transform;
 		DisableColliders ();
 		sr.color = color;
@@ -434,6 +448,18 @@ public class Bird : MonoBehaviour {
 			} else {
 				dock.gameObject.layer = LayerMask.NameToLayer ("Default");
 			}
+
+			if (dock.item) {
+				Hatchling h = dock.item.GetComponent<Hatchling> ();
+				if (h && !pup) {
+					pup = h;
+					pup.transform.parent = transform;
+					pup.transform.rotation = Quaternion.identity;
+					pup.transform.position = transform.position + pupOffset;
+					pup.flying = true;
+					dock.item = null;
+				}
+			}
 		}
 
 		dock.GetComponent<BoxCollider2D> ().enabled = true;
@@ -449,8 +475,7 @@ public class Bird : MonoBehaviour {
 		Invoke ("EnableColliders", .5f);
 		sr.sortingLayerName = "Birds";
 		sr.sortingOrder = 0;
-		p.GetComponent<SpriteRenderer> ().sortingLayerName = "Birds";
-		p.GetComponent<SpriteRenderer> ().sortingOrder = 1;
+		p.Undock ();
 	}
 
 	void EnableColliders () {
@@ -467,6 +492,25 @@ public class Bird : MonoBehaviour {
 		}
 	}
 
+	IEnumerator Flash (float timeAtDamage) {
+		if (Time.time - timeAtDamage > damageDuration) {
+			Die ();
+			yield break;
+		}
+		Color startColor = sr.color;
+		sr.color = new Color (1, 0, 0, Mathf.Max(startColor.a, .5f));
+		yield return new WaitForSeconds (flashDuration);
+		if (docked) {
+			yield break;
+		}
+		sr.color = startColor;
+		yield return new WaitForSeconds (flashGap);
+		if (docked) {
+			yield break;
+		}
+		StartCoroutine (Flash (timeAtDamage));
+	}
+
 	IEnumerator FlashDamage (float timeAtDamage) {
 		Color startColor = sr.color;
 		sr.color = new Color (1, 0, 0, Mathf.Max(startColor.a, .5f));
@@ -480,6 +524,7 @@ public class Bird : MonoBehaviour {
 			float flashGapModifier = flashDampener * (Time.time - timeAtDamage);
 			if (flashGapModifier > 1) {
 				//explode
+				print ("death time: " + Time.time);
 				Die ();
 				yield break;
 			}
@@ -499,15 +544,16 @@ public class Bird : MonoBehaviour {
 		yield return new WaitForSeconds (duration);
 		if (p) { 
 			p.GetComponent<SpriteRenderer> ().color = p.color;
-			sr.color = startColor;
+		} 
 
-		} else {
-			sr.color = Color.black;
-		}
+		sr.color = startColor;
 		invincible = false;
 	}
 
 	public IEnumerator Boost () {
+		if (ranOutOfGas || direction == Vector2.zero) {
+			yield break;
+		}
 		canBoost = false;
 		gas -= gasPerBoost;
 		forceMag = boostForceMag;
@@ -532,7 +578,7 @@ public class Bird : MonoBehaviour {
 	}
 
 	void LowOnGas () {
-		Vector3 position = new Vector3 (transform.position.x, transform.position.y + 1.5f * GetComponent<BoxCollider2D> ().size.y, 0f);
+		Vector3 position = new Vector3 (transform.position.x, transform.position.y + gasLightOffset, 0f);
 		gasLight = Instantiate (gasLightPrefab, position, transform.rotation) as GameObject;
 		gasLight.transform.parent = transform;
 		gasLightFlashing = true;
@@ -766,7 +812,6 @@ public class Bird : MonoBehaviour {
 	}
 
 	public void LayEgg () {
-		print ("laid an egg");
 		GameObject eggObj = Instantiate (eggPrefab, transform.position, Quaternion.identity) as GameObject;
 		eggObj.transform.parent = dock.transform;
 		dock.item = eggObj.GetComponent<Egg> ().transform;
@@ -774,7 +819,6 @@ public class Bird : MonoBehaviour {
 	}
 
 	public void EatGreens () {
-		print ("ate greens, in heat");
 		inHeat = true;
 	}
 

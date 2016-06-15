@@ -20,7 +20,7 @@ public class Invader : Flyer {
 		base.OnFixedUpdate ();
 	}
 
-	void OnTriggerEnter2D ( Collider2D other) {
+	void OnTriggerEnter2D (Collider2D other) {
 		base.TriggerEnter2D (other);
 	}
 

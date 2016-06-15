@@ -32,6 +32,6 @@ public class Bullet : Projectile {
 	}
 
 	void OnBecameInvisible () {
-		gameObject.SetActive (false);
+		Die ();//gameObject.SetActive (false);
 	}
 }

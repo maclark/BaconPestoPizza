@@ -4,9 +4,10 @@ using System.Collections.Generic;
 
 public class Unit : MonoBehaviour {
 	public int hp;
-	protected SpriteRenderer sr;
 	public float wakeUpRange = 300f;
+	public Transform attacker;
 
+	protected SpriteRenderer sr;
 	private Color color;
 
 	protected virtual void OnAwake () {
@@ -28,6 +29,10 @@ public class Unit : MonoBehaviour {
 	}
 
 	public virtual void Die () {
+		if (attacker) {
+			attacker.SendMessage ("Killed", transform, SendMessageOptions.DontRequireReceiver);
+			print ("attacker: " + attacker.name);
+		}
 		Destroy (gameObject);
 	}
 

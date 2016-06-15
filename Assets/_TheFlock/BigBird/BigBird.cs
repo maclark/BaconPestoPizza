@@ -13,10 +13,7 @@ public class BigBird : MonoBehaviour {
 	public int turn = 0;
 	public float turnSpeed = 200f;
 	public float halfSecFill = 5f;
-	public int halfSecRepair = 5;
-	public int gold = 0;
 	public LandingPad nearestPad = null;
-	public float landedScale = 15f;
 	public float coopWidth;
 	public float coopHeight;
 	public CargoHold hold;
@@ -33,7 +30,6 @@ public class BigBird : MonoBehaviour {
 	private ResourceBar waterTank;
 	private ResourceBar energyTank;
 	private float water;
-	private Bird birdGettingRepairs = null;
 	private Bird birdGettingGas = null;
 	private Transform target = null;
 	private Pump pump;
@@ -42,7 +38,6 @@ public class BigBird : MonoBehaviour {
 	private Thruster[] thrusters;
 	private List<Bird> dockedBirds = new List<Bird> ();
 	private List<Bird> gasLine = new List<Bird> ();
-	private List<Bird> repairLine = new List<Bird> ();
 
 
 	void Awake() {
@@ -82,10 +77,6 @@ public class BigBird : MonoBehaviour {
 
 		if (turn != 0 && !landed) {
 			rb.AddTorque (turnSpeed * turn);
-
-			if (engineOn) {
-				//SetCamera ();
-			}
 		}
 
 		if (drinking) {
@@ -241,13 +232,7 @@ public class BigBird : MonoBehaviour {
 			gasLine.Add (b);
 		}
 
-		if (birdGettingRepairs == null) {
-			if (b.health < b.maxHealth) {
-				StartCoroutine (RepairBird (b));
-			}
-		} else {
-			repairLine.Add (b);
-		}
+		medkit.FindHurtBird ();
 	}
 
 	public void RemoveFromDockedBirds (Bird b) {
@@ -260,37 +245,6 @@ public class BigBird : MonoBehaviour {
 		}
 	}
 
-	IEnumerator RepairBird (Bird b) {
-		if (b == null) {
-			if (repairLine.Count > 0) {
-				Bird nextInLine = repairLine [repairLine.Count - 1];
-				repairLine.Remove (repairLine [repairLine.Count - 1]);
-				StartCoroutine (RepairBird (nextInLine));
-			} else {
-				medkit.Reset ();
-				yield break;
-			}
-		}
-
-		birdGettingRepairs = b;
-		medkit.transform.position = b.transform.position;
-		yield return new WaitForSeconds (.5f);
-		b.health += halfSecRepair;
-		if (b.health > b.maxHealth) {
-			b.health = b.maxHealth;
-			if (repairLine.Count > 0) {
-				Bird nextInLine = repairLine [repairLine.Count - 1];
-				gasLine.Remove (repairLine [repairLine.Count - 1]);
-				StartCoroutine (RepairBird (nextInLine));
-			} else {
-				birdGettingRepairs = null;
-				medkit.Reset ();
-			}
-		} else {
-			StartCoroutine (RepairBird (birdGettingRepairs));
-		}
-	}
-
 	IEnumerator FillBirdTank (Bird b) {
 		if (b == null) {
 			pump.RecoilHose ();
@@ -299,6 +253,8 @@ public class BigBird : MonoBehaviour {
 		pump.MoveToBirdPos (b.transform.position);
 		birdGettingGas = b;
 		b.gas += halfSecFill;
+		b.ranOutOfGas = false;
+		b.forceMag = b.hydratedForceMag;
 		yield return new WaitForSeconds (.5f);
 		if (b.gas > b.fullTank) {
 			b.gas = b.fullTank;

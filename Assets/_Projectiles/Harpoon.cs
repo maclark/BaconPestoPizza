@@ -47,12 +47,11 @@ public class Harpoon : MonoBehaviour {
 		tetherVector = transform.position - harpooner.transform.position;
 		tetherLength = tetherVector.magnitude;
 		if (tetherLength > maxTetherLength) {
+			TetherHarp ();
 			SetGripping (false);
 			//Destroy (gameObject);
-			Debug.Log ("snapped harp off");
-		} else {
-			HandleTether ();
-		}
+		} 
+		HandleTether ();
 	}
 
 	void OnTriggerEnter2D (Collider2D other) { 
@@ -115,7 +114,7 @@ public class Harpoon : MonoBehaviour {
 			lr.material.color = harpooner.GetComponent<Bird> ().p.color;
 		}
 		else {
-			lr.material.color = Color.red;
+			//lr.material.color = Color.red;
 			taut = true;
 		} 
 	}
@@ -139,7 +138,7 @@ public class Harpoon : MonoBehaviour {
 		transform.position = harpooned.transform.position;
 		transform.parent = harpooned.transform;
 
-		if (harpoonRecipient.tag == "Player") {
+		if (harpoonRecipient.tag == "Bird") {
 			linkedBirds.Clear ();
 			AttemptWeb (harpooner.GetComponent<Bird> ());
 		} else {
@@ -177,7 +176,7 @@ public class Harpoon : MonoBehaviour {
 					lr.material.color = new Color (lr.material.color.r, lr.material.color.g, lr.material.color.b, .2f);
 				}
 				if (harpooned != null) {
-					if (harpooned.tag == "Player") {
+					if (harpooned.tag == "Bird") {
 						harpooned.GetComponent<Bird> ().RemoveHarp (this);
 					} else {
 						harpooned.SendMessage ("HarpoonReleased", null, SendMessageOptions.DontRequireReceiver);
@@ -244,8 +243,9 @@ public class Harpoon : MonoBehaviour {
 
 	void SetTautLength (float newLength) {
 		//stretchiness should be some % set elsewhere of the tautlength
-		tautLength = newLength;
-		maxTetherLength = tautLength * (1 + stretchiness);
+		tautLength = newLength + Mathf.Epsilon;
+		maxTetherLength = Mathf.Min (Mathf.Abs (tautLength), Mathf.Abs (maxTetherLength));
+		tautLength = maxTetherLength;
 	}
 
 	void HandleTether () {
@@ -266,4 +266,27 @@ public class Harpoon : MonoBehaviour {
 			HandleRecalling ();
 		}
 	}
+
+	void TetherHarp () {
+		//determine direction of tether and orthogonal axis to that
+		Vector2 directionOfTether = transform.position - harpooner.transform.position;
+		directionOfTether.Normalize ();
+		Vector2 orthoDirectionOfTether = new Vector2 (directionOfTether.y, -directionOfTether.x);
+
+		//find components of velocity along new axes
+		Vector2 harpVel = rb.velocity;
+		float harpVelTetherComponent = Vector2.Dot (harpVel, directionOfTether);
+
+		float harpVelOrthoComponent = Vector2.Dot (harpVel, orthoDirectionOfTether);
+
+		//if harpoon still moving away from harpooner, stop it
+		if (harpVelTetherComponent > 0) {
+			harpVelTetherComponent = 0;
+		}
+
+		//Add components of velocity to find resultant velocity vector of harpoon
+		Vector2 resultantHarpVel = (directionOfTether * harpVelTetherComponent) + (orthoDirectionOfTether * harpVelOrthoComponent);
+		rb.velocity = resultantHarpVel;
+	}
+
 }

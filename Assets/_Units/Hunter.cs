@@ -64,8 +64,10 @@ public class Hunter : Flyer {
 
 	void OnTriggerEnter2D (Collider2D other) {
 		if (other.tag == "PlayerBullet") {
-			TakeDamage (other.GetComponent<Projectile> ().damage, Color.gray);
-			other.GetComponent<Projectile> ().Die ();
+			Projectile pro = other.GetComponent<Projectile> ();
+			attacker = pro.owner;
+			TakeDamage (pro.damage, Color.gray);
+			pro.Die ();
 		}
 		else if (other.tag == "Explosion") {
 			TakeDamage (Mathf.RoundToInt (other.GetComponent<Projectile> ().damage / 4), Color.gray);
@@ -73,7 +75,7 @@ public class Hunter : Flyer {
 	}
 
 	void OnCollisionEnter2D (Collision2D coll) {
-		if (coll.transform.tag == "Player") {
+		if (coll.transform.tag == "Bird") {
 			coll.transform.GetComponent<Bird> ().TakeOneShotKill ();
 		} else if (rb.velocity.sqrMagnitude > meleeVelThresh) {
 			if (coll.transform.tag == "BigBird") {

@@ -29,6 +29,8 @@ public class Carrier : Unit {
 
 	public void TriggerEnter2D (Collider2D other) {
 		if (other.tag == "PlayerBullet") {
+			Projectile pro = other.GetComponent<Projectile> ();
+			attacker = pro.owner;
 			TakeDamage (other.GetComponent<Bullet> ().damage, Color.red);
 			other.GetComponent<Bullet> ().Die ();
 		} else if (other.tag == "Explosion") {

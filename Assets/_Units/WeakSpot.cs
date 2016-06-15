@@ -2,6 +2,7 @@
 using System.Collections;
 
 public class WeakSpot : MonoBehaviour {
+
 	private float modifier = 20f;
 	private Hunter hunt;
 
@@ -12,8 +13,10 @@ public class WeakSpot : MonoBehaviour {
 		
 	public void OnTriggerEnter2D (Collider2D other) {
 		if (other.tag == "PlayerBullet") {
-			hunt.TakeDamage (Mathf.RoundToInt (other.GetComponent<Projectile> ().damage * modifier), Color.red);
-			other.GetComponent<Bullet> ().Die ();
+			Projectile pro = other.GetComponent<Projectile> ();
+			hunt.attacker = pro.owner;
+			hunt.TakeDamage (Mathf.RoundToInt (pro.damage * modifier), Color.red);
+			pro.Die ();
 		}
 	}
 }

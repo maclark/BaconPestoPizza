@@ -12,6 +12,7 @@ public class ObjectPooler : MonoBehaviour
 
 	private GameObject container;
 	private Color color = Color.magenta;
+	private Transform owner;
 
 	void Start ()	{
 		container = new GameObject (pooledObject.name + "Container");
@@ -21,6 +22,7 @@ public class ObjectPooler : MonoBehaviour
 		{
 			GameObject obj = (GameObject)Instantiate(pooledObject);
 			obj.GetComponent<SpriteRenderer> ().color = color;
+			obj.GetComponent<Projectile> ().owner = owner;
 			obj.SetActive(false);
 			obj.transform.parent = container.transform;
 			pooledObjects.Add(obj);
@@ -35,6 +37,7 @@ public class ObjectPooler : MonoBehaviour
 			{
 				GameObject obj = (GameObject)Instantiate(pooledObject);
 				obj.GetComponent<SpriteRenderer> ().color = color;
+				obj.GetComponent<Projectile> ().owner = owner;
 				obj.SetActive(false);
 				pooledObjects[i] = obj;
 				return pooledObjects[i];
@@ -49,6 +52,7 @@ public class ObjectPooler : MonoBehaviour
 		{
 			GameObject obj = (GameObject)Instantiate(pooledObject);
 			obj.GetComponent<SpriteRenderer> ().color = color;
+			obj.GetComponent<Projectile> ().owner = owner;
 			pooledObjects.Add(obj);
 			obj.transform.parent = container.transform;
 			return obj;
@@ -66,4 +70,10 @@ public class ObjectPooler : MonoBehaviour
 	}
 
 	//#TODO could set other properties, like tags
+	public void SetPooledObjectsOwner (Transform t) {
+		owner = t;
+		foreach (GameObject obj in pooledObjects) {
+			obj.GetComponent<Projectile> ().owner = owner;
+		}
+	}
 }

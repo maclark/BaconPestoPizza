@@ -31,7 +31,7 @@ public class OrbWeb : MonoBehaviour {
 				HandleHitCargo (other.GetComponent<Cargo> ());
 			}
 		}
-		else if (other.tag == "Player" && !CheckIfWebber (other.transform) && !other.transform.GetComponent<Bird> ().webbed) {
+		else if (other.tag == "Bird" && !CheckIfWebber (other.transform) && !other.transform.GetComponent<Bird> ().webbed) {
 			other.transform.GetComponent<Bird> ().Webbed (this);
 		}
 	}

@@ -31,6 +31,8 @@ public class Player : MonoBehaviour {
 		hol = new Holster (this);
 		color = sr.color;
 		body = gm.GetBody ();
+		GetComponent<ObjectPooler> ().SetPooledObjectsColor (color);
+		GetComponent<ObjectPooler> ().SetPooledObjectsOwner (transform);
 	}
 
 	public void StartPlayer () {
@@ -50,7 +52,6 @@ public class Player : MonoBehaviour {
 		b.Shield.SetColor (color);
 		b.ReloadIndicator.SetColor (color);
 		GetComponent<ObjectPooler> ().enabled = true;
-		GetComponent<ObjectPooler> ().SetPooledObjectsColor (color);
 		b.transform.rotation = Quaternion.identity;
 		b.body.rotation = Quaternion.identity;
 		transform.rotation = b.transform.rotation;
@@ -94,6 +95,10 @@ public class Player : MonoBehaviour {
 			b.harp.SetGripping (false);
 			b.harp.SetRecalling (true);
 		}
+		if (itemHeld) {
+			Destroy (itemHeld.gameObject);
+			itemHeld = null;
+		}
 		sr.sprite = sprites [0];
 		GameObject bub = Instantiate (gm.bubblePrefab, transform.position, transform.rotation) as GameObject;
 		gm.AddAlliedTransform (bub.transform);
@@ -117,12 +122,25 @@ public class Player : MonoBehaviour {
 	public void DockOnBigBird (Dock d) {
 		sr.sortingLayerName = "BigBird";
 		sr.sortingOrder = 2;
+		if (itemHeld) {
+			itemHeld.GetComponent<SpriteRenderer> ().sortingLayerName = sr.sortingLayerName;
+			itemHeld.GetComponent<SpriteRenderer> ().sortingOrder = sr.sortingOrder + 1;
+		}
 		pi.station = d.transform;
 		pi.state = PlayerInput.State.DOCKED;
 		pi.CancelInvoke ();
 		w.firing = false;
-
 		d.GetComponent<BoxCollider2D> ().enabled = false;
+	}
+
+	public void Undock () {
+		itemTouching = null;
+		sr.sortingLayerName = "Birds";
+		sr.sortingOrder = 1;
+		if (itemHeld) {
+			itemHeld.GetComponent<SpriteRenderer> ().sortingLayerName = sr.sortingLayerName;
+			itemHeld.GetComponent<SpriteRenderer> ().sortingOrder = sr.sortingOrder + 1;
+		}
 	}
 
 	public void Webbed (OrbWeb ow) {
@@ -209,8 +227,9 @@ public class Player : MonoBehaviour {
 		} else if (pi.state == PlayerInput.State.DOCKED) {
 			Dock dock = pi.station.GetComponent<Dock> ();
 			if (!dock.item) {
+				itemHeld.transform.position = dock.transform.position;
 				itemHeld.GetComponent<SpriteRenderer> ().sortingLayerName = bigBird.GetComponent<SpriteRenderer> ().sortingLayerName;
-				itemHeld.GetComponent<SpriteRenderer> ().sortingOrder = bigBird.GetComponent<SpriteRenderer> ().sortingOrder + 1;
+				itemHeld.GetComponent<SpriteRenderer> ().sortingOrder = bigBird.GetComponent<SpriteRenderer> ().sortingOrder + 2;
 				dock.item = itemHeld;
 				itemHeld.transform.parent = pi.station;
 				itemHeld = null;
@@ -240,6 +259,15 @@ public class Player : MonoBehaviour {
 			itemHeld.transform.parent = transform;
 			itemHeld.GetComponent<SpriteRenderer> ().sortingLayerName = sr.sortingLayerName;
 			itemHeld.GetComponent<SpriteRenderer> ().sortingOrder = sr.sortingOrder + 1;
+		}
+	}
+
+	public void Killed (Transform t) {
+		print (name + " killed " + t.name);
+		if (b) {
+			if (b.pup) {
+				b.pup.IncrementAssists ();
+			}
 		}
 	}
 }

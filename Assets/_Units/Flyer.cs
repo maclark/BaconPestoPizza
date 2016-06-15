@@ -47,10 +47,12 @@ public class Flyer : Unit {
 		Chase ();
 	}
 
-	public void TriggerEnter2D ( Collider2D other) {
+	public void TriggerEnter2D (Collider2D other) {
 		if (other.tag == "PlayerBullet") {
-			TakeDamage (other.GetComponent<Projectile> ().damage, Color.red);
-			other.GetComponent<Projectile> ().Die ();
+			Projectile pro = other.GetComponent<Projectile> ();
+			attacker = pro.owner;
+			TakeDamage (pro.damage, Color.red);
+			pro.Die ();
 		}
 		else if (other.tag == "Explosion") {
 			TakeDamage (other.GetComponent<Projectile> ().damage, Color.red);
@@ -70,6 +72,7 @@ public class Flyer : Unit {
 	}
 
 	public override void Die() {
+		print ("flyer die");
 		if (transform.parent) {
 			if (transform.parent.GetComponent<Carrier> ()) {
 				transform.parent.GetComponent<Carrier> ().LoseInterceptor (transform);
@@ -101,6 +104,9 @@ public class Flyer : Unit {
 	}
 
 	protected virtual void Chase () {
+		if (!target) {
+			SetNearestTarget ();
+		}
 		Vector3 direction = target.position - transform.position;
 		if (Vector3.Magnitude (direction) > attackRange) {  
 			direction.Normalize ();

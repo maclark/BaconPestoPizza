@@ -5,6 +5,8 @@ public class Projectile : MonoBehaviour {
 
 	public int damage;
 	public float forceMag = 40f;
+	public Transform owner;
+
 	protected Rigidbody2D rb;
 
 	protected virtual void OnAwake () {
@@ -33,7 +35,7 @@ public class Projectile : MonoBehaviour {
 	}
 
 	public virtual void Die () {
-		Destroy (gameObject);
+		print ("actually killing projectile?");
 	}
 
 	public virtual void BecameInvisible () {

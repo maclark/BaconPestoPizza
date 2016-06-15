@@ -38,11 +38,13 @@ public class Alakazam : Flyer {
 
 	void OnTriggerEnter2D (Collider2D other) {
 		if (other.tag == "PlayerBullet") {
-			TakeShieldDamage (other.GetComponent<Projectile> ().damage);
+			Projectile pro = other.GetComponent<Projectile> ();
+			attacker = pro.owner;
+			TakeShieldDamage (pro.damage);
 			if (!teleporting) {
 				StartCoroutine (Teleport ());
 			}
-			other.GetComponent<Projectile> ().Die ();
+			pro.Die ();
 		}
 		else if (other.tag == "Explosion") {
 			base.TriggerEnter2D (other);
@@ -92,7 +94,7 @@ public class Alakazam : Flyer {
 		Destroy (obj, portalDuration);
 		float x = Random.Range (-teleportRange, teleportRange);
 		float y = Random.Range (-teleportRange, teleportRange);
-		transform.position = new Vector3 (x, y, 0);
+		transform.position = new Vector3 (transform.position.x + x, transform.position.y + y, 0);
 		shieldHealth = shieldMaxHealth;
 		shieldBroken = false;
 		shield.GetComponent<SpriteRenderer> ().enabled = true;
