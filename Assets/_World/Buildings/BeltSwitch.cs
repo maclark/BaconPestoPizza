@@ -6,8 +6,7 @@ public class BeltSwitch : MonoBehaviour {
 
 	private ConveyorBelt[] belts;
 
-	// Use this for initialization
-	void Start () {
+	void Awake () {
 		belts = GetComponentsInChildren<ConveyorBelt> ();
 	}
 

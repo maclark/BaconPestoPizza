@@ -694,10 +694,27 @@ public class Bird : MonoBehaviour {
 		}
 	}
 
-	/// <summary>
-	/// Hurls the harpoon.
-	/// </summary>
 	public void HurlHarpoon () {
+		if (!hurledHarp) {
+			p.aim.Normalize ();
+			harp.transform.parent = null;
+
+			////Offset harp so it doesn't immediately collide with ship
+			releaseHarpPosition = p.transform.position + p.aim * harpHurlOffset;
+
+			//simple launch (not swinging or winding up)
+			harp.transform.position = releaseHarpPosition;
+			harp.Fire (harp.transform, p.aim);
+			harp.GetComponent<BoxCollider2D> ().enabled = true;
+
+			hurledHarp = true;
+			aimingHarp = false;
+			harpLoaded = false;
+		}
+	
+	}
+
+	public void SwingHurlHarpoon () {
 		if (!hurledHarp && !swingingHarp) {
 			p.aim.Normalize ();
 			harp.transform.parent = null;

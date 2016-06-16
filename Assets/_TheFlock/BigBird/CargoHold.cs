@@ -133,9 +133,7 @@ public class CargoHold : MonoBehaviour {
 			t.rotation = transform.rotation;
 			t.parent = transform;
 			t.tag = "Untagged";
-			if (gm.bigBird.Landed) {
-				t.gameObject.layer = LayerMask.NameToLayer ("Default");
-			}
+			t.gameObject.layer = LayerMask.NameToLayer ("Default");
 			t.GetComponent<BoxCollider2D> ().enabled = false;
 			t.GetComponent<Rigidbody2D> ().Sleep ();
 			MoveToLoadingPlatform (t);

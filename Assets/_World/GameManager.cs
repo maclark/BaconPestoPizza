@@ -46,13 +46,6 @@ public class GameManager : MonoBehaviour {
 		MakeContainers ();
 	}
 
-	void Start () {
-		goldText.text = bigBird.transform.position.y.ToString();
-	}
-
-	void Update () {
-		goldText.text = bigBird.transform.position.y.ToString();
-	}
 
 	public List<Transform> GetAlliedTransforms () {
 		return alliedTransforms;

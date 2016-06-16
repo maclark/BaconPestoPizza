@@ -483,7 +483,6 @@ public class PlayerInput : MonoBehaviour {
 			}
 		}
 
-
 		if (Input.GetButtonDown (aCrossButton)) {
 			if (p.itemHeld) {
 				p.DropItem ();
@@ -623,7 +622,13 @@ public class PlayerInput : MonoBehaviour {
 			}
 		}
 
-
+		if (Input.GetButtonDown (aCrossButton)) {
+			if (p.itemHeld) {
+				p.DropItem ();
+			} else if (p.itemTouching) {
+				p.PickUpItem ();
+			}
+		}
 	}
 
 	void HandleInWebInput () {

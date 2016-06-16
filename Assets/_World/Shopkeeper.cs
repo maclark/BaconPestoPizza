@@ -8,9 +8,10 @@ public class Shopkeeper : MonoBehaviour {
 	public int unitOfEnergyPrice = 10;
 	public int tonOfWaterPrice = 10;
 	public int greensPrice = 60;
-	public int gemPrice = 20;
+	public int rubyPrice = 20;
+	public int eggPrice = 100;
 
-	public enum GoodsType {GEM, CANNONBALLS, TORPEDO, UNIT_ENERGY, TON_WATER, GREENS}
+	//public enum GoodsType {GEM, CANNONBALLS, TORPEDO, UNIT_ENERGY, TON_WATER, GREENS}
 
 	public GameObject colliderChild;
 	private GameManager gm;
@@ -25,33 +26,33 @@ public class Shopkeeper : MonoBehaviour {
 		return colls;
 	}
 
-	public void SellToPlayer (GoodsType gt) {
-		switch (gt) {
-		case GoodsType.CANNONBALLS:
+	public void SellToPlayer (Cargo.CargoType ct) {
+		switch (ct) {
+		case Cargo.CargoType.CANNONBALLS:
 			if (!gm.bbm.cannonballsMaxed) {
 				gm.bbm.cannonballs += 3;
 				gm.bbm.PayShop (cannonballsPrice);
 			}
 			break;
-		case GoodsType.TORPEDO:
+		case Cargo.CargoType.TORPEDO:
 			if (!gm.bbm.torpedoesMaxed) {
 				gm.bbm.torpedoes++;
 				gm.bbm.PayShop (torpedoPrice);
 			}
 			break;
-		case GoodsType.UNIT_ENERGY:
+		case Cargo.CargoType.UNIT_ENERGY:
 			if (!gm.GetBigBirdEnergyTank ().full) {
 				gm.bbm.energyTank.IncreaseResource (2000);
 				gm.bbm.PayShop (unitOfEnergyPrice);
 			}
 			break;
-		case GoodsType.TON_WATER:
+		case Cargo.CargoType.TON_WATER:
 			if (!gm.GetBigBirdWaterTank ().full) {
 				gm.bbm.waterTank.IncreaseResource (2000);
 				gm.bbm.PayShop (tonOfWaterPrice);
 			}
 			break;
-		case GoodsType.GREENS:
+		case Cargo.CargoType.GREENS:
 			if (!gm.bigBird.hold.GetFull ()) {
 			//	SpawnCargo (Cargo.CargoType.GREENS);
 				gm.bbm.PayShop (greensPrice);
@@ -64,24 +65,27 @@ public class Shopkeeper : MonoBehaviour {
 	}
 
 
-	public void BuyFromPlayer (GoodsType gt) {
+	public void BuyFromPlayer (Cargo.CargoType gt) {
 		switch (gt) {
-		case GoodsType.GEM:
-			gm.bbm.Collect (gemPrice / 2);
+		case Cargo.CargoType.RUBY:
+			gm.bbm.Collect (rubyPrice / 2);
 			break;
-		case GoodsType.CANNONBALLS:
+		case Cargo.CargoType.EGG:
+			gm.bbm.Collect (eggPrice / 2);
+			break;
+		case Cargo.CargoType.CANNONBALLS:
 			gm.bbm.Collect (cannonballsPrice / 2);
 			break;
-		case GoodsType.TORPEDO:
+		case Cargo.CargoType.TORPEDO:
 			gm.bbm.Collect (torpedoPrice / 2);
 			break;
-		case GoodsType.UNIT_ENERGY:
+		case Cargo.CargoType.UNIT_ENERGY:
 			gm.bbm.Collect (unitOfEnergyPrice / 2);
 			break;
-		case GoodsType.TON_WATER:
+		case Cargo.CargoType.TON_WATER:
 			gm.bbm.Collect (tonOfWaterPrice / 2);
 			break;
-		case GoodsType.GREENS:
+		case Cargo.CargoType.GREENS:
 			gm.bbm.Collect (greensPrice / 2);
 			break;
 		default:

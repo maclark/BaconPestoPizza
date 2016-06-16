@@ -46,10 +46,12 @@ public class Harpoon : MonoBehaviour {
 	void FixedUpdate () {
 		tetherVector = transform.position - harpooner.transform.position;
 		tetherLength = tetherVector.magnitude;
-		if (tetherLength > maxTetherLength) {
-			TetherHarp ();
+		if (tetherLength > maxTetherLength + 1) {
+			print ("harpoon broke free");
+			ClampHarp ();
 			SetGripping (false);
-			//Destroy (gameObject);
+		} else if (tetherLength > maxTetherLength) {
+			ClampHarp ();
 		} 
 		HandleTether ();
 	}
@@ -243,13 +245,13 @@ public class Harpoon : MonoBehaviour {
 
 	void SetTautLength (float newLength) {
 		//stretchiness should be some % set elsewhere of the tautlength
-		tautLength = newLength + Mathf.Epsilon;
-		maxTetherLength = Mathf.Min (Mathf.Abs (tautLength), Mathf.Abs (maxTetherLength));
-		tautLength = maxTetherLength;
+		tautLength = Mathf.Min (tautLength, newLength);
+		maxTetherLength = Mathf.Min (maxTetherLength, tautLength + tautLength * stretchiness);
 	}
 
 	void HandleTether () {
 		if (tetherLength > tautLength) {
+			print ("applying spring force");
 			float x = tetherLength - tautLength;
 			tetherDirection = transform.position - harpooner.transform.position;
 			tetherDirection.Normalize ();
@@ -287,6 +289,17 @@ public class Harpoon : MonoBehaviour {
 		//Add components of velocity to find resultant velocity vector of harpoon
 		Vector2 resultantHarpVel = (directionOfTether * harpVelTetherComponent) + (orthoDirectionOfTether * harpVelOrthoComponent);
 		rb.velocity = resultantHarpVel;
+	}
+
+	void ClampHarp () {
+		print ("applying clamp");
+		float r = tetherVector.magnitude;
+		float theta = Mathf.Atan2 (tetherVector.y, tetherVector.x);
+		r = Mathf.Clamp (r, 0, maxTetherLength); 
+		float x = r * Mathf.Cos (theta);
+		float y = r * Mathf.Sin (theta);
+		transform.position = new Vector3 (harpooner.transform.position.x + x, harpooner.transform.position.y + y, 0);
+		//TetherHarp ();
 	}
 
 }

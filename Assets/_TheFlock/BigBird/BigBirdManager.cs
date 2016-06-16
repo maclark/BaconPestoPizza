@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.UI;
 using System.Collections;
 
 public class BigBirdManager : MonoBehaviour {
@@ -16,6 +17,8 @@ public class BigBirdManager : MonoBehaviour {
 	public bool drinking = false;
 	public ResourceBar waterTank;
 	public ResourceBar energyTank;
+	public Text distance;
+	public Text coins;
 
 	private GameManager gm;
 	private WaterSource localWater;
@@ -27,13 +30,23 @@ public class BigBirdManager : MonoBehaviour {
 		energyTank = gm.GetBigBirdEnergyTank ();
 	}
 
+
 	void Start () {
 		waterTank.capacity = waterTankCapacity;
 		waterTank.SetResource (waterTankCapacity);
 		energyTank.capacity = hp;
 		waterTank.current = hp;
 		energyTank.current = hp;
+		distance.text = transform.position.y.ToString();
+		coins.text = 0.ToString ();
+
 	}
+
+
+	void Update () {
+		distance.text = transform.position.y.ToString();
+	}
+
 
 	public void GainCannonballs (int balls) {
 		cannonballs += balls;
@@ -54,10 +67,12 @@ public class BigBirdManager : MonoBehaviour {
 
 	public void PayShop (int price) {
 		money -= price;
+		coins.text = money.ToString ();
 	}
 
 	public void Collect (float collection) {
 		money += Mathf.RoundToInt (collection);
+		coins.text = money.ToString ();
 	}
 
 

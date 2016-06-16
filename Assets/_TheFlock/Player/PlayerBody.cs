@@ -12,10 +12,12 @@ public class PlayerBody : MonoBehaviour {
 
 	private GameManager gm;
 	private Rigidbody2D rb;
+	private Player p;
 
 	void Awake () {
 		gm = GameObject.FindObjectOfType<GameManager> ();
 		rb = GetComponent<Rigidbody2D> ();
+		p = GetComponent<Player> ();
 	}
 
 	void FixedUpdate () {
@@ -25,12 +27,16 @@ public class PlayerBody : MonoBehaviour {
 	void OnTriggerEnter2D (Collider2D other) {
 		if (other.name == "BoardingZone") {
 			pad = other.transform.parent.GetComponent<LandingPad> ();
+		} else if (other.GetComponent<Cargo> ()) {
+			p.itemTouching = other.transform;
 		}
 	}
 
 	void OnTriggerExit2D (Collider2D other) {
 		if (other.name == "BoardingZone") {
 			pad = null;
+		} else if (other.GetComponent<Cargo> ()) {
+			p.itemTouching = other.transform;
 		}
 	}
 

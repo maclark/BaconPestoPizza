@@ -2,7 +2,7 @@
 using System.Collections;
 
 public class Cargo : MonoBehaviour {
-	public enum CargoType {POWERBIRD, GEM, SHIELD, GOLD, GREENS}
+	public enum CargoType {RUBY, CANNONBALLS, TORPEDO, UNIT_ENERGY, TON_WATER, POWERBIRD, EGG, SHIELD, GOLD, GREENS}
 	public CargoType cargoType;
 	public Sprite diamond;
 
@@ -24,10 +24,24 @@ public class Cargo : MonoBehaviour {
 				birdie.EatGreens ();
 				Destroy (gameObject);
 			}
+		} else if (coll.transform.tag == "Player") {
+			coll.transform.GetComponentInChildren<Player> ().itemTouching = transform;
+		}
+	}
+
+	void OnCollisionsExit2D (Collision2D coll) {
+		if (coll.transform.tag == "Player") {
+			Player otherP = coll.transform.GetComponentInChildren<Player> ();
+			if (otherP.itemTouching) {
+				if (otherP.itemTouching == transform) {
+					otherP.itemTouching = null;
+				}
+			}
 		}
 	}
 
 	void OnTriggerEnter2D (Collider2D other) {
+		
 	}
 
 	public void RandomType () {
@@ -38,8 +52,8 @@ public class Cargo : MonoBehaviour {
 		case CargoType.POWERBIRD:
 			sr.color = Color.cyan;
 			break;
-		case CargoType.GEM:
-			sr.color = Color.magenta;
+		case CargoType.RUBY:
+			sr.color = Color.red;
 			sr.sprite = diamond;
 			break;
 		case CargoType.SHIELD:

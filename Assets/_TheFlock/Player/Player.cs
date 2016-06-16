@@ -227,8 +227,12 @@ public class Player : MonoBehaviour {
 			Dock dock = pi.station.GetComponent<Dock> ();
 			if (!dock.item) {
 				itemHeld.transform.position = dock.transform.position;
-				itemHeld.GetComponent<SpriteRenderer> ().sortingLayerName = bigBird.GetComponent<SpriteRenderer> ().sortingLayerName;
-				itemHeld.GetComponent<SpriteRenderer> ().sortingOrder = bigBird.GetComponent<SpriteRenderer> ().sortingOrder + 2;
+				if (!itemHeld.GetComponent<Egg> ()) {
+					itemHeld.GetComponent<Rigidbody2D> ().isKinematic = false;
+				}
+				itemHeld.GetComponent<BoxCollider2D> ().enabled = true;
+				itemHeld.GetComponentInChildren<SpriteRenderer> ().sortingLayerName = bigBird.GetComponent<SpriteRenderer> ().sortingLayerName;
+				itemHeld.GetComponentInChildren<SpriteRenderer> ().sortingOrder = bigBird.GetComponent<SpriteRenderer> ().sortingOrder + 2;
 				dock.item = itemHeld;
 				itemHeld.transform.parent = pi.station;
 				itemHeld = null;
@@ -256,8 +260,10 @@ public class Player : MonoBehaviour {
 			itemTouching = null;
 			itemHeld.transform.position = transform.position;
 			itemHeld.transform.parent = transform;
-			itemHeld.GetComponent<SpriteRenderer> ().sortingLayerName = sr.sortingLayerName;
-			itemHeld.GetComponent<SpriteRenderer> ().sortingOrder = sr.sortingOrder + 1;
+			itemHeld.GetComponent<Rigidbody2D> ().isKinematic = true;
+			itemHeld.GetComponent<BoxCollider2D> ().enabled = false;
+			itemHeld.GetComponentInChildren<SpriteRenderer> ().sortingLayerName = sr.sortingLayerName;
+			itemHeld.GetComponentInChildren<SpriteRenderer> ().sortingOrder = sr.sortingOrder + 1;
 		}
 	}
 

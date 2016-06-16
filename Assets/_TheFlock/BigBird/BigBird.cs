@@ -268,13 +268,16 @@ public class BigBird : MonoBehaviour {
 	}
 
 	public void LiftOff () {
+		rb.isKinematic = false;
 		TurnEngineOn ();
+		nearestPad.WithdrawRamp ();
 		transform.parent = null;
 		nearestPad.occupant = null;
 		landed = false;
 	}
 
 	IEnumerator LandingApproach (LandingPad pad) {
+		pad.ExtendRamp ();
 		yield return new WaitForSeconds (1f);
 		//transform.localScale = new Vector3 (landedScale, landedScale, 1);
 		transform.position = pad.transform.position;//+ pad.landingMarkOffset;
