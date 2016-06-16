@@ -14,19 +14,20 @@ public class GameManager : MonoBehaviour {
 	public GameObject tunnelPrefab;
 	public GameObject shopPrefab;
 	public GameObject nextPortal;
-	public Vector3 appointment1 = new Vector3 (100, 0, 0);
-	public Vector3 endOfPortalTailOffset = new Vector3 (0, 67.08f, 0);
-	public Vector3 lastPortalPosition = new Vector3 (0, 0, 0);
-	public float screenClampBuffer = 1;
-	public Text goldText;
-	public List<Transform> appointments = new List<Transform> ();
-	public BigBird bigBird;
-	public int zoneNumber = 0;
 	public Transform exitContainer;
 	public Transform boundaryContainer;
 	public Transform bodyContainer;
 	public Transform enemyContainer;
 	public Transform buildingContainer;
+	public Vector3 appointment1 = new Vector3 (100, 0, 0);
+	public Vector3 endOfPortalTailOffset = new Vector3 (0, 67.08f, 0);
+	public Vector3 lastPortalPosition = new Vector3 (0, 0, 0);
+	public List<Transform> appointments = new List<Transform> ();
+	public Text goldText;
+	public BigBird bigBird;
+	public BigBirdManager bbm;
+	public int zoneNumber = 0;
+	public float screenClampBuffer = 1;
 	public float gallonsPerSquareUnit = 14;
 	public float warpDelay = 2f;
 
@@ -37,24 +38,12 @@ public class GameManager : MonoBehaviour {
 
 	void Awake () {
 		bigBird = GameObject.FindObjectOfType<BigBird> ();
+		bbm = bigBird.GetComponent<BigBirdManager> ();
 		tetrisGod = GameObject.FindObjectOfType<Tetris> ();
 		AddAlliedTransform (bigBird.transform);
 		MakeInvisibleTarget ();
-		exitContainer = new GameObject ().transform;
-		exitContainer.transform.name = "ZoneExits";
-		exitContainer.transform.parent = transform;
-		boundaryContainer = new GameObject ().transform;
-		boundaryContainer.transform.name = "BoundaryWalls";
-		boundaryContainer.transform.parent = transform;
-		bodyContainer = new GameObject ().transform;
-		bodyContainer.transform.name = "Bodies";
-		bodyContainer.transform.parent = transform;
-		enemyContainer = new GameObject ().transform;
-		enemyContainer.transform.name = "Enemies";
-		enemyContainer.transform.parent = transform;
-		buildingContainer = new GameObject ().transform;
-		buildingContainer.transform.name = "Buildings";
-		buildingContainer.transform.parent = transform;
+
+		MakeContainers ();
 	}
 
 	void Start () {
@@ -171,5 +160,23 @@ public class GameManager : MonoBehaviour {
 		zoneNumber++;
 		tetrisGod.origin.y += tetrisGod.rows * tetrisGod.roomHeight + 100f;
 		tetrisGod.SpawnNewZone ();
+	}
+
+	void MakeContainers () {
+		exitContainer = new GameObject ().transform;
+		exitContainer.transform.name = "ZoneExits";
+		exitContainer.transform.parent = transform;
+		boundaryContainer = new GameObject ().transform;
+		boundaryContainer.transform.name = "BoundaryWalls";
+		boundaryContainer.transform.parent = transform;
+		bodyContainer = new GameObject ().transform;
+		bodyContainer.transform.name = "Bodies";
+		bodyContainer.transform.parent = transform;
+		enemyContainer = new GameObject ().transform;
+		enemyContainer.transform.name = "Enemies";
+		enemyContainer.transform.parent = transform;
+		buildingContainer = new GameObject ().transform;
+		buildingContainer.transform.name = "Buildings";
+		buildingContainer.transform.parent = transform;
 	}
 }

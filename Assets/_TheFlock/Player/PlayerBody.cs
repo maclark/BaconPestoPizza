@@ -24,7 +24,7 @@ public class PlayerBody : MonoBehaviour {
 
 	void OnTriggerEnter2D (Collider2D other) {
 		if (other.name == "BoardingZone") {
-			pad = other.transform.GetComponentInChildren<LandingPad> ();
+			pad = other.transform.parent.GetComponent<LandingPad> ();
 		}
 	}
 
@@ -35,11 +35,21 @@ public class PlayerBody : MonoBehaviour {
 	}
 
 
-	public void PressedA () {
+	/*public void PressedA () {
 		if (pad) {
 			if (pad.occupant) {
 				if (pad.occupant == gm.bigBird.transform) {
 					GetComponentInChildren<Player> ().SpiritAway (gm.bigBird.transform, PlayerInput.State.NEUTRAL);
+				} 
+			}
+		}
+	}*/
+
+	public void PressedB () {
+		if (pad) {
+			if (pad.occupant) {
+				if (pad.occupant == gm.bigBird.transform) {
+					GetComponentInChildren<Player> ().SpiritAway (gm.bigBird.transform, PlayerInput.State.CHANGING_STATIONS);
 				} 
 			}
 		}

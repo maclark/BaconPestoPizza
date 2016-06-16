@@ -2,18 +2,17 @@
 using System.Collections;
 
 public class Cargo : MonoBehaviour {
-	public enum CargoType {POWERBIRD, AUTOTURRET, SHIELD, GOLD, GREENS}
+	public enum CargoType {POWERBIRD, GEM, SHIELD, GOLD, GREENS}
 	public CargoType cargoType;
+	public Sprite diamond;
 
 	private SpriteRenderer sr;
 
 	void Awake () {
 		sr = GetComponentInChildren<SpriteRenderer> ();
-		RandomType ();
 	}
 
 	void OnCollisionEnter2D (Collision2D coll) {
-		print (coll.transform.tag);
 		if (coll.transform.tag == "Bird") {
 			Bird birdie = coll.transform.GetComponent<Bird> ();
 			if (cargoType == Cargo.CargoType.SHIELD) {
@@ -32,21 +31,19 @@ public class Cargo : MonoBehaviour {
 	}
 
 	public void RandomType () {
-		cargoType = (CargoType) Random.Range (0, 5);
+		cargoType = (CargoType) Random.Range (0, (int)CargoType.GREENS);
 
 		switch (cargoType) 
 		{
 		case CargoType.POWERBIRD:
 			sr.color = Color.cyan;
 			break;
-		case CargoType.AUTOTURRET:
-			sr.color = Color.black;
+		case CargoType.GEM:
+			sr.color = Color.magenta;
+			sr.sprite = diamond;
 			break;
 		case CargoType.SHIELD:
 			sr.color = Color.blue;
-			break;
-		case CargoType.GOLD:
-			sr.color = Color.yellow;
 			break;
 		case CargoType.GREENS:
 			sr.color = Color.green;

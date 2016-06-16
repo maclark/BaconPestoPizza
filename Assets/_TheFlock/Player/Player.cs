@@ -196,7 +196,6 @@ public class Player : MonoBehaviour {
 	}
 
 	public void SpiritAway (Transform master, PlayerInput.State s) {
-		transform.position = master.position;
 		transform.parent = master;
 		body.gameObject.SetActive (false);
 		if (master == bigBird.transform) {

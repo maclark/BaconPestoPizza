@@ -525,7 +525,7 @@ public class PlayerInput : MonoBehaviour {
 		}
 
 		if (bigBird.Landed) {
-			if (Input.GetButtonDown (aCrossButton)) {
+			if (Input.GetButtonDown (LB)) {
 				bigBird.LiftOff ();
 			}
 			return;
@@ -607,6 +607,11 @@ public class PlayerInput : MonoBehaviour {
 	}
 
 	void HandleOnFootInput () {
+		if (Input.GetButtonDown (bCircleButton)) {
+			p.body.PressedB ();
+			return;
+		}
+
 		p.body.direction = new Vector2 (Input.GetAxis (LSHorizontal), Input.GetAxis (LSVertical));
 
 		Vector2 rightStick = new Vector2 (Input.GetAxis (RSHorizontal), Input.GetAxis (RSVertical));
@@ -618,9 +623,7 @@ public class PlayerInput : MonoBehaviour {
 			}
 		}
 
-		if (Input.GetButtonUp (aCrossButton)) {
-			p.body.PressedA ();
-		}
+
 	}
 
 	void HandleInWebInput () {

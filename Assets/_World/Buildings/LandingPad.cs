@@ -5,10 +5,11 @@ public class LandingPad : MonoBehaviour {
 
 	public Vector3 disembarkPoint;
 	public Vector3 landingMarkOffset;
+	public Transform boardingZone;
 	public Transform occupant;
 
 	void Start () {
-		disembarkPoint = transform.parent.transform.position;
+		disembarkPoint = boardingZone.position;
 	}
 
 }

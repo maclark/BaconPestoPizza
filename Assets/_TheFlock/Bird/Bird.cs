@@ -80,7 +80,6 @@ public class Bird : MonoBehaviour {
 	private Vector3 releaseHarpPosition;
 	private Vector3 windUpOffset;
 	private Vector3 hurlAim;
-	private float startForceMag;
 	private float swingStartTime;
 	private float windUpStartTime;
 	private float theta;
@@ -108,10 +107,7 @@ public class Bird : MonoBehaviour {
 		otherHarps = new List<Harpoon> ();
 		linkedBirds = new List<Bird> ();
 
-		startForceMag = forceMag;
-
 		DockOnBigBird ();
-		LayEgg ();
 		gm.AddAlliedTransform (transform);
 	}
 
@@ -153,7 +149,7 @@ public class Bird : MonoBehaviour {
 
 		//check if just boosted
 		if (!canBoost) {
-			forceMag = startForceMag;
+			forceMag = hydratedForceMag;
 		}	
 	}
 
@@ -385,7 +381,9 @@ public class Bird : MonoBehaviour {
 		}
 
 		if (dock.item) {
-			p.itemTouching = dock.item;
+			if (p) {
+				p.itemTouching = dock.item;
+			}
 		}
 
 		if (rolling) {
@@ -812,10 +810,12 @@ public class Bird : MonoBehaviour {
 	}
 
 	public void LayEgg () {
-		GameObject eggObj = Instantiate (eggPrefab, transform.position, Quaternion.identity) as GameObject;
-		eggObj.transform.parent = dock.transform;
-		dock.item = eggObj.GetComponent<Egg> ().transform;
-		pregnant = false;
+		if (!dock.item) {
+			GameObject eggObj = Instantiate (eggPrefab, transform.position, Quaternion.identity) as GameObject;
+			eggObj.transform.parent = dock.transform;
+			dock.item = eggObj.GetComponent<Egg> ().transform;
+			pregnant = false;
+		}
 	}
 
 	public void EatGreens () {

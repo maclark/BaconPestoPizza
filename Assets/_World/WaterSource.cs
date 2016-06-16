@@ -27,13 +27,13 @@ public class WaterSource : MonoBehaviour {
 
 	void OnTriggerStay2D (Collider2D other) {
 		if (other.name == "BigBirdColliders") {
-			other.transform.parent.GetComponent<BigBird> ().AtWaterSource (this);
+			gm.bbm.AtWaterSource (this);
 		}
 	}
 
 	void OnTriggerExit2D (Collider2D other) {
 		if (other.name == "BigBirdColliders") {
-			other.transform.parent.GetComponent<BigBird> ().LeftWaterSource (this);
+			gm.bbm.LeftWaterSource (this);
 		}
 	}
 

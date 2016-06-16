@@ -7,7 +7,9 @@ public class Destructible : MonoBehaviour {
 	public int hp = 500;
 	public float birthRange = 5f;
 	public float epxlosionMag = 100f;
+	public float chanceForCargo = .33f;
 	public List<GameObject> babies;
+	public GameObject cargo;
 
 	void OnTriggerEnter2D (Collider2D other) {
 		Projectile proj = other.GetComponent<Projectile> ();
@@ -33,6 +35,9 @@ public class Destructible : MonoBehaviour {
 			foreach (GameObject obj in babies) {
 				GiveBirth (obj);
 			}
+		}
+		if (Random.Range (0f, 1f) < chanceForCargo) {
+			GiveBirth (cargo);
 		}
 		Destroy (gameObject);
 	}

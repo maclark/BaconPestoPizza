@@ -118,11 +118,6 @@ public class OrbWeb : MonoBehaviour {
 			sr.color = c.GetComponentInChildren<SpriteRenderer> ().color;
 			Destroy (c.gameObject);
 			break;
-		case Cargo.CargoType.AUTOTURRET:
-			webType = WebType.AUTOTURRET;
-			sr.color = c.GetComponentInChildren<SpriteRenderer> ().color;
-			Destroy (c.gameObject);
-			break;
 		default:
 			break;
 		}

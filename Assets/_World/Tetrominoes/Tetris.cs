@@ -344,7 +344,7 @@ public class Tetris : MonoBehaviour {
 			float x = Random.Range (botLeft.x, botLeft.x + fieldWidth);
 			float y = Random.Range (botLeft.y, botLeft.y + fieldHeight);
 			transform.position = new Vector2 (x, y);	
-			BoxCollider2D[] colls = gm.shopPrefab.GetComponent<Shop> ().GetColliderChild ();
+			BoxCollider2D[] colls = gm.shopPrefab.GetComponent<Shopkeeper> ().GetColliderChild ();
 			if (CheckSpaceClear(colls, 0f)) {
 				GameObject go = Instantiate (gm.shopPrefab, transform.position, transform.rotation) as GameObject;
 				go.transform.parent = gm.buildingContainer;
