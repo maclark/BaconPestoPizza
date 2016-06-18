@@ -38,7 +38,7 @@ public class Torpedo : Projectile {
 		t.RemoveTorp (this);
 		Instantiate (explosionPrefab, transform.position, transform.rotation);
 		CancelInvoke ();
-		Destroy (gameObject);
+		base.Die ();
 	}
 
 	void OnBecameInsivible () {

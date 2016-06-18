@@ -1,20 +1,21 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class Egg : MonoBehaviour {
+public class Egg : Item {
 
 	public float layTime;
 	public float gestationTime;
 	public GameObject hatchlingPrefab;
 	public bool inCoop = false;
 
-	//private GameManager gm;
+	private Coop coo;
 
 	void Awake () {
-		//gm = GameObject.FindObjectOfType<GameManager> ();
+		base.OnAwake ();
 	}
 		
 	void Start () {
+		coo = gm.bigBird.GetComponentInChildren<Coop> ();
 		layTime = 0f;
 	}
 	
@@ -27,36 +28,87 @@ public class Egg : MonoBehaviour {
 		}
 	}
 
-	public void OnTriggerEnter2D (Collider2D other) {
-		if (inCoop) {
-			if (other.tag == "Player") {
-				other.GetComponentInChildren<Player> ().itemTouching = transform;
-			}
-		}
+	void OnTriggerStay2D (Collider2D other) {
+		//if (other.tag == "Player") {
+		//print ("egg touching");
+		//other.transform.parent.GetComponentInChildren<Player> ().itemTouching = transform;
+		//}
+		base.TriggerStay2D (other);
 	}
 
 	public void OnTriggerExit2D (Collider2D other) {
-		if (inCoop) {
-			if (other.tag == "Player") {
-				Player otherP = other.GetComponentInChildren<Player> ();
-				if (otherP.itemTouching) {
-					if (otherP.itemTouching == transform) {
-						otherP.itemTouching = null;
-					}
+		/*if (other.tag == "Player") {
+			print ("egg untouching");
+
+			Player otherP = other.transform.parent.GetComponentInChildren<Player> ();
+			if (otherP.itemTouching) {
+				if (otherP.itemTouching == transform) {
+					otherP.itemTouching = null;
 				}
 			}
-		}
+		}*/
+	}
+
+	void OnCollisionEnter2D (Collision2D coll) {
+		base.CollisionEnter2D (coll);
+	}
+
+	void OnCollisionExit2D (Collision2D coll) {
+		base.CollisionExit2D (coll);
 	}
 
 	public void Hatch () {
 		if (inCoop) {
-			GameObject obj = Instantiate (hatchlingPrefab, transform.position, Quaternion.identity) as GameObject;
+			GameObject newPup = Instantiate (hatchlingPrefab, transform.position, Quaternion.identity) as GameObject;
+			coo.RemoveOccupant (transform);
+			coo.AddOccupant (newPup.transform);
 			if (transform.parent) {
-				obj.transform.parent = transform.parent;
+				newPup.transform.parent = transform.parent;
 			}
 		} else {
 			print ("hatching not in coop");
 		}
 		Destroy (gameObject);
+	}
+
+	public override void Drop (Player p, string sortLayerName, int sortOrder) {
+		bool droppedItem = false;
+		PlayerInput.State pState = p.GetComponent<PlayerInput> ().state;
+		if (pState == PlayerInput.State.IN_COOP) {
+			if (!coo.full) {
+				coo.AddOccupant (this.transform);
+				this.transform.parent = coo.transform;
+				gameObject.layer = LayerMask.NameToLayer ("OnBoard");
+				GetComponent<Collider2D> ().isTrigger = false;
+				GetComponent<Rigidbody2D> ().isKinematic = false;
+				GetComponent<Rigidbody2D> ().drag = 0f;
+				sortOrder++;
+				transform.parent = null;
+				droppedItem = true;
+			}
+		} else if (pState == PlayerInput.State.ON_FOOT) {
+			gameObject.layer = LayerMask.NameToLayer ("Pedestrians");
+			GetComponent<Collider2D> ().isTrigger = false;
+			GetComponent<Rigidbody2D> ().isKinematic = false;
+			GetComponent<Rigidbody2D> ().drag = 5f;
+			sortOrder++;
+			transform.parent = null;
+			droppedItem = true;
+
+		} else if (pState == PlayerInput.State.DOCKED) {
+			Dock dock = p.GetComponent<PlayerInput>().station.GetComponent<Dock> ();
+			if (!dock.item) {
+				transform.position = dock.transform.position;
+				transform.parent = dock.transform;
+				dock.item = transform;
+				GetComponent<Collider2D> ().isTrigger = true;
+				GetComponent<Rigidbody2D> ().isKinematic = true;
+				sortOrder += 2;
+				droppedItem = true;
+			}
+		}
+		if (droppedItem) {
+			base.Drop (p, sortLayerName, sortOrder); 
+		}
 	}
 }

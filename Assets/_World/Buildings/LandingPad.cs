@@ -15,6 +15,21 @@ public class LandingPad : MonoBehaviour {
 		WithdrawRamp ();
 	}
 
+	public void OnTriggerStay2D (Collider2D other) {
+		if (other.tag == "BigBird") {
+			other.GetComponentInParent<BigBird> ().nearestPad = this;
+		}
+	}
+
+	void OnTriggerExit2D (Collider2D other) {
+		if (other.tag == "BigBird") {
+			LandingPad np = other.GetComponentInParent<BigBird> ().nearestPad;
+			if (this == np) {
+				np = null;
+			}
+		}
+	}
+
 	public void ExtendRamp () {
 		foreach (Transform t in rampParts) {
 			t.gameObject.SetActive (true);

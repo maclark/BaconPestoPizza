@@ -41,6 +41,7 @@ public class Turret : MonoBehaviour {
 		if (aim == Vector3.zero) {
 			//depends on base rotation of object... TODO
 			//aim = transform.up;
+			aim = transform.up;
 		}
 		torp.Fire (transform.position, aim);
 		ready = false;

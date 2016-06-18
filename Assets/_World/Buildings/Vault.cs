@@ -6,9 +6,9 @@ public class Vault : MonoBehaviour {
 	public Shopkeeper keeper;
 
 	void OnCollisionEnter2D (Collision2D coll) {
-		Cargo c = coll.transform.GetComponent<Cargo> ();
+		Item c = coll.transform.GetComponent<Item> ();
 		if (c) {
-			keeper.BuyFromPlayer (c.cargoType);
+			keeper.BuyFromPlayer (c.itemType);
 			Destroy (c.gameObject);
 		}
 	}

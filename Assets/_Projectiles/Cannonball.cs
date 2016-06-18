@@ -22,6 +22,7 @@ public class Cannonball : Projectile {
 	}
 
 	void OnTriggerEnter2D (Collider2D other) {
+		print ("cannonball triggering");
 		base.TriggerEnter2D (other);
 	}
 

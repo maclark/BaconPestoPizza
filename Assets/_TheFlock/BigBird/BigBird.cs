@@ -7,14 +7,21 @@ public class BigBird : MonoBehaviour {
 	public float forceMag = 75f;
 	public int turn = 0;
 	public float turnSpeed = 200f;
+	public float landingSpeed = 1f;
+	public float landingRotate = 1f;
+	public float landingDelta = .1f;
 	public float halfSecFill = 5f;
 	public LandingPad nearestPad = null;
-	public float coopWidth;
-	public float coopHeight;
 	public CargoHold hold;
 	public GameObject cannonballPrefab;
 	public List<Transform> rightCans;
 	public List<Transform> leftCans;
+
+
+
+	public bool landing = false;
+
+
 
 	private GameManager gm;
 	private BigBirdManager bbm;
@@ -41,6 +48,12 @@ public class BigBird : MonoBehaviour {
 		medkit = GetComponentInChildren<Medkit> ();
 		hold = GetComponentInChildren<CargoHold> ();
 		thrusters = GetComponentsInChildren<Thruster> ();
+	}
+
+	void Update () {
+		if (landing) {
+			LandingApproach ();
+		}
 	}
 
 	void FixedUpdate () {
@@ -79,7 +92,6 @@ public class BigBird : MonoBehaviour {
 				SetCamera ();
 			}
 		}
-
 		if (other.tag == "EnemyBullet") {
 			if (Random.Range (0, 1f) > .5) {
 				TakeDamage (other.GetComponent<Projectile> ().damage);
@@ -94,9 +106,7 @@ public class BigBird : MonoBehaviour {
 			TurnEngineOn ();
 			forceMag = 10 * forceMag;
 		}
-		else if (other.name == "LandingPad") {
-			nearestPad = other.GetComponent<LandingPad> ();
-		}
+
 	}
 
 	void OnCollisionEnter2D (Collision2D coll) {
@@ -108,23 +118,17 @@ public class BigBird : MonoBehaviour {
 			}
 		}
 
-		if (coll.transform.tag == "Enemy") {
+		if (coll.transform.tag == "FlyerEnemy") {
 			TakeDamage (coll.transform.GetComponent<Flyer> ().kamikazeDamage);
 			coll.transform.gameObject.GetComponent<Flyer> ().Die ();
 		} else if (coll.gameObject.tag == "Harpoonable") {
-			if (coll.gameObject.GetComponent<Cargo> ()) {
+			if (coll.gameObject.GetComponent<Item> ()) {
 				hold.Load (coll.transform);
 			}
 		}
 	}
 
-	void OnTriggerExit2D (Collider2D other) {
-		if (other.name == "LandingPad") {
-			if (nearestPad == other.GetComponent<LandingPad> ()) {
-				nearestPad = null;
-			}
-		}
-	}
+
 
 	/// <summary>
 	/// MAKE SURE TO CHEK IF RETURED NULL DOCK. Probably should use bool return type with an out dock variable.
@@ -256,18 +260,15 @@ public class BigBird : MonoBehaviour {
 	}
 
 	public void BigDock () {
-		landed = true;
 		TurnEngineOff ();
-		rb.Sleep ();
-		StartCoroutine (LandingApproach (nearestPad));
-		nearestPad.occupant = this.transform;
-
-		//rb.velocity = Vector3.zero;
-		//rb.angularVelocity = 0f;
-	
+		landing = true;
+		nearestPad.ExtendRamp ();
+		LandingApproach ();
+		nearestPad.occupant = this.transform;	
 	}
 
 	public void LiftOff () {
+		landing = false;
 		rb.isKinematic = false;
 		TurnEngineOn ();
 		nearestPad.WithdrawRamp ();
@@ -276,15 +277,29 @@ public class BigBird : MonoBehaviour {
 		landed = false;
 	}
 
-	IEnumerator LandingApproach (LandingPad pad) {
-		pad.ExtendRamp ();
-		yield return new WaitForSeconds (1f);
-		//transform.localScale = new Vector3 (landedScale, landedScale, 1);
-		transform.position = pad.transform.position;//+ pad.landingMarkOffset;
-		transform.rotation = Quaternion.LookRotation (transform.forward, pad.transform.up);
-		transform.parent = pad.transform;
-		rb.angularVelocity = 0f;
-		rb.isKinematic = true;
+	public void LandingApproach () {
+		if (!nearestPad) {
+			Debug.Log ("landing on null pad");
+			LiftOff ();
+			return;
+		}
+
+		Vector3 translationDirection = nearestPad.transform.position - transform.position;
+		translationDirection.Normalize ();
+		transform.Translate (translationDirection * landingSpeed * Time.deltaTime);
+		transform.rotation = Quaternion.RotateTowards (transform.rotation, nearestPad.transform.rotation, landingRotate);
+		if (transform.position.x - nearestPad.transform.position.x < landingDelta &&
+			transform.position.y - nearestPad.transform.position.y < landingDelta &&
+			transform.position.z - nearestPad.transform.position.z < landingDelta) 
+		{
+			landing = false;
+			landed = true;
+			transform.parent = nearestPad.transform;
+			transform.rotation = nearestPad.transform.rotation;
+			rb.velocity = Vector3.zero;
+			rb.angularVelocity = 0f;
+			rb.isKinematic = true;
+		}
 	}
 
 	public bool Landed {

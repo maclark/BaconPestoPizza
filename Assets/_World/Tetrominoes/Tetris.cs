@@ -67,13 +67,11 @@ public class Tetris : MonoBehaviour {
 	}
 
 
-	// Use this for initialization
 	void Start () {
 		SpawnNewZone ();
 		gm.StartCoroutine (gm.WarpBigBird (spelunkyGod.bottomExitVector));
 	}
 	
-	// Update is called once per frame
 	void Update () {
 		if (Input.GetKeyDown (KeyCode.Space)) {
 			SpawnShopField (origin, columns * roomWidth, rows * roomHeight, shopAttempts);
@@ -97,10 +95,10 @@ public class Tetris : MonoBehaviour {
 		spelunkyGod.PlacePortal ();
 		spelunkyGod.PlaceTunnel ();
 		SpawnMegaTetrosOffTrail ();
+		SpawnShopField (origin, columns * roomWidth, rows * roomHeight, shopAttempts);
 		SpawnWaterField (origin, columns * roomWidth, rows * roomHeight, waterAttempts);
 		SpawnRectangleField (origin, columns * roomWidth, rows * roomHeight, tetroAttempts);
 		spelunkyGod.OutlineCave ();
-		SpawnShopField (origin, columns * roomWidth, rows * roomHeight, shopAttempts);
 		SpawnEnemyField (origin, columns * roomWidth, rows * roomHeight);
 		SpawnDestructibles (origin, columns * roomWidth, rows * roomHeight, destructibleSpots, destructibleAttsPerSpot);
 		spelunkyGod.DestroySpaceSavers ();
@@ -212,14 +210,12 @@ public class Tetris : MonoBehaviour {
 			BoxCollider2D col = possibleColliders [i];
 			Vector2 boxSize = new Vector2 (col.transform.localScale.x + buff * 2, col.transform.localScale.y + buff * 2);
 			Vector2 spawnPosition = transform.position + col.transform.position;
-			//Debug.Log (possibleColliders [i].transform.name + " at " + spawnPosition + " with boxSize: " + boxSize);
 			float angle = 0f;
 			if (col.transform.parent) {
 				angle = col.transform.parent.rotation.eulerAngles.z;
 			}
 			RaycastHit2D hit = Physics2D.BoxCast (spawnPosition, boxSize, angle, Vector2.zero, 0f); 
 			if (hit.transform != null) {
-				//Debug.Log (possibleColliders [i].transform.name + " hit " + hit.transform.name);
 				return false;  
 			}
 		}
@@ -343,11 +339,14 @@ public class Tetris : MonoBehaviour {
 		for (int i = 0; i < attempts; i++) {
 			float x = Random.Range (botLeft.x, botLeft.x + fieldWidth);
 			float y = Random.Range (botLeft.y, botLeft.y + fieldHeight);
-			transform.position = new Vector2 (x, y);	
-			BoxCollider2D[] colls = gm.shopPrefab.GetComponent<Shopkeeper> ().GetColliderChild ();
+			transform.position = new Vector2 (x, y);
+			BoxCollider2D[] colls = gm.shopPrefab.GetComponentInChildren<Shopkeeper> ().GetColliderChild ();
 			if (CheckSpaceClear(colls, 0f)) {
 				GameObject go = Instantiate (gm.shopPrefab, transform.position, transform.rotation) as GameObject;
 				go.transform.parent = gm.buildingContainer;
+
+				//cap one shop per spawnshopfield call
+				return;
 			}
 		}
 	}
@@ -364,7 +363,7 @@ public class Tetris : MonoBehaviour {
 
 	void SpawnEnemyField (Vector2 botLeft, float fieldWidth, float fieldHeight) {
 		int iAtts = Mathf.RoundToInt (Mathf.Log (invaderAttempts * difficultyMod * (gm.zoneNumber + 1)));
-		int icAtts = Mathf.RoundToInt (Mathf.Log (invaderCarrierAttempts * difficultyMod * (gm.zoneNumber - 1)));
+		int icAtts = Mathf.RoundToInt (Mathf.Log (invaderCarrierAttempts * difficultyMod * (gm.zoneNumber + 1)));
 		int pufAtts = Mathf.RoundToInt (Mathf.Log (pufferAttempts * difficultyMod * (gm.zoneNumber + 1)));
 		int huntPairAtts = Mathf.RoundToInt (Mathf.Log (hunterPairAttempts * difficultyMod * (gm.zoneNumber + 1)));
 		int alkAtts = Mathf.RoundToInt (Mathf.Log (alakazamAttempts * difficultyMod * (gm.zoneNumber + 1)));

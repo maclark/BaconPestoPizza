@@ -35,7 +35,7 @@ public class Projectile : MonoBehaviour {
 	}
 
 	public virtual void Die () {
-		print ("actually killing projectile?");
+		Destroy (gameObject);
 	}
 
 	public virtual void BecameInvisible () {

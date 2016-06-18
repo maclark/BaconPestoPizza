@@ -24,7 +24,9 @@ public class Flyer : Unit {
 	}
 
 	protected override void OnStart () {
-		SetNearestTarget ();
+		//TODO maybe should just track all nearest players all the time?
+		InvokeRepeating ("SetNearestTarget", 2f, 2f);
+		//SetNearestTarget ();
 	}
 
 	protected override void OnUpdate () {
@@ -72,7 +74,6 @@ public class Flyer : Unit {
 	}
 
 	public override void Die() {
-		print ("flyer die");
 		if (transform.parent) {
 			if (transform.parent.GetComponent<Carrier> ()) {
 				transform.parent.GetComponent<Carrier> ().LoseInterceptor (transform);

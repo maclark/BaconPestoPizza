@@ -30,7 +30,7 @@ public class Player : MonoBehaviour {
 		bigBird = GameObject.FindObjectOfType<BigBird> ();
 		hol = new Holster (this);
 		color = sr.color;
-		body = gm.GetBody ();
+		body = gm.GetBody (this);
 		GetComponent<ObjectPooler> ().SetPooledObjectsColor (color);
 		GetComponent<ObjectPooler> ().SetPooledObjectsOwner (transform);
 	}
@@ -63,7 +63,7 @@ public class Player : MonoBehaviour {
 		sr.color = color;
 		sr.sprite = sprites [0];
 		sr.sortingLayerName = newParent.GetComponent<SpriteRenderer> ().sortingLayerName;
-		sr.sortingOrder = 2;
+		sr.sortingOrder = 1;
 
 		transform.parent = newParent;
 		transform.position = pi.station.position;
@@ -105,6 +105,7 @@ public class Player : MonoBehaviour {
 		bub.GetComponent<Bubble> ().p = this;
 		bub.GetComponent<Rigidbody2D> ().velocity = initialVelocity;
 		bub.GetComponent<SpriteRenderer> ().color = new Color (color.r, color.g, color.b, .5f);
+		sr.color = color;
 		transform.parent = bub.transform;
 		pi.CancelInvoke ();
 		pi.state = PlayerInput.State.IN_BUBBLE;
@@ -193,14 +194,22 @@ public class Player : MonoBehaviour {
 		transform.parent = body.transform;
 		sr.sortingLayerName = sortingLayer;
 		sr.sortingOrder = sortingOrd;
+		if (itemHeld) {
+			itemHeld.GetComponentInChildren<SpriteRenderer> ().sortingLayerName = sr.sortingLayerName;
+			itemHeld.GetComponentInChildren<SpriteRenderer> ().sortingOrder = sr.sortingOrder + 1;
+		}
 	}
 
 	public void SpiritAway (Transform master, PlayerInput.State s) {
 		transform.parent = master;
 		body.gameObject.SetActive (false);
 		if (master == bigBird.transform) {
-			sr.sortingLayerName = "Birds";
-			sr.sortingOrder = 0;
+			sr.sortingLayerName = "BigBird";
+			sr.sortingOrder = 1;
+			if (itemHeld) {
+				itemHeld.GetComponentInChildren<SpriteRenderer> ().sortingLayerName = sr.sortingLayerName;
+				itemHeld.GetComponentInChildren<SpriteRenderer> ().sortingOrder = sr.sortingOrder + 1;
+			}
 		}
 		pi.state = s;
 	}
@@ -213,31 +222,7 @@ public class Player : MonoBehaviour {
 	}
 
 	public void DropItem () {
-		if (pi.state == PlayerInput.State.IN_COOP) {
-			Coop coo = pi.station.GetComponent<Coop> ();
-			if (!coo.full) {
-				coo.AddOccupant (itemHeld);
-				itemHeld.GetComponent<SpriteRenderer> ().sortingLayerName = bigBird.GetComponent<SpriteRenderer> ().sortingLayerName;
-				itemHeld.GetComponent<SpriteRenderer> ().sortingOrder = bigBird.GetComponent<SpriteRenderer> ().sortingOrder + 1;
-				itemHeld.transform.parent = pi.station;
-				itemTouching = itemHeld;
-				itemHeld = null;
-			}
-		} else if (pi.state == PlayerInput.State.DOCKED) {
-			Dock dock = pi.station.GetComponent<Dock> ();
-			if (!dock.item) {
-				itemHeld.transform.position = dock.transform.position;
-				if (!itemHeld.GetComponent<Egg> ()) {
-					itemHeld.GetComponent<Rigidbody2D> ().isKinematic = false;
-				}
-				itemHeld.GetComponent<BoxCollider2D> ().enabled = true;
-				itemHeld.GetComponentInChildren<SpriteRenderer> ().sortingLayerName = bigBird.GetComponent<SpriteRenderer> ().sortingLayerName;
-				itemHeld.GetComponentInChildren<SpriteRenderer> ().sortingOrder = bigBird.GetComponent<SpriteRenderer> ().sortingOrder + 2;
-				dock.item = itemHeld;
-				itemHeld.transform.parent = pi.station;
-				itemHeld = null;
-			}
-		}
+		itemHeld.GetComponent<Item> ().Drop (this, GetComponent<SpriteRenderer> ().sortingLayerName, GetComponent<SpriteRenderer> ().sortingOrder);
 	}
 
 	public void PickUpItem () {
@@ -250,6 +235,13 @@ public class Player : MonoBehaviour {
 		}
 
 		if (!itemHeld) {
+			Item it = itemTouching.GetComponent<Item> ();
+			if (it.forSale) {
+				if (!it.keeper.SellToPlayer (it)) {
+					return;
+				}
+			}
+
 			if (pi.state == PlayerInput.State.IN_COOP) {
 				pi.station.GetComponent<Coop> ().RemoveOccupant (itemTouching);
 			} else if (pi.state == PlayerInput.State.DOCKED) {
@@ -260,8 +252,9 @@ public class Player : MonoBehaviour {
 			itemTouching = null;
 			itemHeld.transform.position = transform.position;
 			itemHeld.transform.parent = transform;
+			itemHeld.GetComponent<Rigidbody2D> ().velocity = Vector3.zero;
 			itemHeld.GetComponent<Rigidbody2D> ().isKinematic = true;
-			itemHeld.GetComponent<BoxCollider2D> ().enabled = false;
+			itemHeld.GetComponent<Collider2D> ().enabled = false;
 			itemHeld.GetComponentInChildren<SpriteRenderer> ().sortingLayerName = sr.sortingLayerName;
 			itemHeld.GetComponentInChildren<SpriteRenderer> ().sortingOrder = sr.sortingOrder + 1;
 		}

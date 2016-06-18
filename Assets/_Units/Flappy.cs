@@ -19,10 +19,7 @@ public class Flappy : Flyer {
 	}
 
 	void OnCollisionEnter2D (Collision2D coll) {
-		print ("flappy collided");
-
 		if (coll.transform.tag == "Bird") {
-			print ("flappy collided with bird");
 			coll.transform.GetComponent<Bird> ().TakeDamage (kamikazeDamage);
 			Die ();
 		} else if (coll.transform.GetComponent<Flyer> ()) {
@@ -34,11 +31,7 @@ public class Flappy : Flyer {
 	}
 
 	void OnTriggerEnter2D (Collider2D other) {
-		print ("flappy triggered");
-
 		if (other.tag == "Bird") {
-			print ("flappy triggered with bird");
-
 			if (target != null) {
 				float pDist = Vector3.Distance (other.transform.position, transform.position);
 				float tDist = Vector3.Distance (target.transform.position, transform.position);

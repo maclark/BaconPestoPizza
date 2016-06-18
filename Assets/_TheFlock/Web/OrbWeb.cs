@@ -27,8 +27,8 @@ public class OrbWeb : MonoBehaviour {
 
 	void OnTriggerEnter2D (Collider2D other) {
 		if (other.tag == "Harpoonable") {
-			if (other.GetComponent<Cargo> ()) {
-				HandleHitCargo (other.GetComponent<Cargo> ());
+			if (other.GetComponent<Item> ()) {
+				HandleHitCargo (other.GetComponent<Item> ());
 			}
 		}
 		else if (other.tag == "Bird" && !CheckIfWebber (other.transform) && !other.transform.GetComponent<Bird> ().webbed) {
@@ -110,10 +110,10 @@ public class OrbWeb : MonoBehaviour {
 		return false;
 	}
 
-	void HandleHitCargo (Cargo c) {
-		switch (c.cargoType) 
+	void HandleHitCargo (Item c) {
+		switch (c.itemType) 
 		{
-		case Cargo.CargoType.POWERBIRD:
+		case Item.ItemType.POWERBIRD:
 			webType = WebType.POWERBIRD;
 			sr.color = c.GetComponentInChildren<SpriteRenderer> ().color;
 			Destroy (c.gameObject);

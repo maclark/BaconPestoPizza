@@ -5,6 +5,7 @@ public class PlayerBody : MonoBehaviour {
 
 	public float forceMag;
 	public Vector3 playerOffset;
+	public GameObject trigger;
 	public LandingPad pad;
 
 	[HideInInspector]
@@ -17,7 +18,6 @@ public class PlayerBody : MonoBehaviour {
 	void Awake () {
 		gm = GameObject.FindObjectOfType<GameManager> ();
 		rb = GetComponent<Rigidbody2D> ();
-		p = GetComponent<Player> ();
 	}
 
 	void FixedUpdate () {
@@ -27,7 +27,9 @@ public class PlayerBody : MonoBehaviour {
 	void OnTriggerEnter2D (Collider2D other) {
 		if (other.name == "BoardingZone") {
 			pad = other.transform.parent.GetComponent<LandingPad> ();
-		} else if (other.GetComponent<Cargo> ()) {
+		} else if (other.name == "CargoPlatform") {
+			pad = other.GetComponentInParent<BigBird> ().nearestPad;
+		} else if (other.GetComponent<Item> ()) {
 			p.itemTouching = other.transform;
 		}
 	}
@@ -35,21 +37,14 @@ public class PlayerBody : MonoBehaviour {
 	void OnTriggerExit2D (Collider2D other) {
 		if (other.name == "BoardingZone") {
 			pad = null;
-		} else if (other.GetComponent<Cargo> ()) {
-			p.itemTouching = other.transform;
-		}
-	}
-
-
-	/*public void PressedA () {
-		if (pad) {
-			if (pad.occupant) {
-				if (pad.occupant == gm.bigBird.transform) {
-					GetComponentInChildren<Player> ().SpiritAway (gm.bigBird.transform, PlayerInput.State.NEUTRAL);
-				} 
+		} else if (other.name == "CargoPlatform") {
+			pad = null;
+		} else if (other.GetComponent<Item> ()) {
+			if (p.itemTouching == other.transform) {
+				p.itemTouching = null;
 			}
 		}
-	}*/
+	}
 
 	public void PressedB () {
 		if (pad) {
@@ -60,4 +55,9 @@ public class PlayerBody : MonoBehaviour {
 			}
 		}
 	}
+
+	public void SetPlayer (Player player) {
+		p = player;
+	}
+
 }

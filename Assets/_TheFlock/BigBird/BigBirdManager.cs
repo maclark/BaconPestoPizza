@@ -65,9 +65,15 @@ public class BigBirdManager : MonoBehaviour {
 		}
 	}
 
-	public void PayShop (int price) {
-		money -= price;
-		coins.text = money.ToString ();
+	public bool PayShop (int price) {
+		if (money - price >= 0) {
+			money -= price;
+			coins.text = money.ToString ();
+			return true;
+		} else {
+			print ("can't afford item");
+			return false;
+		}
 	}
 
 	public void Collect (float collection) {

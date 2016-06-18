@@ -15,11 +15,14 @@ public class Bird : MonoBehaviour {
 
 	public float boostForceMag = 60f;
 	public float flashGap = 1f;
-	public float flashDuration = .15f;
+	public float flashDuration = .2f;
 	public float damageDuration = 10f;
 	public float flashDampener = .1f;
 	public float hitInvincibilityDuration = .25f;
 	public float boostCooldown = 2f;
+	public float dockRayLength = 8f;
+	public float undockColliderDelay = .2f;
+	
 
 	public float fullTank = 60f;
 	public float lowGasWarning = 10f;
@@ -27,7 +30,7 @@ public class Bird : MonoBehaviour {
 	public float gasPerSecond = 1f;
 	public float gasPerBoost = 2f;
 	public float gasLightDelay = .2f;
-	public float gasLightOffset = 5f;
+	public float iconAboveOffset = 5f;
 	public float harpHurlOffset = 1f;
 	public float swingSpeed = 3f;
 	public float windUpTime = 1f;
@@ -36,7 +39,7 @@ public class Bird : MonoBehaviour {
 	public float rollDuration = 1f;
 	public float rerollDelay = 1f;
 	public float rollSpeed = 1f;
-	public Vector3 pupOffset;
+	public float loveLasts = 2f;
 
 	public bool docked = false;
 	public bool webbed = false;
@@ -55,6 +58,7 @@ public class Bird : MonoBehaviour {
 	public GameObject harpoonPrefab;
 	public GameObject gasLightPrefab;
 	public GameObject eggPrefab;
+	public GameObject lovePrefab;
 	public OrbWeb webTrap;
 	public Hatchling pup;
 	public List<Bird> linkedBirds;
@@ -108,6 +112,8 @@ public class Bird : MonoBehaviour {
 		linkedBirds = new List<Bird> ();
 
 		DockOnBigBird ();
+		LayEgg ();
+
 		gm.AddAlliedTransform (transform);
 	}
 
@@ -180,9 +186,9 @@ public class Bird : MonoBehaviour {
 				}
 			}
 		} else if (other.tag == "Harpoonable") {
-			Cargo otherC = other.GetComponent<Cargo> ();
+			Item otherC = other.GetComponent<Item> ();
 			if (otherC) {
-				if (otherC.cargoType == Cargo.CargoType.SHIELD) {
+				if (otherC.itemType == Item.ItemType.BIRD_SHIELD) {
 					if (!shield.gameObject.activeSelf) {
 						shield.ActivateShield ();
 						Destroy (other.gameObject);
@@ -211,6 +217,7 @@ public class Bird : MonoBehaviour {
 		} else if (coll.transform.tag == "Bird") {
 			if (inHeat) {
 				pregnant = true;
+				MakeLove ();
 				inHeat = false;
 			}
 		}
@@ -425,7 +432,7 @@ public class Bird : MonoBehaviour {
 		return docked;
 	}
 
-	public void Undock () {
+	public void UndockFromBigBird () {
 		if (health < maxHealth) {
 			Debug.Log ("Can't undock unhealthy bird.");
 			return;
@@ -433,7 +440,7 @@ public class Bird : MonoBehaviour {
 
 		Vector3 releaseDirection = transform.position - bigBird.transform.position;
 		releaseDirection.Normalize ();
-		RaycastHit2D hit = Physics2D.Raycast (dock.transform.position, releaseDirection, 6f, releaseMask);
+		RaycastHit2D hit = Physics2D.Raycast (dock.transform.position, releaseDirection, dockRayLength, releaseMask);
 		if (hit.transform != null) {
 			print ("undock blocked by " + hit.transform.name);
 			return;
@@ -451,10 +458,7 @@ public class Bird : MonoBehaviour {
 				Hatchling h = dock.item.GetComponent<Hatchling> ();
 				if (h && !pup) {
 					pup = h;
-					pup.transform.parent = transform;
-					pup.transform.rotation = Quaternion.identity;
-					pup.transform.position = transform.position + pupOffset;
-					pup.flying = true;
+					pup.UndockFromBigBird (this);
 					dock.item = null;
 				}
 			}
@@ -470,7 +474,7 @@ public class Bird : MonoBehaviour {
 		rb.WakeUp ();
 
 		rb.AddForce (releaseDirection * boostForceMag);
-		Invoke ("EnableColliders", .5f);
+		Invoke ("EnableColliders", undockColliderDelay);
 		sr.sortingLayerName = "Birds";
 		sr.sortingOrder = 0;
 		p.Undock ();
@@ -576,7 +580,7 @@ public class Bird : MonoBehaviour {
 	}
 
 	void LowOnGas () {
-		Vector3 position = new Vector3 (transform.position.x, transform.position.y + gasLightOffset, 0f);
+		Vector3 position = new Vector3 (transform.position.x, transform.position.y + iconAboveOffset, 0f);
 		gasLight = Instantiate (gasLightPrefab, position, transform.rotation) as GameObject;
 		gasLight.transform.parent = transform;
 		gasLightFlashing = true;
@@ -839,4 +843,9 @@ public class Bird : MonoBehaviour {
 		inHeat = true;
 	}
 
+	void MakeLove () {
+		Vector3 spawnPosition = new Vector3 (transform.position.x, transform.position.y + iconAboveOffset, 0f);
+		GameObject love = Instantiate (lovePrefab, spawnPosition, Quaternion.identity) as GameObject;
+		Destroy (love, loveLasts);
+	}
 }

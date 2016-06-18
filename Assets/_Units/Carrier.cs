@@ -31,8 +31,8 @@ public class Carrier : Unit {
 		if (other.tag == "PlayerBullet") {
 			Projectile pro = other.GetComponent<Projectile> ();
 			attacker = pro.owner;
-			TakeDamage (other.GetComponent<Bullet> ().damage, Color.red);
-			other.GetComponent<Bullet> ().Die ();
+			TakeDamage (other.GetComponent<Projectile> ().damage, Color.red);
+			other.GetComponent<Projectile> ().Die ();
 		} else if (other.tag == "Explosion") {
 			if (hitExplosion)
 				return;
@@ -45,6 +45,9 @@ public class Carrier : Unit {
 		spawning = true;
 		if (interceptors.Count < maxInterceptors) {
 			GameObject enemyObj = Instantiate (enemyPrefab, GetComponentInChildren<Dock> ().transform.position, Quaternion.identity) as GameObject;
+			if (transform.parent) {
+				enemyObj.transform.parent = transform.parent;
+			}
 			interceptors.Add (enemyObj.transform);
 		}
 

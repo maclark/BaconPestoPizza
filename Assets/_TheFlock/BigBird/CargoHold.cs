@@ -2,9 +2,11 @@
 using System.Collections;
 
 public class CargoHold : MonoBehaviour {
-	public GameObject cargoPrefab;
-	public Cargo[,] cargo = new Cargo[3, 3];
-	public Cargo platformCargo;
+	public GameObject rubyPrefab;
+	public GameObject greensPrefab;
+	public GameObject powerbirdPrefab;
+	public Item[,] cargo = new Item[3, 3];
+	public Item platformCargo;
 	public Transform loadingPlatform;
 	public float columnWidth = 1f;
 	public float rowWidth = 1.2f;
@@ -27,9 +29,9 @@ public class CargoHold : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
-		CreateCargo ();
-		CreateCargo ();
-		CreateCargo ();
+		CreateCargo (rubyPrefab);
+		CreateCargo (greensPrefab);
+		CreateCargo (powerbirdPrefab);
 	}
 
 	public void GrabSwapOrStoreCargo () {
@@ -44,7 +46,7 @@ public class CargoHold : MonoBehaviour {
 		} else {
 			if (cargo [xSelector, ySelector] != null) {
 				//Swap
-				Cargo c = cargo [xSelector, ySelector];
+				Item c = cargo [xSelector, ySelector];
 				MoveToCompartment (platformCargo.transform, xSelector, ySelector);
 				cargo [xSelector, ySelector] = platformCargo;
 				MoveToLoadingPlatform (c.transform);
@@ -87,10 +89,10 @@ public class CargoHold : MonoBehaviour {
 	}
 
 	public void MoveToLoadingPlatform (Transform t) {
-		Cargo tCar = t.GetComponent<Cargo> ();
-		if (tCar) {
+		Item tItem = t.GetComponent<Item> ();
+		if (tItem) {
 			MoveToCompartment (t, 1, -1);
-			platformCargo = tCar;
+			platformCargo = tItem;
 		}
 		Player tPlayer = t.GetComponent<Player> ();
 		if (tPlayer) {
@@ -108,7 +110,7 @@ public class CargoHold : MonoBehaviour {
 	public void Dump (Transform t) {
 		t.parent = null;
 
-		Cargo tCar = t.GetComponent<Cargo> ();
+		Item tCar = t.GetComponent<Item> ();
 		if (tCar) {
 			platformCargo = null;
 			t.tag = "Harpoonable";
@@ -117,18 +119,19 @@ public class CargoHold : MonoBehaviour {
 			}
 		}
 
-		StartCoroutine (tCar.Dumped ());
+		StartCoroutine (tCar.EnableColliders ());
 
 		Vector3 dir = transform.position - gm.bigBird.transform.position;
 		dir.Normalize ();
 		Rigidbody2D trb = t.GetComponent<Rigidbody2D> ();
+		trb.isKinematic = false;
 		trb.AddTorque (Random.Range (-torqueSkew, torqueSkew));
 		trb.AddForce (dir * dumpForce);
 	}
 
 	//TODO could require someone to help with the unloading on big bird?
 	public void Load (Transform t) {
-		Cargo tCar = t.GetComponent<Cargo> ();
+		Item tCar = t.GetComponent<Item> ();
 		if (tCar && platformCargo == null) {
 			t.rotation = transform.rotation;
 			t.parent = transform;
@@ -158,7 +161,7 @@ public class CargoHold : MonoBehaviour {
 		return null;
 	}
 
-	public void CreateCargo () {
+	public void CreateCargo (GameObject obj) {
 		//TODO some definite optimization that can be done with GetAvailableCompartment ()
 		//and CheckForFull and the member variable full.
 		int[] compartment = GetAvailableCompartment ();
@@ -168,13 +171,13 @@ public class CargoHold : MonoBehaviour {
 		}
 		int xSelectorTemp = xSelector;
 		int ySelectorTemp = ySelector;
-		Cargo tempCargo = platformCargo;
+		Item tempCargo = platformCargo;
 
-		GameObject cargoObj = Instantiate (cargoPrefab, transform.position, Quaternion.identity) as GameObject;
-		Cargo cargo = cargoObj.GetComponent<Cargo> ();
-		cargo.RandomType ();
-		cargo.transform.parent = transform;
-		platformCargo = cargo;
+		GameObject itemObj = Instantiate (obj, transform.position, Quaternion.identity) as GameObject;
+		Item item = itemObj.GetComponent<Item> ();
+		//item.RandomType ();
+		item.transform.parent = transform;
+		platformCargo = item;
 		xSelector = compartment[0];
 		ySelector = compartment[1];
 		GrabSwapOrStoreCargo ();

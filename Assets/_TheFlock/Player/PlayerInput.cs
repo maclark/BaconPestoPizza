@@ -221,9 +221,9 @@ public class PlayerInput : MonoBehaviour {
 		} 
 
 
-		if (Input.GetButtonDown (startButton)) {
+		/*if (Input.GetButtonDown (startButton)) {
 			gm.TogglePause();
-		}
+		}*/
 
 		if (state == State.NEUTRAL) {
 			HandleNeutralInput ();
@@ -287,6 +287,7 @@ public class PlayerInput : MonoBehaviour {
 		} else if (state == State.IN_COOP) {
 			sr.enabled = true;
 			p.ManifestFlesh (transform.position, "BigBird", 1);
+			p.body.trigger.SetActive (true);
 			p.body.transform.parent = station.transform;
 			return;
 		} else if (state == State.ON_FOOT) {
@@ -345,6 +346,8 @@ public class PlayerInput : MonoBehaviour {
 				selectedState = State.ON_TURRET;
 			} else if (hit.collider.name == "CargoPlatform") {
 				selectedState = State.ON_PLATFORM;
+			} else if (hit.collider.name == "CargoHold") {
+				selectedState = State.IN_HOLD;
 			} else if (hit.collider.name == "Coop") {
 				selectedState = State.IN_COOP;
 			} else if (hit.collider.name == "BoardingZone") {
@@ -384,7 +387,7 @@ public class PlayerInput : MonoBehaviour {
 			}
 		} else if (p.b.harpLoaded) {
 			if (Input.GetAxisRaw (leftTrigger) <= 0) {
-				p.b.HurlHarpoon ();
+				p.b.SwingHurlHarpoon ();
 			}
 		} else if (p.b.catchingHarp) {
 			if (Input.GetAxisRaw (leftTrigger) <= 0) {
@@ -457,7 +460,7 @@ public class PlayerInput : MonoBehaviour {
 		}
 
 		if (Input.GetButtonDown (LB)) {
-			p.b.Undock ();
+			p.b.UndockFromBigBird ();
 			if (!p.b.docked) {
 				state = State.FLYING;
 			}
@@ -467,6 +470,7 @@ public class PlayerInput : MonoBehaviour {
 	void HandleInCoopInput () {
 		if (Input.GetButtonDown (bCircleButton)) {
 			p.transform.parent = station;
+			p.body.trigger.SetActive (false);
 			p.body.gameObject.SetActive (false);
 			state = State.CHANGING_STATIONS;
 			return;
@@ -512,7 +516,7 @@ public class PlayerInput : MonoBehaviour {
 	void HandlePilotingInput () {
 		if (Input.GetButtonDown (bCircleButton)) {
 			bigBird.turn = 0;
-			station.GetComponentInChildren<SpriteRenderer> ().color = Color.grey;
+			station.GetComponentInChildren<SpriteRenderer> ().color = Color.black;
 			state = State.CHANGING_STATIONS;
 			return;
 		}
@@ -523,7 +527,7 @@ public class PlayerInput : MonoBehaviour {
 			return;
 		}
 
-		if (bigBird.Landed) {
+		if (bigBird.Landed || bigBird.landing) {
 			if (Input.GetButtonDown (LB)) {
 				bigBird.LiftOff ();
 			}
@@ -570,6 +574,15 @@ public class PlayerInput : MonoBehaviour {
 			gm.bigBird.hold.Occupy (false);
 			state = State.CHANGING_STATIONS;
 			return;
+		}
+
+		if (!sr.enabled) {
+			sr.enabled = true;
+			gm.bigBird.hold.xSelector = 1;
+			gm.bigBird.hold.ySelector = 1;
+			sh.verticalStickInUse = false;
+			sh.horizontalStickInUse = false;
+			gm.bigBird.hold.Occupy (true);
 		}
 
 		sh.HandleInHoldSticks (p, LSVertical, LSHorizontal);

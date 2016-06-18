@@ -39,10 +39,10 @@ public class GameManager : MonoBehaviour {
 	void Awake () {
 		bigBird = GameObject.FindObjectOfType<BigBird> ();
 		bbm = bigBird.GetComponent<BigBirdManager> ();
+		bbm.money = 500;
 		tetrisGod = GameObject.FindObjectOfType<Tetris> ();
 		AddAlliedTransform (bigBird.transform);
 		MakeInvisibleTarget ();
-
 		MakeContainers ();
 	}
 
@@ -136,11 +136,12 @@ public class GameManager : MonoBehaviour {
 		//tetrisGod.SpawnRectangleField (new Vector2 (-tetrisGod.width / 2, tetrisGod.height * gatesBroken), tetrisGod.width, tetrisGod.height, tetrisGod.tetroAttempts);
 	}
 
-	public PlayerBody GetBody () {
+	public PlayerBody GetBody (Player p) {
 		GameObject obj = Instantiate (bodyPrefab, transform.position, Quaternion.identity) as GameObject;
 		obj.SetActive (false);
 		obj.transform.parent = bodyContainer;
 		PlayerBody pBody = obj.GetComponent<PlayerBody> ();
+		pBody.SetPlayer (p);
 		return pBody;
 	}
 
