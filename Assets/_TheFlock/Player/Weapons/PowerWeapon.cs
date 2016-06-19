@@ -7,21 +7,23 @@ public class PowerWeapon : Weapon {
 	public float scatter = .1f;
 	public float spread = 1f;
 	public float spreadOffset = 1f;
+	public Transform[] powerers;
 
 	public PowerWeapon (Holster hol) : base (hol) {
+		powerers = hol.p.b.power.GetPowerers ();
 		name = "Power Weapon";
 		bulletSpeed = 250f;
 		reloadSpeed = 1f;
 		fireRate = .001f;
 		clipSize = 100;
-		roundsLeftInClip = 100;
+		roundsLeftInClip = 500 * powerers.Length;
 		damage = 150;
 	}
 
 	public override void  Fire (Vector3 dir) {
 		if (roundsLeftInClip > 0) {
 			for (int i = 0; i < barrelAmount; i++) {
-				Bullet bull = hol.p.GetComponent<ObjectPooler> ().GetPooledObject ().GetComponent<Bullet> ();
+				Bullet bull = GetBullet ();
 				bull.gameObject.SetActive (true);
 				bull.forceMag = bulletSpeed;
 
@@ -37,8 +39,16 @@ public class PowerWeapon : Weapon {
 				roundsLeftInClip--;
 			}
 		} else {
-			Debug.Log ("unweb");
-			hol.p.b.webTrap.Consumed ();
+			Debug.Log ("unpowerbird");
+			//hol.p.b.webTrap.Consumed ();
+			hol.p.b.power.Exhausted ();
 		}
 	}
+
+	public Bullet GetBullet () {
+		int index = Random.Range (0, powerers.Length);
+		Bullet bull = powerers [index].GetComponentInChildren<ObjectPooler> ().GetPooledObject ().GetComponent<Bullet> ();
+		return bull;
+	}
+
 }

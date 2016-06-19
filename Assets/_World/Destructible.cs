@@ -29,7 +29,7 @@ public class Destructible : MonoBehaviour {
 	void Die () {
 		Harpoonable hpl = GetComponent<Harpoonable> ();
 		if (hpl) {
-			hpl.Detach ();
+			hpl.BreakLoose ();
 		}
 		if (babies != null) {
 			foreach (GameObject obj in babies) {

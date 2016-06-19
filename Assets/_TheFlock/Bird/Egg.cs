@@ -71,8 +71,7 @@ public class Egg : Item {
 		Destroy (gameObject);
 	}
 
-	public override void Drop (Player p, string sortLayerName, int sortOrder) {
-		bool droppedItem = false;
+	public override void Drop (Player p, string sortLayerName, int sortOrder, bool droppedItem=false, bool canDrop=true) {
 		PlayerInput.State pState = p.GetComponent<PlayerInput> ().state;
 		if (pState == PlayerInput.State.IN_COOP) {
 			if (!coo.full) {
@@ -86,17 +85,8 @@ public class Egg : Item {
 				transform.parent = null;
 				droppedItem = true;
 			}
-		} else if (pState == PlayerInput.State.ON_FOOT) {
-			gameObject.layer = LayerMask.NameToLayer ("Pedestrians");
-			GetComponent<Collider2D> ().isTrigger = false;
-			GetComponent<Rigidbody2D> ().isKinematic = false;
-			GetComponent<Rigidbody2D> ().drag = 5f;
-			sortOrder++;
-			transform.parent = null;
-			droppedItem = true;
-
 		} else if (pState == PlayerInput.State.DOCKED) {
-			Dock dock = p.GetComponent<PlayerInput>().station.GetComponent<Dock> ();
+			Dock dock = p.GetComponent<PlayerInput> ().station.GetComponent<Dock> ();
 			if (!dock.item) {
 				transform.position = dock.transform.position;
 				transform.parent = dock.transform;
@@ -106,9 +96,23 @@ public class Egg : Item {
 				sortOrder += 2;
 				droppedItem = true;
 			}
+		} /*else if (pState == PlayerInput.State.ON_FOOT) {
+			gameObject.layer = LayerMask.NameToLayer ("Crossover");
+			GetComponent<Collider2D> ().isTrigger = false;
+			GetComponent<Rigidbody2D> ().isKinematic = false;
+			GetComponent<Rigidbody2D> ().drag = 5f;
+			sortOrder++;
+			transform.parent = null;
+			alreadyDroppedItem = true;
+		} else if (pState == PlayerInput.State.IN_HOLD || pState == PlayerInput.State.ON_PLATFORM) {
+			GetComponent<Collider2D> ().isTrigger = true;
+			GetComponent<Rigidbody2D> ().isKinematic = true;
+			transform.parent = gm.bigBird.hold.transform;
+			alreadyDroppedItem = true;
+		} else if (pState == PlayerInput.State.ON_PLATFORM) {
+
 		}
-		if (droppedItem) {
-			base.Drop (p, sortLayerName, sortOrder); 
-		}
+		*/
+		base.Drop (p, sortLayerName, sortOrder, droppedItem, canDrop);
 	}
 }

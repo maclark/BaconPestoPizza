@@ -113,7 +113,7 @@ public class OrbWeb : MonoBehaviour {
 	void HandleHitCargo (Item c) {
 		switch (c.itemType) 
 		{
-		case Item.ItemType.POWERBIRD:
+		case Item.ItemType.EAGLEHEAD:
 			webType = WebType.POWERBIRD;
 			sr.color = c.GetComponentInChildren<SpriteRenderer> ().color;
 			Destroy (c.gameObject);

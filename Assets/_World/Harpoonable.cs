@@ -1,14 +1,17 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 public class Harpoonable : MonoBehaviour {
 
-	public Harpoon harp;
+	//public Harpoon harp;
 	public RelRB rrb;
 	public Vector2 relPos;
 
-	private GameObject destroyableObject;
 	private GameManager gm;
+	private List<Harpoon> otherHarps = new List<Harpoon> ();
+	private GameObject destroyableObject;
+
 
 	public class RelRB {
 		Rigidbody2D parentRB;
@@ -42,15 +45,17 @@ public class Harpoonable : MonoBehaviour {
 	}
 
 	public Rigidbody2D RiBo () {
-		Rigidbody2D rb;
+		if (transform.parent) {
+			if (transform.parent.GetComponent<Rigidbody2D> ()) {
+				return transform.parent.GetComponent<Rigidbody2D> ();
+			}
+		} 
+
 		if (GetComponent<Rigidbody2D> ()) {
-			rb = GetComponent<Rigidbody2D> ();
-		} else if (transform.parent.GetComponent<Rigidbody2D> ()) {
-			rb = transform.parent.GetComponent<Rigidbody2D> ();
-		} else {
-			rb = null;
-		}
-		return rb;
+			return GetComponent<Rigidbody2D> ();
+		} 
+
+		return null;
 	}
 
 	public void SetRelRB () {
@@ -61,16 +66,20 @@ public class Harpoonable : MonoBehaviour {
 		}
 	}
 
-	public void Detach () {
-		if (harp) {
-			harp.SetGripping (false);
+	public void BreakLoose () {
+		foreach (Harpoon har in otherHarps) {
+			har.SetGripping (false);
 		}
 	}
+
+	//receives message
 	public void BeenHarpooned (Harpoon h) {
-		harp = h;
+		otherHarps.Add (h);
 	}
-	public void HarpoonReleased () {
-		harp = null;
+
+	//receives message
+	public void HarpoonReleased (Harpoon h) {
+		otherHarps.Remove (h);
 	}
 
 	public void IsPierced () {
@@ -84,7 +93,7 @@ public class Harpoonable : MonoBehaviour {
 		}
 	}
 
-	public float GetEffectiveMass (Vector3 whalePosition, Vector3 pullingDirection) {
+	public float GetDirectionalMass (Vector3 pullerPosition) {
 		float totalMass = RiBo ().mass;
 		/*foreach (Harpoon h in otherHarps) {
 			float m = h.GetHarpooner ().GetComponent<Bird> ().GetEffectiveMass ();
@@ -96,5 +105,9 @@ public class Harpoonable : MonoBehaviour {
 			}
 		}*/
 		return totalMass;
+	}
+
+	public List<Harpoon> GetOtherHarps () {
+		return otherHarps;
 	}
 }

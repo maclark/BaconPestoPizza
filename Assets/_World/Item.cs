@@ -3,15 +3,15 @@ using System.Collections;
 
 public class Item : MonoBehaviour {
 
-	public enum ItemType {RUBY, CANNONBALLS, TORPEDO,  POWERBIRD, EGG, BIRD_SHIELD, TON_WATER, SUN, GREENS}
+	public enum ItemType {BATTERY, EAGLEHEAD, BIRD_SHIELD, RUBY, CANNONBALLS, TORPEDO, EGG, TON_WATER, SUN, GREENS}
 	public ItemType itemType;
 	public Sprite diamond;
 	public Sprite birdhead;
 	public Sprite egg;
 	public Sprite greens;
 	public Shopkeeper keeper;
-	public bool forSale = false;
 	public Transform displayCase;
+	public bool forSale = false;
 
 	protected GameManager gm;
 	protected SpriteRenderer sr;
@@ -35,12 +35,6 @@ public class Item : MonoBehaviour {
 
 
 	protected void TriggerStay2D (Collider2D other) {
-		/*if (other.name == "CargoPlatform") {
-			CargoHold ch = gm.bigBird.GetComponentInChildren<CargoHold> ();
-			if (!ch.platformCargo) {
-				ch.MoveToLoadingPlatform (transform);
-			}
-		}*/
 	}
 
 	protected void TriggerExit2D (Collider2D other) {
@@ -56,18 +50,7 @@ public class Item : MonoBehaviour {
 	}
 
 	protected void CollisionEnter2D (Collision2D coll) {
-		if (coll.transform.tag == "Bird") {
-			Bird birdie = coll.transform.GetComponent<Bird> ();
-			if (itemType == Item.ItemType.BIRD_SHIELD) {
-				if (!birdie.Shield.gameObject.activeSelf) {
-					birdie.Shield.ActivateShield ();
-					Destroy (gameObject);
-				}
-			} else if (itemType == Item.ItemType.GREENS) {
-				birdie.EatGreens ();
-				Destroy (gameObject);
-			}
-		} else if (coll.transform.tag == "Player") {
+		if (coll.transform.tag == "Player") {
 			coll.transform.GetComponentInChildren<Player> ().itemTouching = transform;
 		}
 	}
@@ -88,7 +71,7 @@ public class Item : MonoBehaviour {
 		itemType = (ItemType) Random.Range (0, (int)ItemType.GREENS);
 		switch (itemType) 
 		{
-		case ItemType.POWERBIRD:
+		case ItemType.EAGLEHEAD:
 			sr.color = Color.cyan;
 			break;
 		case ItemType.RUBY:
@@ -113,11 +96,35 @@ public class Item : MonoBehaviour {
 		col.isTrigger = false;
 	}
 
-	public virtual void Drop (Player p, string sortLayerName, int sortOrder) {
-		GetComponent<Collider2D> ().enabled = true;
-		GetComponentInChildren<SpriteRenderer> ().sortingLayerName = sortLayerName;
-		GetComponentInChildren<SpriteRenderer> ().sortingOrder = sortOrder;
-		p.itemHeld = null;
+	public virtual void Drop (Player p, string sortLayerName, int sortOrder, bool droppedItem=false, bool canDrop=true) {
+		if (!canDrop) {
+			return;
+		}
+
+		if (!droppedItem) {
+			PlayerInput.State pState = p.GetComponent<PlayerInput> ().state;
+			if (pState == PlayerInput.State.ON_FOOT) {
+				gameObject.layer = LayerMask.NameToLayer ("Crossover");
+				GetComponent<Collider2D> ().isTrigger = false;
+				GetComponent<Rigidbody2D> ().isKinematic = false;
+				GetComponent<Rigidbody2D> ().drag = 5f;
+				sortOrder++;
+				transform.parent = null;
+				droppedItem = true;
+			} else if (pState == PlayerInput.State.IN_HOLD || pState == PlayerInput.State.ON_PLATFORM) {
+				GetComponent<Collider2D> ().isTrigger = true;
+				GetComponent<Rigidbody2D> ().isKinematic = true;
+				transform.parent = gm.bigBird.hold.transform;
+				droppedItem = true;
+			}
+		}
+
+		if (droppedItem) {
+			GetComponent<Collider2D> ().enabled = true;
+			GetComponentInChildren<SpriteRenderer> ().sortingLayerName = sortLayerName;
+			GetComponentInChildren<SpriteRenderer> ().sortingOrder = sortOrder;
+			p.itemHeld = null;
+		}
 	}
 
 	public void Sold () {

@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class Greens : Item {
+public class Battery : Item {
 
 	void Awake () {
 		OnAwake ();
@@ -10,8 +10,8 @@ public class Greens : Item {
 	void OnCollisionEnter2D (Collision2D coll) {
 		if (coll.transform.tag == "Bird") {
 			Bird birdie = coll.transform.GetComponent<Bird> ();
-			if (!birdie.inHeat) {
-				birdie.EatGreens ();
+			if (!birdie.hasBattery) {
+				birdie.hasBattery = true;
 				Destroy (gameObject);
 			}
 		}

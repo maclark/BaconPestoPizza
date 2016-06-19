@@ -101,8 +101,7 @@ public class Hatchling : Item {
 		flying = true;
 	}
 
-	public override void Drop (Player p, string sortLayerName, int sortOrder) {
-		bool droppedItem = false;
+	public override void Drop (Player p, string sortLayerName, int sortOrder, bool droppedItem=false, bool canDrop=true) {
 		PlayerInput.State pState = p.GetComponent<PlayerInput> ().state;
 		if (pState == PlayerInput.State.IN_COOP) {
 			Coop coo = gm.bigBird.GetComponentInChildren<Coop> ();
@@ -115,16 +114,11 @@ public class Hatchling : Item {
 				GetComponent<Rigidbody2D> ().drag = 0f;
 				sortOrder++;
 				droppedItem = true;
+			} else {
+				canDrop = false;
 			}
-		} else if (pState == PlayerInput.State.ON_FOOT) {
-			gameObject.layer = LayerMask.NameToLayer ("Pedestrians");
-			GetComponent<Collider2D> ().isTrigger = false;
-			GetComponent<Rigidbody2D> ().isKinematic = false;
-			GetComponent<Rigidbody2D> ().drag = 5f;
-			sortOrder++;
-			droppedItem = true;
 		} else if (pState == PlayerInput.State.DOCKED) {
-			Dock dock = p.GetComponent<PlayerInput>().station.GetComponent<Dock> ();
+			Dock dock = p.GetComponent<PlayerInput> ().station.GetComponent<Dock> ();
 			if (!dock.item) {
 				GetComponent<Rigidbody2D> ().isKinematic = false;
 				transform.position = dock.transform.position;
@@ -134,9 +128,10 @@ public class Hatchling : Item {
 				sortOrder += 2;
 				droppedItem = true;
 			}
+		} else if (pState == PlayerInput.State.IN_HOLD || pState == PlayerInput.State.ON_PLATFORM) {
+			canDrop = false;
 		}
-		if (droppedItem) {
-			base.Drop (p, sortLayerName, sortOrder); 
-		}
+			
+		base.Drop (p, sortLayerName, sortOrder, droppedItem, canDrop);
 	}
 }

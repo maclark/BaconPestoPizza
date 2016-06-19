@@ -30,6 +30,8 @@ public class Coop : MonoBehaviour {
 		Egg e = t.GetComponent<Egg> ();
 		if (e) {
 			e.inCoop = false;
+			//TODO not the most elegant solution to change layer here
+			e.gameObject.layer = LayerMask.NameToLayer ("Default");
 		}
 		full = false;
 		occupants.Remove (t);	

@@ -121,14 +121,16 @@ public class BigBird : MonoBehaviour {
 		if (coll.transform.tag == "FlyerEnemy") {
 			TakeDamage (coll.transform.GetComponent<Flyer> ().kamikazeDamage);
 			coll.transform.gameObject.GetComponent<Flyer> ().Die ();
-		} else if (coll.gameObject.tag == "Harpoonable") {
-			if (coll.gameObject.GetComponent<Item> ()) {
-				hold.Load (coll.transform);
-			}
-		}
+		} 
+
+
 	}
 
-
+	void OnCollisionStay2D (Collision2D coll) {
+		if (coll.gameObject.GetComponent<Item> ()) {
+			hold.Load (coll.transform);
+		}
+	}
 
 	/// <summary>
 	/// MAKE SURE TO CHEK IF RETURED NULL DOCK. Probably should use bool return type with an out dock variable.

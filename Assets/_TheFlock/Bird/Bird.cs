@@ -43,6 +43,7 @@ public class Bird : MonoBehaviour {
 
 	public bool docked = false;
 	public bool webbed = false;
+	public bool powered = false;
 	public bool harpLoaded = false;
 	public bool aimingHarp = false;
 	public bool swingingHarp = false;
@@ -51,6 +52,7 @@ public class Bird : MonoBehaviour {
 	public bool catchingHarp = false;
 	public bool pregnant = false;
 	public bool inHeat = false;
+	public bool hasBattery = false;
 	public bool ranOutOfGas = false;
 	public bool colorSet = false;
 
@@ -59,13 +61,18 @@ public class Bird : MonoBehaviour {
 	public GameObject gasLightPrefab;
 	public GameObject eggPrefab;
 	public GameObject lovePrefab;
+	public Sprite powerbird;
+	public Sprite greyhound;
 	public OrbWeb webTrap;
+	public Powerbird power;
 	public Hatchling pup;
-	public List<Bird> linkedBirds;
-	public List<Harpoon> otherHarps;
+	public Circuit circuit;
+	public List<Bird> linkedBirds = new List<Bird> ();
+	public List<Harpoon> otherHarps = new List<Harpoon> ();
 
 	[HideInInspector]
 	public Color color;
+	[HideInInspector]
 	public bool damaged = false, invincible = false, canBoost = true, hurledHarp = false, canRoll = true, rolling = false;
 	[HideInInspector]
 	public Vector2 direction = Vector2.zero, pullDir = Vector2.zero, orthoPullDir = Vector2.zero;
@@ -108,8 +115,7 @@ public class Bird : MonoBehaviour {
 			colorSet = true;
 		}
 
-		otherHarps = new List<Harpoon> ();
-		linkedBirds = new List<Bird> ();
+
 
 		DockOnBigBird ();
 		LayEgg ();
@@ -149,7 +155,7 @@ public class Bird : MonoBehaviour {
 	}
 
 	void FixedUpdate () {
-		if (!docked && !webbed) {
+		if (!docked && !webbed && !powered) {
 			HandleFlying ();
 		}
 
@@ -186,7 +192,7 @@ public class Bird : MonoBehaviour {
 				}
 			}
 		} else if (other.tag == "Harpoonable") {
-			Item otherC = other.GetComponent<Item> ();
+			/*Item otherC = other.GetComponent<Item> ();
 			if (otherC) {
 				if (otherC.itemType == Item.ItemType.BIRD_SHIELD) {
 					if (!shield.gameObject.activeSelf) {
@@ -194,7 +200,7 @@ public class Bird : MonoBehaviour {
 						Destroy (other.gameObject);
 					}
 				}
-			}
+			}*/
 		}
 	}
 
@@ -661,42 +667,7 @@ public class Bird : MonoBehaviour {
 			}
 		}
 	}
-
-	public void Webbed (OrbWeb ow) {
-		ow.captive = transform;
-		webTrap = ow;
-		webbed = true;
-		if (rolling) {
-			transform.rotation = Quaternion.identity;
-			rolling = false;
-			canRoll = true;
-		}
-		if (harp) {
-			harp.SetGripping (false);
-			harp.SetRecalling (true);
-			Destroy (harp.gameObject);
-			hurledHarp = false;
-		}
-		DetachOtherHarps ();
-		transform.position = ow.transform.position;
-		transform.parent = ow.transform;
-		rb.Sleep ();
-		//DisableColliders ();
-
-		if (p) {
-			p.Webbed (ow);
-		}
-	}
-
-	public void Unwebbed () {
-		webbed = false;
-		webTrap = null;
-		transform.parent = null;
-		//EnableColliders ();
-		if (p) {
-			p.Unwebbed ();
-		}
-	}
+		
 
 	public void HurlHarpoon () {
 		if (!hurledHarp) {
@@ -847,5 +818,107 @@ public class Bird : MonoBehaviour {
 		Vector3 spawnPosition = new Vector3 (transform.position.x, transform.position.y + iconAboveOffset, 0f);
 		GameObject love = Instantiate (lovePrefab, spawnPosition, Quaternion.identity) as GameObject;
 		Destroy (love, loveLasts);
+	}
+
+	public void RandomColor () {
+		sr.color = Random.ColorHSV ();
+	}
+
+	public void Webbed (OrbWeb ow) {
+		ow.captive = transform;
+		webTrap = ow;
+		webbed = true;
+		if (rolling) {
+			transform.rotation = Quaternion.identity;
+			rolling = false;
+			canRoll = true;
+		}
+		if (harp) {
+			harp.SetGripping (false);
+			harp.SetRecalling (true);
+			Destroy (harp.gameObject);
+			hurledHarp = false;
+		}
+		DetachOtherHarps ();
+		transform.position = ow.transform.position;
+		transform.parent = ow.transform;
+		rb.Sleep ();
+		//DisableColliders ();
+
+		if (p) {
+			p.Webbed (ow);
+		}
+	}
+
+	public void Unwebbed () {
+		webbed = false;
+		webTrap = null;
+		transform.parent = null;
+		//EnableColliders ();
+		if (p) {
+			p.Unwebbed ();
+		}
+	}
+
+	public void Powered (Powerbird pb) {
+		power = pb;
+		powered = true;
+		if (rolling) {
+			transform.rotation = Quaternion.identity;
+			rolling = false;
+			canRoll = true;
+		}
+		if (harp) {
+			harp.SetGripping (false);
+			harp.SetRecalling (true);
+			Destroy (harp.gameObject);
+			hurledHarp = false;
+		}
+		GetComponent<Rigidbody2D> ().mass = .5f;
+		GetComponent<Rigidbody2D> ().drag = 0f;
+		DetachOtherHarps ();
+		transform.parent = pb.transform;
+		rb.Sleep ();
+
+		if (p) {
+			p.Powered (pb);
+		}
+		
+	}
+
+	public void Unpowered () { 
+		powered = false;
+		power = null;
+		transform.parent = null;
+		GetComponent<Rigidbody2D> ().mass = 1f;
+		GetComponent<Rigidbody2D> ().drag = 5f;
+		//EnableColliders ();
+		if (p) {
+			p.Unpowered ();
+		}
+	}
+
+	void SetRigidbodiesKinematic (bool set) {
+		Rigidbody2D[] rigs = GetComponentsInChildren<Rigidbody2D> ();
+		for (int i = 0; i < rigs.Length; i++) {
+			rigs [i].isKinematic = set;
+		}
+	}
+
+	public void BeenHarpooned (Harpoon h) {
+		Bird birdie = h.GetHarpooner ().GetComponent<Bird> ();
+
+		linkedBirds.Clear ();
+		//AttemptWeb (birdie);
+
+		Circuit circ = new Circuit ();
+		circ.AttemptCircuit (birdie);
+	}
+
+
+
+
+	public void HarpoonReleased (Harpoon h) {
+		RemoveHarp (h);
 	}
 }

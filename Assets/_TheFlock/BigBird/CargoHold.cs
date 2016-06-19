@@ -5,6 +5,8 @@ public class CargoHold : MonoBehaviour {
 	public GameObject rubyPrefab;
 	public GameObject greensPrefab;
 	public GameObject powerbirdPrefab;
+	public GameObject birdShieldPrefab;
+	public GameObject batteryPrefab;
 	public Item[,] cargo = new Item[3, 3];
 	public Item platformCargo;
 	public Transform loadingPlatform;
@@ -32,6 +34,8 @@ public class CargoHold : MonoBehaviour {
 		CreateCargo (rubyPrefab);
 		CreateCargo (greensPrefab);
 		CreateCargo (powerbirdPrefab);
+		CreateCargo (birdShieldPrefab);
+		CreateCargo (batteryPrefab);
 	}
 
 	public void GrabSwapOrStoreCargo () {
@@ -110,16 +114,18 @@ public class CargoHold : MonoBehaviour {
 	public void Dump (Transform t) {
 		t.parent = null;
 
-		Item tCar = t.GetComponent<Item> ();
-		if (tCar) {
+		Item tItem = t.GetComponent<Item> ();
+		if (tItem) {
 			platformCargo = null;
-			t.tag = "Harpoonable";
+			if (tItem.GetComponent<Harpoonable> ()) {
+				tItem.GetComponent<Harpoonable> ().enabled = true;
+			}
 			if (gm.bigBird.Landed) {
 				t.gameObject.layer = LayerMask.NameToLayer ("Crossover");
 			}
 		}
 
-		StartCoroutine (tCar.EnableColliders ());
+		StartCoroutine (tItem.EnableColliders ());
 
 		Vector3 dir = transform.position - gm.bigBird.transform.position;
 		dir.Normalize ();
@@ -131,16 +137,29 @@ public class CargoHold : MonoBehaviour {
 
 	//TODO could require someone to help with the unloading on big bird?
 	public void Load (Transform t) {
-		Item tCar = t.GetComponent<Item> ();
-		if (tCar && platformCargo == null) {
-			t.rotation = transform.rotation;
-			t.parent = transform;
-			t.tag = "Untagged";
-			t.gameObject.layer = LayerMask.NameToLayer ("Default");
-			t.GetComponent<BoxCollider2D> ().enabled = false;
-			t.GetComponent<Rigidbody2D> ().Sleep ();
-			MoveToLoadingPlatform (t);
-		}
+		//check if item being loaded
+		Item it = t.GetComponent<Item> ();
+		if (it) {
+			//check if it's a puppy (can't load puppies)
+			//TODO puppies die if left in hold for x amount of time
+			Hatchling pup = t.GetComponent<Hatchling> ();
+			if (pup) {
+				return;
+			} else if (platformCargo == null) {
+				if (it.GetComponent<Harpoonable> ()) {
+					it.GetComponent<Harpoonable> ().enabled = false;
+				}
+				t.rotation = transform.rotation;
+				t.parent = transform;
+				t.tag = "Untagged";
+				t.gameObject.layer = LayerMask.NameToLayer ("Default");
+				t.GetComponent<Collider2D> ().enabled = false;
+				t.GetComponent<Rigidbody2D> ().Sleep ();
+				t.GetComponent<SpriteRenderer> ().sortingLayerName = "BigBird";
+				t.GetComponent<SpriteRenderer> ().sortingOrder = 1;
+				MoveToLoadingPlatform (t);
+			}
+		} 
 	}
 
 	void EnableCollider () {
@@ -201,5 +220,82 @@ public class CargoHold : MonoBehaviour {
 
 	public bool GetFull () {
 		return full;
+	}
+
+	public void PressedA (Player p) {
+		if (p.itemHeld) {
+			//attempt swap
+			if (cargo [xSelector, ySelector] == null) {
+				cargo [xSelector, ySelector] = p.itemHeld.GetComponent<Item> ();
+				p.DropItem ();
+				if (p.itemHeld) {
+					//drop failed
+					cargo [xSelector, ySelector] = null;
+				}
+			} else {
+				//cargo compartment is not empty
+				Item tempItem = cargo [xSelector, ySelector].GetComponent<Item> ();
+				cargo [xSelector, ySelector] = p.itemHeld.GetComponent<Item> ();
+				p.DropItem ();
+				if (p.itemHeld) {
+					//drop failed
+					cargo [xSelector, ySelector] = null;
+				}
+				p.itemTouching = tempItem.transform;
+				p.PickUpItem ();			
+			}
+		} 
+		//just try to pick up
+		else if (!p.itemHeld) {
+			if (cargo [xSelector, ySelector] == null) {
+				//compartment is empty and not holding anything, do nothing				
+			} else {
+				//cargo compartment is not empty, pick it up
+				p.itemTouching = cargo [xSelector, ySelector].transform;
+				p.PickUpItem ();
+				if (p.itemHeld) {
+					cargo [xSelector, ySelector] = null;
+					full = false;
+				}
+			}
+		}
+	}
+
+	public void PressedAOnPlatform (Player p) {
+		if (p.itemHeld) {
+			//attempt swap
+			if (platformCargo == null) {
+				platformCargo = p.itemHeld.GetComponent<Item> ();
+				p.DropItem ();
+				if (p.itemHeld) {
+					//drop failed
+					platformCargo = null;
+				}
+			} else {
+				//cargo compartment is not empty
+				Item tempItem = platformCargo.GetComponent<Item> ();
+				platformCargo = p.itemHeld.GetComponent<Item> ();
+				p.DropItem ();
+				if (p.itemHeld) {
+					//drop failed
+					platformCargo = null;
+				}
+				p.itemTouching = tempItem.transform;
+				p.PickUpItem ();			
+			}
+		} 
+		//just try to pick up
+		else if (!p.itemHeld) {
+			if (platformCargo == null) {
+				//compartment is empty and not holding anything, do nothing				
+			} else {
+				//cargo compartment is not empty, pick it up
+				p.itemTouching = platformCargo.transform;
+				p.PickUpItem ();
+				if (p.itemHeld) {
+					platformCargo = null;
+				}
+			}
+		}
 	}
 }

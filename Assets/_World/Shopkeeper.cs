@@ -4,9 +4,10 @@ using System.Collections.Generic;
 
 public class Shopkeeper : MonoBehaviour {
 
+	public int batteryPrice = 30;
 	public int cannonballsPrice = 6;
 	public int torpedoPrice = 3;
-	public int powerbirdPrice = 60;
+	public int eagleheadPrice = 60;
 	public int birdShieldPrice = 30;
 	public int unitOfEnergyPrice = 10;
 	public int tonOfWaterPrice = 10;
@@ -49,6 +50,21 @@ public class Shopkeeper : MonoBehaviour {
 		bool soldItem = false;
 
 		switch (it.itemType) {
+		case Item.ItemType.BATTERY:
+			if (gm.bbm.PayShop (batteryPrice)) {
+				soldItem = true;
+			}
+			break;
+		case Item.ItemType.EAGLEHEAD:
+			if (gm.bbm.PayShop (eagleheadPrice)) {
+				soldItem = true;
+			}
+			break;
+		case Item.ItemType.BIRD_SHIELD:
+			if (gm.bbm.PayShop (birdShieldPrice)) {
+				soldItem = true;
+			}
+			break;
 		case Item.ItemType.RUBY:
 			if (gm.bbm.PayShop (rubyPrice)) {
 				soldItem = true;
@@ -68,16 +84,6 @@ public class Shopkeeper : MonoBehaviour {
 					gm.bbm.torpedoes++;
 					soldItem = true;
 				}
-			}
-			break;
-		case Item.ItemType.POWERBIRD:
-			if (gm.bbm.PayShop (powerbirdPrice)) {
-				soldItem = true;
-			}
-			break;
-		case Item.ItemType.BIRD_SHIELD:
-			if (gm.bbm.PayShop (birdShieldPrice)) {
-				soldItem = true;
 			}
 			break;
 		case Item.ItemType.TON_WATER:
@@ -116,6 +122,15 @@ public class Shopkeeper : MonoBehaviour {
 
 	public void BuyFromPlayer (Item.ItemType gt) {
 		switch (gt) {
+		case Item.ItemType.BATTERY:
+			gm.bbm.Collect (batteryPrice / 2);
+			break;
+		case Item.ItemType.EAGLEHEAD:
+			gm.bbm.Collect (eagleheadPrice / 2);
+			break;
+		case Item.ItemType.BIRD_SHIELD:
+			gm.bbm.Collect (birdShieldPrice / 2);
+			break;
 		case Item.ItemType.RUBY:
 			gm.bbm.Collect (rubyPrice / 2);
 			break;
@@ -125,14 +140,8 @@ public class Shopkeeper : MonoBehaviour {
 		case Item.ItemType.TORPEDO:
 			gm.bbm.Collect (torpedoPrice / 2);
 			break;
-		case Item.ItemType.POWERBIRD:
-			gm.bbm.Collect (powerbirdPrice / 2);
-			break;
 		case Item.ItemType.EGG:
 			gm.bbm.Collect (eggPrice / 2);
-			break;
-		case Item.ItemType.BIRD_SHIELD:
-			gm.bbm.Collect (birdShieldPrice / 2);
 			break;
 		case Item.ItemType.TON_WATER:
 			gm.bbm.Collect (tonOfWaterPrice / 2);

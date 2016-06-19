@@ -29,7 +29,7 @@ public class PlayerInput : MonoBehaviour {
 	public string leftClick = "empty";
 	public string rightClick = "empty";
 
-	public enum State {NEUTRAL, FLYING, CHANGING_STATIONS, DOCKED, ON_TURRET, PILOTING, NAVIGATING, IN_BUBBLE, IN_WEB, IN_HOLD, ON_PLATFORM, IN_COOP, ON_FOOT}
+	public enum State {NEUTRAL, FLYING, CHANGING_STATIONS, DOCKED, ON_TURRET, PILOTING, NAVIGATING, IN_BUBBLE, IN_WEB, POWERBIRD, IN_HOLD, ON_PLATFORM, IN_COOP, ON_FOOT}
 	public State state = State.DOCKED;
 	public State selectedState = State.NEUTRAL;
 
@@ -241,6 +241,8 @@ public class PlayerInput : MonoBehaviour {
 			HandleNavigationInput ();
 		} else if (state == State.IN_WEB) {
 			HandleInWebInput ();
+		} else if (state == State.POWERBIRD) {
+			HandlePowerbirdInput ();
 		} else if (state == State.IN_HOLD) {
 			HandleInHoldInput ();
 		} else if (state == State.ON_PLATFORM) {
@@ -587,8 +589,12 @@ public class PlayerInput : MonoBehaviour {
 
 		sh.HandleInHoldSticks (p, LSVertical, LSHorizontal);
 
-		if (Input.GetButtonDown (aCrossButton)) {
+		if (Input.GetButtonDown (xSquareButton)) {
 			gm.bigBird.hold.GrabSwapOrStoreCargo ();
+		}
+
+		if (Input.GetButtonDown (aCrossButton)) {
+			gm.bigBird.hold.PressedA (p);
 		}
 
 	}
@@ -612,6 +618,10 @@ public class PlayerInput : MonoBehaviour {
 		sh.HandleOnPlatformSticks (p, LSVertical, LSHorizontal);
 
 		if (Input.GetButtonDown (aCrossButton)) {
+			gm.bigBird.hold.PressedAOnPlatform (p);
+		}
+
+		if (Input.GetButtonDown (xSquareButton)) {
 			if (gm.bigBird.hold.platformCargo) {
 				gm.bigBird.hold.Dump (gm.bigBird.hold.platformCargo.transform);
 			}
@@ -656,6 +666,20 @@ public class PlayerInput : MonoBehaviour {
 		}
 		HandleWeaponFiring ();
 	}
+
+	void HandlePowerbirdInput () {
+		Vector2 rightStick = new Vector2( Input.GetAxis(RSHorizontal), Input.GetAxis(RSVertical));
+		if (rightStick != Vector2.zero) {
+			p.aim = rightStick;
+		} 
+		else if (p.aim == Vector3.zero) {
+			if (p.b.direction != Vector2.zero) {
+				p.aim = new Vector3 (p.b.direction.x, p.b.direction.y, 0);
+			}
+		}
+		HandleWeaponFiring ();
+	}
+
 
 
 

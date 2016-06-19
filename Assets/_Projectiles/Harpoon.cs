@@ -19,8 +19,10 @@ public class Harpoon : MonoBehaviour {
 	public bool gripping = true;
 	public bool taut = false;
 	public OrbWeb web = null;
+	public Powerbird powerbirdie = null;
 	public GameObject webPrefab;
 	public GameObject orbWebPrefab;
+	public GameObject positronPrefab;
 
 	private Rigidbody2D rb;
 	private LineRenderer lr;
@@ -49,7 +51,9 @@ public class Harpoon : MonoBehaviour {
 		if (tetherLength > maxTetherLength + 1) {
 			print ("harpoon broke free");
 			ClampHarp ();
-			SetGripping (false);
+			if (harpooned) {
+				SetGripping (false);
+			}
 		} else if (tetherLength > maxTetherLength) {
 			ClampHarp ();
 		} 
@@ -58,6 +62,7 @@ public class Harpoon : MonoBehaviour {
 
 	void OnTriggerEnter2D (Collider2D other) { 
 		Bird pBird = other.transform.GetComponent<Bird> ();
+		Harpoonable hool = other.GetComponent<Harpoonable> ();
 		if (!pBird) {
 			if (other.transform.parent) {
 				pBird = other.transform.parent.GetComponent<Bird> ();
@@ -76,10 +81,12 @@ public class Harpoon : MonoBehaviour {
 					pBird.otherHarps.Add (this);
 				}
 			}
-		} else if (other.GetComponent<Harpoonable> ()) {
-			if (gripping) {
-				HarpoonObject (other.gameObject);
-				other.GetComponent<Harpoonable> ().SetSortingLayer ("Birds");
+		} else if (hool) {
+			if (hool.enabled) {
+				if (gripping) {
+					HarpoonObject (other.gameObject);
+					other.GetComponent<Harpoonable> ().SetSortingLayer ("Birds");
+				}
 			}
 		}
 	}
@@ -139,14 +146,7 @@ public class Harpoon : MonoBehaviour {
 		GetComponent<BoxCollider2D> ().enabled = false;
 		transform.position = harpooned.transform.position;
 		transform.parent = harpooned.transform;
-
-		if (harpoonRecipient.tag == "Bird") {
-			linkedBirds.Clear ();
-			AttemptWeb (harpooner.GetComponent<Bird> ());
-		} else {
-			harpoonRecipient.SendMessage ("BeenHarpooned", this, SendMessageOptions.DontRequireReceiver);
-		}
-
+		harpoonRecipient.SendMessageUpwards ("BeenHarpooned", this, SendMessageOptions.DontRequireReceiver);
 	}
 
 	public void ToggleRecalling () {
@@ -174,15 +174,12 @@ public class Harpoon : MonoBehaviour {
 			SpriteRenderer[] renderers = GetComponentsInChildren<SpriteRenderer> ();
 			if (gripping) {
 				foreach (SpriteRenderer r in renderers) {
+					r.color = Color.gray;
 					r.color = new Color (r.color.r, r.color.g, r.color.b, .5f);
 					lr.material.color = new Color (lr.material.color.r, lr.material.color.g, lr.material.color.b, .2f);
 				}
 				if (harpooned != null) {
-					if (harpooned.tag == "Bird") {
-						harpooned.GetComponent<Bird> ().RemoveHarp (this);
-					} else {
-						harpooned.SendMessage ("HarpoonReleased", null, SendMessageOptions.DontRequireReceiver);
-					}
+					harpooned.SendMessageUpwards ("HarpoonReleased", this, SendMessageOptions.DontRequireReceiver);
 					harpooned = null;
 					transform.parent = null;
 					GetComponent<Rigidbody2D> ().WakeUp ();
@@ -191,7 +188,7 @@ public class Harpoon : MonoBehaviour {
 				gripping = false;
 			} else {
 				foreach (SpriteRenderer r in renderers) {
-					r.color = new Color (r.color.r, r.color.g, r.color.b, 1f);
+					r.color = Color.black;
 				}
 				lr.material.color = new Color (lr.material.color.r, lr.material.color.g, lr.material.color.b, 1f);
 				gripping = true;
@@ -251,7 +248,7 @@ public class Harpoon : MonoBehaviour {
 
 	void HandleTether () {
 		if (tetherLength > tautLength) {
-			print ("applying spring force");
+			//print ("applying spring force");
 			float x = tetherLength - tautLength;
 			tetherDirection = transform.position - harpooner.transform.position;
 			tetherDirection.Normalize ();
@@ -259,9 +256,11 @@ public class Harpoon : MonoBehaviour {
 			if (!harpooned) {
 				rb.AddForce (springForce);
 			} else {
-				harpooned.GetComponent<Harpoonable> ().RiBo ().AddForce (springForce);
+				//harpooned.GetComponent<Harpoonable> ().RiBo ().AddForce (springForce);
+				harpooned.GetComponent<Harpoonable> ().GetComponent<Rigidbody2D> ().AddForce (springForce);
 			}
-			harpooner.GetComponent<Harpoonable> ().RiBo ().AddForce (-springForce);
+			//harpooner.GetComponent<Harpoonable> ().RiBo ().AddForce (-springForce);
+			harpooner.GetComponent<Harpoonable> ().GetComponent<Rigidbody2D> ().AddForce (-springForce);
 		}
 
 		if (recalling) {
@@ -292,14 +291,36 @@ public class Harpoon : MonoBehaviour {
 	}
 
 	void ClampHarp () {
-		print ("applying clamp");
+		//print ("applying clamp");
 		float r = tetherVector.magnitude;
 		float theta = Mathf.Atan2 (tetherVector.y, tetherVector.x);
 		r = Mathf.Clamp (r, 0, maxTetherLength); 
 		float x = r * Mathf.Cos (theta);
 		float y = r * Mathf.Sin (theta);
-		transform.position = new Vector3 (harpooner.transform.position.x + x, harpooner.transform.position.y + y, 0);
-		//TetherHarp ();
+		if (harpooned) {
+			//TODO for relative mass adjustment. Current method just makes lighter mass move.
+			/*
+			float harpoonedMass = harpooned.GetComponent<Harpoonable> ().GetDirectionalMass (harpooner.transform.position);
+			float harpoonerMass = harpooner.GetComponent<Harpoonable> ().GetDirectionalMass (harpooned.transform.position);
+			float harpoonedPercentage = harpoonedMass / (harpoonedMass + harpoonerMass);
+			float harpoonerPercentage = 1 - harpoonedMass;
+			*/
+			float harpoonedMass = harpooned.GetComponent<Harpoonable> ().GetDirectionalMass (harpooner.transform.position);
+			float harpoonerMass = harpooner.GetComponent<Harpoonable> ().GetDirectionalMass (harpooned.transform.position);
+			if (harpoonerMass >= harpoonedMass) {
+				Vector3 newHarpoonedPos = new Vector3 (harpooner.transform.position.x + x, harpooner.transform.position.y + y, 0);
+				harpooned.transform.position = newHarpoonedPos;
+				transform.position = newHarpoonedPos;
+			} else {
+				Vector3 newHarpoonerPos = new Vector3 (harpooned.transform.position.x - x, harpooned.transform.position.y - y, 0);
+				harpooner.transform.position = newHarpoonerPos;
+			}
+		}
+	}
+
+	void SendPositrons () {
+		GameObject positronObj = Instantiate (positronPrefab, harpooner.transform.position, Quaternion.identity) as GameObject;
+		Positron posi = positronObj.GetComponent<Positron> ();
 	}
 
 }

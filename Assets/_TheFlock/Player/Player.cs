@@ -16,6 +16,7 @@ public class Player : MonoBehaviour {
 	public Transform itemTouching;
 
 	private bool holdingString = false;
+	private bool reigningPowerbird = false;
 	private GameManager gm;
 	private SpriteRenderer sr;
 	private PlayerInput pi;
@@ -144,41 +145,7 @@ public class Player : MonoBehaviour {
 		}
 	}
 
-	public void Webbed (OrbWeb ow) {
-		if (ow.webType == OrbWeb.WebType.POWERBIRD) {
-			storedWeapon = w;
-			w = new PowerWeapon (hol);
-		}
-		pi.state = PlayerInput.State.IN_WEB;
-		pi.CancelInvoke ();
-	}
 
-	public void Unwebbed () {
-		if (storedWeapon != null) {
-			pi.CancelInvoke ();
-			w = storedWeapon;
-
-			storedWeapon = null;
-		}
-		pi.CancelInvoke ();
-		pi.state = PlayerInput.State.FLYING;
-	}
-
-	public void HoldWebString (OrbWeb ow) {
-		holdingString = true;
-		if (ow.webType == OrbWeb.WebType.POWERBIRD) {
-			print ("player" + pi.playerNum + " cries, 'hold the line!'");
-		}
-		pi.CancelInvoke ();
-	}
-
-	public void ReleaseWebString () {
-		holdingString = false;
-	}
-
-	public bool GetHoldingString () {
-		return holdingString;
-	}
 
 	public void MoveToPlatform () {
 		sr.enabled = false;
@@ -247,16 +214,22 @@ public class Player : MonoBehaviour {
 			} else if (pi.state == PlayerInput.State.DOCKED) {
 				pi.station.GetComponent<Dock> ().item = null;
 			}
-				
+
 			itemHeld = itemTouching;
 			itemTouching = null;
 			itemHeld.transform.position = transform.position;
 			itemHeld.transform.parent = transform;
-			itemHeld.GetComponent<Rigidbody2D> ().velocity = Vector3.zero;
-			itemHeld.GetComponent<Rigidbody2D> ().isKinematic = true;
+
+			Rigidbody2D itrb = itemHeld.GetComponent<Rigidbody2D> ();
+			itrb.velocity = Vector3.zero;
+			itrb.isKinematic = true;
+			itrb.drag = 1f;
+
+			SpriteRenderer itsr = itemHeld.GetComponentInChildren<SpriteRenderer> ();
+			itsr.sortingLayerName = sr.sortingLayerName;
+			itsr.sortingOrder = sr.sortingOrder + 1;
+
 			itemHeld.GetComponent<Collider2D> ().enabled = false;
-			itemHeld.GetComponentInChildren<SpriteRenderer> ().sortingLayerName = sr.sortingLayerName;
-			itemHeld.GetComponentInChildren<SpriteRenderer> ().sortingOrder = sr.sortingOrder + 1;
 		}
 	}
 
@@ -267,5 +240,79 @@ public class Player : MonoBehaviour {
 				b.pup.IncrementAssists ();
 			}
 		}
+	}
+
+	public void Webbed (OrbWeb ow) {
+		if (ow.webType == OrbWeb.WebType.POWERBIRD) {
+			storedWeapon = w;
+			b.GetComponent<SpriteRenderer> ().sprite = b.powerbird;
+			w = new PowerWeapon (hol);
+		}
+		b.InvokeRepeating ("RandomColor", Eaglehead.colorSwapSpeed, Eaglehead.colorSwapSpeed);
+		pi.state = PlayerInput.State.IN_WEB;
+		pi.CancelInvoke ();
+	}
+
+	public void Unwebbed () {
+		if (storedWeapon != null) {
+			pi.CancelInvoke ();
+			w = storedWeapon;
+
+			storedWeapon = null;
+		}
+		b.GetComponent<SpriteRenderer> ().sprite = b.greyhound;
+		b.CancelInvoke ();
+		pi.CancelInvoke ();
+		pi.state = PlayerInput.State.FLYING;
+	}
+
+	public void HoldWebString (OrbWeb ow) {
+		holdingString = true;
+		if (ow.webType == OrbWeb.WebType.POWERBIRD) {
+			print ("player" + pi.playerNum + " cries, 'hold the line!'");
+		}
+		pi.CancelInvoke ();
+	}
+
+	public void ReleaseWebString () {
+		holdingString = false;
+	}
+
+	public bool GetHoldingString () {
+		return holdingString;
+	}
+
+	public void Powered (Powerbird pb) {
+		storedWeapon = w;
+		b.GetComponentInChildren<SpriteRenderer> ().sprite = b.powerbird;
+		w = new PowerWeapon (hol);
+		pb.InvokeRepeating ("FlashColors", Eaglehead.colorSwapSpeed, Eaglehead.colorSwapSpeed);
+		pi.state = PlayerInput.State.POWERBIRD;
+		pi.CancelInvoke ();
+	}
+
+	public void Unpowered () {
+		pi.CancelInvoke ();
+		w = storedWeapon;
+		storedWeapon = null;
+		b.GetComponentInChildren<SpriteRenderer> ().sprite = b.greyhound;
+		b.GetComponentInChildren<SpriteRenderer> ().color = b.color;
+		//pb.CancelInvoke ();
+		pi.CancelInvoke ();
+		pi.state = PlayerInput.State.FLYING;
+	}
+
+	public void ReignPowerbird (Powerbird pb) {
+		reigningPowerbird = true;
+		print ("player" + pi.playerNum + " cries, 'POWER OVERWHELMING!'");
+		pi.CancelInvoke ();
+	}
+
+	public void UnreignPowerbird () {
+		reigningPowerbird = false;
+	}
+
+	public bool GetReigningBird () {
+		return reigningPowerbird;
 	}
 }
