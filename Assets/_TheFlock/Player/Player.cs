@@ -22,6 +22,7 @@ public class Player : MonoBehaviour {
 	private PlayerInput pi;
 	private BigBird bigBird;
 	private Holster hol;
+	private ObjectPooler pooler;
 
 
 	void Awake () {
@@ -32,8 +33,9 @@ public class Player : MonoBehaviour {
 		hol = new Holster (this);
 		color = sr.color;
 		body = gm.GetBody (this);
-		GetComponent<ObjectPooler> ().SetPooledObjectsColor (color);
-		GetComponent<ObjectPooler> ().SetPooledObjectsOwner (transform);
+		pooler = GetComponent<ObjectPooler> ();
+		pooler.SetPooledObjectsColor (color);
+		pooler.SetPooledObjectsOwner (transform);
 	}
 
 	public void StartPlayer () {
@@ -52,7 +54,7 @@ public class Player : MonoBehaviour {
 		//b.body.GetComponent<SpriteRenderer>().color = b.color;
 		b.Shield.SetColor (color);
 		b.ReloadIndicator.SetColor (color);
-		GetComponent<ObjectPooler> ().enabled = true;
+		pooler.enabled = true;
 		b.transform.rotation = Quaternion.identity;
 		b.body.rotation = Quaternion.identity;
 		transform.rotation = b.transform.rotation;
@@ -189,7 +191,7 @@ public class Player : MonoBehaviour {
 	}
 
 	public void DropItem () {
-		itemHeld.GetComponent<Item> ().Drop (this, GetComponent<SpriteRenderer> ().sortingLayerName, GetComponent<SpriteRenderer> ().sortingOrder);
+		itemHeld.GetComponent<Item> ().Drop (this, GetComponent<SpriteRenderer> ().sortingLayerName, GetComponent<SpriteRenderer> ().sortingOrder - 1);
 	}
 
 	public void PickUpItem () {
@@ -314,5 +316,17 @@ public class Player : MonoBehaviour {
 
 	public bool GetReigningBird () {
 		return reigningPowerbird;
+	}
+
+	public void Equip (Weapon weap) {
+		storedWeapon = w;
+		w = weap;
+		pi.CancelInvoke ();
+	}
+
+	public void Unequip () {
+		w = storedWeapon;
+		storedWeapon = null;
+		pi.CancelInvoke ();
 	}
 }

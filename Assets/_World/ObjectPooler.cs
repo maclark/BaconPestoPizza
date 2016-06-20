@@ -15,13 +15,17 @@ public class ObjectPooler : MonoBehaviour
 	private Transform owner;
 
 	void Start ()	{
-		container = new GameObject (pooledObject.name + "Container");
+		if (container == null) {
+			container = new GameObject (pooledObject.name + "Container");
+		}
 
 		pooledObjects = new List<GameObject>();
 		for(int i = 0; i < pooledAmount; i++)
 		{
 			GameObject obj = (GameObject)Instantiate(pooledObject);
-			obj.GetComponent<SpriteRenderer> ().color = color;
+			if (obj.GetComponent<SpriteRenderer> ()) {
+				obj.GetComponent<SpriteRenderer> ().color = color;
+			}
 			obj.GetComponent<Projectile> ().owner = owner;
 			obj.SetActive(false);
 			obj.transform.parent = container.transform;
@@ -29,14 +33,24 @@ public class ObjectPooler : MonoBehaviour
 		}
 	}
 
+	public void SetPooledObject (GameObject objectWanted) {
+		pooledObject = objectWanted;
+	}
+
+	public void SetContainer (GameObject containerWanted) {
+		container = containerWanted;
+	}
+
 	public GameObject GetPooledObject()
 	{
-		for(int i = 0; i< pooledObjects.Count; i++)
+		for (int i = 0; i < pooledObjects.Count; i++)
 		{
 			if(pooledObjects[i] == null)
 			{
 				GameObject obj = (GameObject)Instantiate(pooledObject);
-				obj.GetComponent<SpriteRenderer> ().color = color;
+				if (obj.GetComponent<SpriteRenderer> ()) { 
+					obj.GetComponent<SpriteRenderer> ().color = color;
+				}
 				obj.GetComponent<Projectile> ().owner = owner;
 				obj.SetActive(false);
 				pooledObjects[i] = obj;
@@ -51,10 +65,12 @@ public class ObjectPooler : MonoBehaviour
 		if (willGrow)
 		{
 			GameObject obj = (GameObject)Instantiate(pooledObject);
-			obj.GetComponent<SpriteRenderer> ().color = color;
+			if (obj.GetComponent<SpriteRenderer> ()) {
+				obj.GetComponent<SpriteRenderer> ().color = color;
+			}
 			obj.GetComponent<Projectile> ().owner = owner;
-			pooledObjects.Add(obj);
 			obj.transform.parent = container.transform;
+			pooledObjects.Add(obj);
 			return obj;
 		}
 

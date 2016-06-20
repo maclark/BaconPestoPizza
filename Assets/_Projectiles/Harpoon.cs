@@ -15,15 +15,21 @@ public class Harpoon : MonoBehaviour {
 	public float minWidthTetherLength = 3;
 	public float minTetherWidth = .05f;
 	public float maxTetherWidth = .2f;
+	public float waterHoseWidth = .4f;
+	public float radiationVacuumHoseWidth = .4f;
 	public bool recalling = false;
 	public bool gripping = true;
 	public bool taut = false;
+	public bool isHose = false;
+	public bool isVacuum = false;
 	public OrbWeb web = null;
+	public Circuit circuit;
 	public Powerbird powerbirdie = null;
 	public GameObject webPrefab;
 	public GameObject orbWebPrefab;
 	public GameObject positronPrefab;
 
+	private GameManager gm;
 	private Rigidbody2D rb;
 	private LineRenderer lr;
 	private Vector3[] tetherPositions = new Vector3[2];
@@ -31,14 +37,17 @@ public class Harpoon : MonoBehaviour {
 	private GameObject harpooned = null;
 	private List<Bird> linkedBirds = new List<Bird> ();
 	private Vector3 tetherVector;
+	private int posis;
 
 	void Awake () {
+		gm = GameObject.FindObjectOfType<GameManager> ();
 		rb = GetComponent<Rigidbody2D> ();
 	}
 
 	void Start () {
 		lr = GetComponent<LineRenderer> ();
 		lr.sortingLayerName = GetComponentInChildren<SpriteRenderer>().sortingLayerName;
+		lr.material.color = harpooner.GetComponent<Bird> ().p.color;
 	}
 
 	void Update () {
@@ -49,7 +58,6 @@ public class Harpoon : MonoBehaviour {
 		tetherVector = transform.position - harpooner.transform.position;
 		tetherLength = tetherVector.magnitude;
 		if (tetherLength > maxTetherLength + 1) {
-			print ("harpoon broke free");
 			ClampHarp ();
 			if (harpooned) {
 				SetGripping (false);
@@ -85,7 +93,6 @@ public class Harpoon : MonoBehaviour {
 			if (hool.enabled) {
 				if (gripping) {
 					HarpoonObject (other.gameObject);
-					other.GetComponent<Harpoonable> ().SetSortingLayer ("Birds");
 				}
 			}
 		}
@@ -114,18 +121,22 @@ public class Harpoon : MonoBehaviour {
 		lr.SetPositions (tetherPositions);
 
 		float distance = Vector3.Distance (tetherPositions[0], tetherPositions[1]);
-		float tetherWidth = Mathf.Lerp (maxTetherWidth, minTetherWidth, (distance - minWidthTetherLength )/ tautLength);
-		lr.SetWidth (tetherWidth, tetherWidth);
-
 		//for determining when to stop thinning the line renderered
 		if (distance < tautLength) {
 			taut = false;
-			lr.material.color = harpooner.GetComponent<Bird> ().p.color;
 		}
 		else {
 			//lr.material.color = Color.red;
 			taut = true;
 		} 
+
+		float tetherWidth;
+		if (isHose) {
+			tetherWidth = waterHoseWidth;
+		} else {
+			tetherWidth = Mathf.Lerp (maxTetherWidth, minTetherWidth, (distance - minWidthTetherLength) / tautLength);
+		}
+		lr.SetWidth (tetherWidth, tetherWidth);
 	}
 
 	public void SetHarpooner (GameObject harpoonThrower) {
@@ -143,10 +154,17 @@ public class Harpoon : MonoBehaviour {
 	public void HarpoonObject (GameObject harpoonRecipient) {
 		harpooned = harpoonRecipient;
 		GetComponent<Rigidbody2D> ().Sleep ();
-		GetComponent<BoxCollider2D> ().enabled = false;
+		Collider2D coll = GetComponent<Collider2D> ();
+		if (coll) {
+			coll.enabled = false;
+		}
 		transform.position = harpooned.transform.position;
 		transform.parent = harpooned.transform;
 		harpoonRecipient.SendMessageUpwards ("BeenHarpooned", this, SendMessageOptions.DontRequireReceiver);
+		harpoonRecipient.GetComponent<Harpoonable> ().SetSortingLayer ("Birds");
+		if (harpoonRecipient.name == "WaterTank") {
+			ChangeTetherToHose ();
+		}
 	}
 
 	public void ToggleRecalling () {
@@ -170,6 +188,16 @@ public class Harpoon : MonoBehaviour {
 	}
 
 	public void SetGripping (bool setGripping) {
+		if (setGripping == false) {
+			if (circuit != null) {
+				circuit.BreakCircuit ();
+			}
+		}
+
+		if (isHose) {
+			ChangeHoseToTether ();
+		}
+
 		if (setGripping != gripping) {
 			SpriteRenderer[] renderers = GetComponentsInChildren<SpriteRenderer> ();
 			if (gripping) {
@@ -257,7 +285,11 @@ public class Harpoon : MonoBehaviour {
 				rb.AddForce (springForce);
 			} else {
 				//harpooned.GetComponent<Harpoonable> ().RiBo ().AddForce (springForce);
-				harpooned.GetComponent<Harpoonable> ().GetComponent<Rigidbody2D> ().AddForce (springForce);
+				if (isHose) {
+					harpooned.GetComponent<Harpoonable> ().GetComponentInParent<Rigidbody2D> ().AddForce (springForce);
+				} else {
+					harpooned.GetComponent<Harpoonable> ().GetComponent<Rigidbody2D> ().AddForce (springForce);
+				}
 			}
 			//harpooner.GetComponent<Harpoonable> ().RiBo ().AddForce (-springForce);
 			harpooner.GetComponent<Harpoonable> ().GetComponent<Rigidbody2D> ().AddForce (-springForce);
@@ -318,9 +350,26 @@ public class Harpoon : MonoBehaviour {
 		}
 	}
 
-	void SendPositrons () {
-		GameObject positronObj = Instantiate (positronPrefab, harpooner.transform.position, Quaternion.identity) as GameObject;
-		Positron posi = positronObj.GetComponent<Positron> ();
+	void SendPositron () {
+		Positron posi = gm.positronPooler.GetPooledObject ().GetComponent<Positron> ();
+		posi.gameObject.SetActive (true);
+		posi.circuit = circuit;
+		posi.circuitHolder = harpooner.GetComponent<Bird> ().p.transform;
+		posi.harpoonedTransform = harpooned.transform;
+		circuit.posis.Add (posi);
 	}
 
+	void ChangeTetherToHose () {
+		isHose = true;
+		Player p = harpooner.GetComponentInChildren<Player> ();
+		p.Equip (new Hose (p.w.hol));
+		lr.material.color = Color.blue;
+	}
+
+	void ChangeHoseToTether () {
+		isHose = false;
+		Player p = harpooner.GetComponentInChildren<Player> ();
+		p.Unequip ();
+		lr.material.color = harpooner.GetComponentInChildren<Bird> ().p.color;
+	}
 }

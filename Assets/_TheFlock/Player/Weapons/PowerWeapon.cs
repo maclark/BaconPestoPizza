@@ -6,13 +6,13 @@ public class PowerWeapon : Weapon {
 	public int barrelAmount = 1;
 	public float scatter = .1f;
 	public float spread = 1f;
-	public float spreadOffset = 1f;
+	public float Offset = 1f;
 	public Transform[] powerers;
 
 	public PowerWeapon (Holster hol) : base (hol) {
 		powerers = hol.p.b.power.GetPowerers ();
-		name = "Power Weapon";
-		bulletSpeed = 250f;
+		name = "PowerWeapon";
+		projectileSpeed = 250f;
 		reloadSpeed = 1f;
 		fireRate = .001f;
 		clipSize = 100;
@@ -25,7 +25,7 @@ public class PowerWeapon : Weapon {
 			for (int i = 0; i < barrelAmount; i++) {
 				Bullet bull = GetBullet ();
 				bull.gameObject.SetActive (true);
-				bull.forceMag = bulletSpeed;
+				bull.forceMag = projectileSpeed;
 
 				float x = Random.Range (0f, scatter);
 				float y = Random.Range (0f, scatter);
@@ -34,7 +34,7 @@ public class PowerWeapon : Weapon {
 
 				float u = Random.Range (-spread, spread);
 				float v = Random.Range (-spread, spread);
-				Vector3 s = hol.p.transform.position + new Vector3 (u, v, 0f) + dir * spreadOffset;
+				Vector3 s = hol.p.transform.position + new Vector3 (u, v, 0f) + dir * Offset;
 				bull.Fire (s, dir);
 				roundsLeftInClip--;
 			}

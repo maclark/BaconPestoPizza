@@ -14,38 +14,65 @@ public class GameManager : MonoBehaviour {
 	public GameObject tunnelPrefab;
 	public GameObject shopPrefab;
 	public GameObject nextPortal;
-	public Transform exitContainer;
-	public Transform boundaryContainer;
-	public Transform bodyContainer;
-	public Transform enemyContainer;
-	public Transform buildingContainer;
-	public Vector3 appointment1 = new Vector3 (100, 0, 0);
-	public Vector3 endOfPortalTailOffset = new Vector3 (0, 67.08f, 0);
-	public Vector3 lastPortalPosition = new Vector3 (0, 0, 0);
-	public List<Transform> appointments = new List<Transform> ();
-	public Text goldText;
-	public BigBird bigBird;
-	public BigBirdManager bbm;
+	public GameObject poolerObject;
+	public GameObject positronPrefab;
+	public GameObject dropPrefab;
+	public GameObject sunPrefab;
+	public GameObject boundaryContainer;
+	public GameObject bodyContainer;
+	public GameObject enemyContainer;
+	public GameObject buildingContainer;
+	public GameObject positronContainer;
+	public GameObject dropContainer;
+	public GameObject sunContainer;
+	public GameObject exitContainer;
 	public int zoneNumber = 0;
 	public float screenClampBuffer = 1;
 	public float gallonsPerSquareUnit = 14;
-	public float warpDelay = 2f;
+	public float warpDelay = 2f;public Vector3 appointment1 = new Vector3 (100, 0, 0);
+	public Text goldText;
+	public ObjectPooler positronPooler;
+	public ObjectPooler dropPooler;
+	public ObjectPooler sunPooler;
+	public BigBird bigBird;
+	public BigBirdManager bbm;
+	public Vector3 endOfPortalTailOffset = new Vector3 (0, 67.08f, 0);
+	public Vector3 lastPortalPosition = new Vector3 (0, 0, 0);
+	public List<Transform> appointments = new List<Transform> ();
 
 	private List<Transform> alliedTransforms = new List<Transform> (); 
 	private bool paused = false;
 	private NavPointer nav;
 	private Tetris tetrisGod;
+	private SunMaker sunGod;
+
 
 	void Awake () {
 		bigBird = GameObject.FindObjectOfType<BigBird> ();
 		bbm = bigBird.GetComponent<BigBirdManager> ();
 		bbm.money = 500;
 		tetrisGod = GameObject.FindObjectOfType<Tetris> ();
+		sunGod = new SunMaker ();
 		AddAlliedTransform (bigBird.transform);
 		MakeInvisibleTarget ();
 		MakeContainers ();
 	}
 
+	void Start () {
+		Pool (ref positronPooler, positronPrefab, positronContainer, Color.white);
+		Pool (ref dropPooler, dropPrefab, dropContainer, Color.blue);
+		Pool (ref sunPooler, sunPrefab, sunContainer, Color.yellow);
+
+		InvokeRepeating ("MakeSuns", 0f, sunGod.sunFrequency);
+	}
+
+	void Pool (ref ObjectPooler pooler, GameObject prefab, GameObject container, Color c) {
+		GameObject poolerObj = Instantiate (poolerObject) as GameObject;
+		pooler = poolerObj.GetComponent<ObjectPooler> ();
+		pooler.SetPooledObject (prefab);
+		pooler.SetPooledObjectsColor (c);
+		pooler.SetContainer (container);
+	}
 
 	public List<Transform> GetAlliedTransforms () {
 		return alliedTransforms;
@@ -139,7 +166,7 @@ public class GameManager : MonoBehaviour {
 	public PlayerBody GetBody (Player p) {
 		GameObject obj = Instantiate (bodyPrefab, transform.position, Quaternion.identity) as GameObject;
 		obj.SetActive (false);
-		obj.transform.parent = bodyContainer;
+		obj.transform.parent = bodyContainer.transform;
 		PlayerBody pBody = obj.GetComponent<PlayerBody> ();
 		pBody.SetPlayer (p);
 		return pBody;
@@ -156,21 +183,37 @@ public class GameManager : MonoBehaviour {
 		tetrisGod.SpawnNewZone ();
 	}
 
+	void MakeSuns () {
+		sunGod.MakeSunshine ();
+	}
+
 	void MakeContainers () {
-		exitContainer = new GameObject ().transform;
-		exitContainer.transform.name = "ZoneExits";
+		exitContainer = new GameObject ();
+		exitContainer.transform.name = "exitContainer";
 		exitContainer.transform.parent = transform;
-		boundaryContainer = new GameObject ().transform;
-		boundaryContainer.transform.name = "BoundaryWalls";
+
+		boundaryContainer = new GameObject ();
+		boundaryContainer.transform.name = "boundaryContainer";
 		boundaryContainer.transform.parent = transform;
-		bodyContainer = new GameObject ().transform;
-		bodyContainer.transform.name = "Bodies";
+
+		bodyContainer = new GameObject ();
+		bodyContainer.transform.name = "bodyContainer";
 		bodyContainer.transform.parent = transform;
-		enemyContainer = new GameObject ().transform;
-		enemyContainer.transform.name = "Enemies";
+
+		enemyContainer = new GameObject ();
+		enemyContainer.transform.name = "enemyContainer";
 		enemyContainer.transform.parent = transform;
-		buildingContainer = new GameObject ().transform;
-		buildingContainer.transform.name = "Buildings";
+
+		buildingContainer = new GameObject ();
+		buildingContainer.transform.name = "buildingContainer";
 		buildingContainer.transform.parent = transform;
+
+		positronContainer = new GameObject ();
+		positronContainer.transform.name = "positronContainer";
+		positronContainer.transform.parent = transform;
+
+		dropContainer = new GameObject ();
+		dropContainer.transform.name = "dropContainer";
+		dropContainer.transform.parent = transform;
 	}
 }

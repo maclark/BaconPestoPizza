@@ -7,7 +7,7 @@ public class Weapon {
 	public bool cocked = true;
 	public bool reloading = false;
 	public float fireRate = .1f;
-	public float bulletSpeed = 200f;
+	public float projectileSpeed = 200f;
 	public float reloadSpeed = 2f;
 	public int clipSize = 60;
 	public int roundsLeftInClip = 60;
@@ -15,15 +15,18 @@ public class Weapon {
 	public bool firing = false;
 	public Holster hol;
 
+	protected GameManager gm;
+
 	public Weapon (Holster holster) {
 		hol = holster;
+		gm = GameObject.FindObjectOfType<GameManager> ();
 	}
 
 	public virtual void Fire (Vector3 dir) {
 		if (roundsLeftInClip > 0 && !reloading) {
 			Bullet bullet = hol.p.GetComponent<ObjectPooler>().GetPooledObject ().GetComponent<Bullet> ();
 			bullet.gameObject.SetActive (true);
-			bullet.forceMag = bulletSpeed;
+			bullet.forceMag = projectileSpeed;
 			bullet.damage = damage;
 			bullet.Fire (hol.p.transform.position, dir);
 			roundsLeftInClip--;

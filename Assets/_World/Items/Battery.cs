@@ -3,7 +3,11 @@ using System.Collections;
 
 public class Battery : Item {
 
+	private Harpoonable hool;
+
+
 	void Awake () {
+		hool = GetComponent<Harpoonable> ();
 		OnAwake ();
 	}
 
@@ -12,6 +16,7 @@ public class Battery : Item {
 			Bird birdie = coll.transform.GetComponent<Bird> ();
 			if (!birdie.hasBattery) {
 				birdie.hasBattery = true;
+				hool.BreakLoose ();
 				Destroy (gameObject);
 			}
 		}

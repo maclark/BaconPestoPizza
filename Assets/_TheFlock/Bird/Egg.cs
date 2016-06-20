@@ -81,7 +81,6 @@ public class Egg : Item {
 				GetComponent<Collider2D> ().isTrigger = false;
 				GetComponent<Rigidbody2D> ().isKinematic = false;
 				GetComponent<Rigidbody2D> ().drag = 0f;
-				sortOrder++;
 				transform.parent = null;
 				droppedItem = true;
 			}

@@ -12,7 +12,7 @@ public class Shotgun : Weapon {
 	public Shotgun (Holster hol) : base (hol) {
 		name = "Shotgun";
 		automatic = false;
-		bulletSpeed = 250f;
+		projectileSpeed = 250f;
 		reloadSpeed = 1f;
 		clipSize = 6;
 		roundsLeftInClip = 6;
@@ -24,7 +24,7 @@ public class Shotgun : Weapon {
 			for (int i = 0; i < barrelAmount; i++) {
 				Bullet bull = hol.p.GetComponent<ObjectPooler> ().GetPooledObject ().GetComponent<Bullet> ();
 				bull.gameObject.SetActive (true);
-				bull.forceMag = bulletSpeed;
+				bull.forceMag = projectileSpeed;
 
 				float x = Random.Range (0f, scatter);
 				float y = Random.Range (0f, scatter);

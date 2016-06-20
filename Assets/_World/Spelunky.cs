@@ -182,7 +182,7 @@ public class Spelunky {
 			Vector3 spawn = new Vector3 (ev.x, ev.y, 0);
 			GameObject exitSaver = GameObject.Instantiate (spaceSaverPrefab, spawn, Quaternion.identity) as GameObject;
 			exitSaver.transform.localScale = new Vector2 (exitWidth, exitWidth);
-			exitSaver.transform.parent = gm.exitContainer;
+			exitSaver.transform.parent = gm.exitContainer.transform;
 
 			if (bottomExitVector == Vector3.zero) {
 				bottomExitVector = new Vector3 (ev.x, ev.y, 0);
@@ -219,32 +219,32 @@ public class Spelunky {
 		Vector3 bottomLeftSpawn = new Vector3 ((botLeft.x + bottomExitVector.x - exitWidth / 2) / 2, botLeft.y, 0);
 		GameObject bottomLeftWall = GameObject.Instantiate (boundaryPrefab, bottomLeftSpawn, Quaternion.identity) as GameObject;
 		bottomLeftWall.transform.localScale = new Vector3 ((bottomExitVector.x - exitWidth / 2 - botLeft.x), 5f, 0);
-		bottomLeftWall.transform.parent = gm.boundaryContainer;
+		bottomLeftWall.transform.parent = gm.boundaryContainer.transform;
 
 		Vector3 bottomRightSpawn = new Vector3 ((botLeft.x + boundaryWidth + bottomExitVector.x + exitWidth / 2) / 2, botLeft.y, 0);
 		GameObject bottomRightWall = GameObject.Instantiate (boundaryPrefab, bottomRightSpawn, Quaternion.identity) as GameObject;
 		bottomRightWall.transform.localScale = new Vector3 (botLeft.x + boundaryWidth - (bottomExitVector.x + exitWidth / 2), 5f, 0);
-		bottomRightWall.transform.parent = gm.boundaryContainer;
+		bottomRightWall.transform.parent = gm.boundaryContainer.transform;
 
 		Vector3 leftWallSpawn = new Vector3 (botLeft.x, botLeft.y + boundaryHeight / 2, 0);
 		GameObject leftWall = GameObject.Instantiate (boundaryPrefab, leftWallSpawn, Quaternion.identity) as GameObject;
 		leftWall.transform.localScale = new Vector3 (5f, boundaryHeight, 0);
-		leftWall.transform.parent = gm.boundaryContainer;
+		leftWall.transform.parent = gm.boundaryContainer.transform;
 
 		Vector3 rightWallSpawn = new Vector3 (botLeft.x + boundaryWidth, botLeft.y + boundaryHeight / 2, 0);
 		GameObject rightWall = GameObject.Instantiate (boundaryPrefab, rightWallSpawn, Quaternion.identity) as GameObject;
 		rightWall.transform.localScale = new Vector3 (5f, boundaryHeight, 0);
-		rightWall.transform.parent = gm.boundaryContainer;
+		rightWall.transform.parent = gm.boundaryContainer.transform;
 
 		Vector3 topLeftSpawn = new Vector3 ((botLeft.x + topExitVector.x - exitWidth / 2) / 2, botLeft.y + boundaryHeight);
 		GameObject topLeftWall = GameObject.Instantiate (boundaryPrefab, topLeftSpawn, Quaternion.identity) as GameObject;
 		topLeftWall.transform.localScale = new Vector3 ((topExitVector.x - exitWidth / 2 - botLeft.x), 5f, 0);
-		topLeftWall.transform.parent = gm.boundaryContainer;
+		topLeftWall.transform.parent = gm.boundaryContainer.transform;
 
 		Vector3 topRightSpawn = new Vector3 ((botLeft.x + boundaryWidth + topExitVector.x + exitWidth / 2) / 2, botLeft.y + boundaryHeight);
 		GameObject topRightWall = GameObject.Instantiate (boundaryPrefab, topRightSpawn, Quaternion.identity) as GameObject;
 		topRightWall.transform.localScale = new Vector3 (botLeft.x + boundaryWidth - (topExitVector.x + exitWidth / 2), 5f, 0);
-		topRightWall.transform.parent = gm.boundaryContainer;
+		topRightWall.transform.parent = gm.boundaryContainer.transform;
 	}
 
 	public void PlacePortal () {
@@ -252,7 +252,7 @@ public class Spelunky {
 			gm.lastPortalPosition = gm.nextPortal.transform.position;
 		}
 		gm.nextPortal = GameObject.Instantiate (portalPrefab, topExitVector, Quaternion.identity) as GameObject;
-		gm.nextPortal.transform.parent = gm.boundaryContainer;
+		gm.nextPortal.transform.parent = gm.boundaryContainer.transform;
 	}
 
 	public void PlaceTunnel () {
@@ -263,7 +263,7 @@ public class Spelunky {
 			Quaternion tunnelRot = Quaternion.LookRotation (gm.transform.forward, bottomExitVector - endOfPortalTail);
 			GameObject tunnel = GameObject.Instantiate (gm.tunnelPrefab, spawnPoint, tunnelRot) as GameObject;
 			tunnel.transform.localScale = new Vector3 (tunnel.transform.localScale.x, distance, 1);
-			tunnel.transform.parent = gm.boundaryContainer;
+			tunnel.transform.parent = gm.boundaryContainer.transform;
 		}
 	}
 }

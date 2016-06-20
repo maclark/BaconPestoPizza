@@ -67,7 +67,12 @@ public class Harpoonable : MonoBehaviour {
 	}
 
 	public void BreakLoose () {
+		List<Harpoon> toRemove = new List<Harpoon> ();
 		foreach (Harpoon har in otherHarps) {
+			toRemove.Add (har);
+		}
+
+		foreach (Harpoon har in toRemove) {
 			har.SetGripping (false);
 		}
 	}
@@ -86,6 +91,11 @@ public class Harpoonable : MonoBehaviour {
 	}
 
 	public void SetSortingLayer (string layerName) {
+		if (transform.parent) {
+			if (transform.parent == gm.bigBird.transform) {
+				return;
+			}
+		}
 		if (GetComponent<SpriteRenderer> ()) {
 			GetComponent<SpriteRenderer> ().sortingLayerName = layerName;
 		} else if (GetComponentInChildren<SpriteRenderer> ()) {

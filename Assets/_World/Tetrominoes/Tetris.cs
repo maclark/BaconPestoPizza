@@ -95,10 +95,10 @@ public class Tetris : MonoBehaviour {
 		spelunkyGod.PlacePortal ();
 		spelunkyGod.PlaceTunnel ();
 		SpawnMegaTetrosOffTrail ();
-		SpawnShopField (origin, columns * roomWidth, rows * roomHeight, shopAttempts);
 		SpawnWaterField (origin, columns * roomWidth, rows * roomHeight, waterAttempts);
 		SpawnRectangleField (origin, columns * roomWidth, rows * roomHeight, tetroAttempts);
 		spelunkyGod.OutlineCave ();
+		SpawnShopField (origin, columns * roomWidth, rows * roomHeight, shopAttempts);
 		SpawnEnemyField (origin, columns * roomWidth, rows * roomHeight);
 		SpawnDestructibles (origin, columns * roomWidth, rows * roomHeight, destructibleSpots, destructibleAttsPerSpot);
 		spelunkyGod.DestroySpaceSavers ();
@@ -278,7 +278,7 @@ public class Tetris : MonoBehaviour {
 		if (cc) {
 			if (CheckSpaceClear(cc, 0f)) {
 				GameObject go = Instantiate(obj, transform.position, transform.rotation) as GameObject;
-				go.transform.parent = gm.enemyContainer;
+				go.transform.parent = gm.enemyContainer.transform;
 			}
 		}
 	}
@@ -288,35 +288,35 @@ public class Tetris : MonoBehaviour {
 			float x = Random.Range (botLeft.x, botLeft.x + fieldWidth);
 			float y = Random.Range (botLeft.y, botLeft.y+ fieldHeight);
 			transform.position = new Vector2 (x, y);
-			SpawnObject (invaderPrefab, gm.enemyContainer);
+			SpawnObject (invaderPrefab, gm.enemyContainer.transform);
 		}
 
 		for (int i = 0; i < invCarAttempts; i++) {
 			float x = Random.Range (botLeft.x, botLeft.x + fieldWidth);
 			float y = Random.Range (botLeft.y, botLeft.y+ fieldHeight);
 			transform.position = new Vector2 (x, y);
-			SpawnObject (invaderCarrierPrefab, gm.enemyContainer);
+			SpawnObject (invaderCarrierPrefab, gm.enemyContainer.transform);
 		}
 
 		for (int i = 0; i < puffAttempts; i++) {
 			float x = Random.Range (botLeft.x, botLeft.x + fieldWidth);
 			float y = Random.Range (botLeft.y, botLeft.y+ fieldHeight);
 			transform.position = new Vector2 (x, y);
-			SpawnObject (pufferPrefab, gm.enemyContainer);
+			SpawnObject (pufferPrefab, gm.enemyContainer.transform);
 		}
 
 		for (int i = 0; i < hunterAttempts; i++) {
 			float x = Random.Range (botLeft.x, botLeft.x + fieldWidth);
 			float y = Random.Range (botLeft.y, botLeft.y+ fieldHeight);
 			transform.position = new Vector2 (x, y);
-			SpawnObject (hunterPairPrefab, gm.enemyContainer);
+			SpawnObject (hunterPairPrefab, gm.enemyContainer.transform);
 		}
 
 		for (int i = 0; i < alkAtts; i++) {
 			float x = Random.Range (botLeft.x, botLeft.x + fieldWidth);
 			float y = Random.Range (botLeft.y, botLeft.y+ fieldHeight);
 			transform.position = new Vector2 (x, y);
-			SpawnObject (alakazamPrefab, gm.enemyContainer);
+			SpawnObject (alakazamPrefab, gm.enemyContainer.transform);
 		}
 	}
 
@@ -343,7 +343,7 @@ public class Tetris : MonoBehaviour {
 			BoxCollider2D[] colls = gm.shopPrefab.GetComponentInChildren<Shopkeeper> ().GetColliderChild ();
 			if (CheckSpaceClear(colls, 0f)) {
 				GameObject go = Instantiate (gm.shopPrefab, transform.position, transform.rotation) as GameObject;
-				go.transform.parent = gm.buildingContainer;
+				go.transform.parent = gm.buildingContainer.transform;
 
 				//cap one shop per spawnshopfield call
 				return;
