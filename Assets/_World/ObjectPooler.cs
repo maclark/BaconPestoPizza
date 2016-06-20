@@ -26,7 +26,9 @@ public class ObjectPooler : MonoBehaviour
 			if (obj.GetComponent<SpriteRenderer> ()) {
 				obj.GetComponent<SpriteRenderer> ().color = color;
 			}
-			obj.GetComponent<Projectile> ().owner = owner;
+			if (obj.GetComponent<Projectile> ()) {
+				obj.GetComponent<Projectile> ().owner = owner;
+			}
 			obj.SetActive(false);
 			obj.transform.parent = container.transform;
 			pooledObjects.Add(obj);
@@ -68,7 +70,9 @@ public class ObjectPooler : MonoBehaviour
 			if (obj.GetComponent<SpriteRenderer> ()) {
 				obj.GetComponent<SpriteRenderer> ().color = color;
 			}
-			obj.GetComponent<Projectile> ().owner = owner;
+			if (obj.GetComponent<Projectile> ()) {
+				obj.GetComponent<Projectile> ().owner = owner;
+			}
 			obj.transform.parent = container.transform;
 			pooledObjects.Add(obj);
 			return obj;

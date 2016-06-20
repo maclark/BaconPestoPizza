@@ -7,6 +7,7 @@ public class Egg : Item {
 	public float gestationTime;
 	public GameObject hatchlingPrefab;
 	public bool inCoop = false;
+	public Color momsColor;
 
 	private Coop coo;
 
@@ -60,6 +61,7 @@ public class Egg : Item {
 	public void Hatch () {
 		if (inCoop) {
 			GameObject newPup = Instantiate (hatchlingPrefab, transform.position, Quaternion.identity) as GameObject;
+			newPup.GetComponent<Hatchling> ().SetColor (momsColor);
 			coo.RemoveOccupant (transform);
 			coo.AddOccupant (newPup.transform);
 			if (transform.parent) {

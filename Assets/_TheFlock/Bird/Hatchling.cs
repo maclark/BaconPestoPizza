@@ -10,7 +10,6 @@ public class Hatchling : Item {
 	public Vector3 pupOffset;
 	public GameObject birdPrefab;
 
-
 	private int assists = 0;
 	private bool isKiller = false;
 	private bool isFlyer = false;
@@ -19,7 +18,6 @@ public class Hatchling : Item {
 		base.OnAwake ();
 	}
 	void Start () {
-		sr.color = Random.ColorHSV ();
 		base.OnStart ();
 	}
 	
@@ -132,5 +130,13 @@ public class Hatchling : Item {
 		}
 			
 		base.Drop (p, sortLayerName, sortOrder, droppedItem, canDrop);
+	}
+
+	public void SetColor (Color c) {
+		sr.color = c;
+	}
+
+	public Color GetColor () {
+		return sr.color;
 	}
 }

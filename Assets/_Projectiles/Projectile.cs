@@ -7,9 +7,11 @@ public class Projectile : MonoBehaviour {
 	public float forceMag = 40f;
 	public Transform owner;
 
+	protected GameManager gm;
 	protected Rigidbody2D rb;
 
 	protected virtual void OnAwake () {
+		gm = GameObject.FindObjectOfType<GameManager> ();
 		rb = GetComponent<Rigidbody2D> ();
 	}
 

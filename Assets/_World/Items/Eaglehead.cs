@@ -83,6 +83,7 @@ public class Eaglehead : Item {
 		pb.SetPowerers (powerers);
 
 		poweredBird.Powered (pb);
+		poweredBird.GetComponent<Rigidbody2D> ().velocity = GetComponent<Rigidbody2D> ().velocity;
 		Destroy (gameObject);
 	}
 }

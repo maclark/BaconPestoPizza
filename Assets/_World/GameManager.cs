@@ -18,6 +18,7 @@ public class GameManager : MonoBehaviour {
 	public GameObject positronPrefab;
 	public GameObject dropPrefab;
 	public GameObject sunPrefab;
+	public GameObject flamePrefab;
 	public GameObject boundaryContainer;
 	public GameObject bodyContainer;
 	public GameObject enemyContainer;
@@ -25,6 +26,7 @@ public class GameManager : MonoBehaviour {
 	public GameObject positronContainer;
 	public GameObject dropContainer;
 	public GameObject sunContainer;
+	public GameObject flameContainer;
 	public GameObject exitContainer;
 	public int zoneNumber = 0;
 	public float screenClampBuffer = 1;
@@ -34,6 +36,7 @@ public class GameManager : MonoBehaviour {
 	public ObjectPooler positronPooler;
 	public ObjectPooler dropPooler;
 	public ObjectPooler sunPooler;
+	public ObjectPooler flamePooler;
 	public BigBird bigBird;
 	public BigBirdManager bbm;
 	public Vector3 endOfPortalTailOffset = new Vector3 (0, 67.08f, 0);
@@ -62,6 +65,7 @@ public class GameManager : MonoBehaviour {
 		Pool (ref positronPooler, positronPrefab, positronContainer, Color.white);
 		Pool (ref dropPooler, dropPrefab, dropContainer, Color.blue);
 		Pool (ref sunPooler, sunPrefab, sunContainer, Color.yellow);
+		Pool (ref flamePooler, flamePrefab, flameContainer, Color.white);
 
 		InvokeRepeating ("MakeSuns", 0f, sunGod.sunFrequency);
 	}
@@ -215,5 +219,9 @@ public class GameManager : MonoBehaviour {
 		dropContainer = new GameObject ();
 		dropContainer.transform.name = "dropContainer";
 		dropContainer.transform.parent = transform;
+
+		flameContainer = new GameObject ();
+		flameContainer.transform.name = "flameContainer";
+		flameContainer.transform.parent = transform;
 	}
 }

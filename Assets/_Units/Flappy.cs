@@ -20,7 +20,10 @@ public class Flappy : Flyer {
 
 	void OnCollisionEnter2D (Collision2D coll) {
 		if (coll.transform.tag == "Bird") {
-			coll.transform.GetComponent<Bird> ().TakeDamage (kamikazeDamage);
+			Bird victim = coll.transform.GetComponent<Bird> ();
+			if (!victim.invincible) {
+				victim.TakeDamage (kamikazeDamage);
+			}
 			Die ();
 		} else if (coll.transform.GetComponent<Flyer> ()) {
 			if (!coll.transform.GetComponent<Flappy> ()) {

@@ -80,6 +80,10 @@ public class BigBird : MonoBehaviour {
 			bbm.Drink ();
 		}
 
+		if (bbm.absorbing) {
+			bbm.Absorb ();
+		}
+
 		SetCamera ();
 
 	}
@@ -174,13 +178,18 @@ public class BigBird : MonoBehaviour {
 		return closestDock.bird;
 	}
 
-	public void TakeDamage( int dam) {
-		bbm.hp -= dam;
-		bbm.energyTank.SetResource (bbm.hp);
-		if (bbm.hp <= 0) {
-			Die ();
+	public void TakeDamage (int dam) {
+		if (bbm.shieldUp) {
+			bbm.energyTank.DecreaseResource (dam);
+			if (bbm.energyTank.empty) {
+				bbm.SolarShieldDown ();
+			}
+		} else {
+			print ("ON FIREEEE");
 		}
 	}
+
+
 
 	void Die() {
 		//gm.RemoveAlliedTransform (transform);
@@ -245,6 +254,10 @@ public class BigBird : MonoBehaviour {
 		b.gas += halfSecFill;
 		b.ranOutOfGas = false;
 		b.forceMag = b.hydratedForceMag;
+		bbm.GasOut (halfSecFill);
+		if (bbm.waterTank.empty) {
+			yield break;
+		}
 		yield return new WaitForSeconds (.5f);
 		if (b.gas > b.fullTank) {
 			b.gas = b.fullTank;

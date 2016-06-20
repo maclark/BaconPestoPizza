@@ -29,6 +29,7 @@ public class Bird : MonoBehaviour {
 	public float gas = 60f;
 	public float gasPerSecond = 1f;
 	public float gasPerBoost = 2f;
+	public float drinkRate = 20f;
 	public float gasLightDelay = .2f;
 	public float iconAboveOffset = 5f;
 	public float harpHurlOffset = 1f;
@@ -88,6 +89,7 @@ public class Bird : MonoBehaviour {
 	private ReloadIndicator reloadIndicator;
 	private GameObject gasLight;
 	private Harpoon loadedHarp;
+	private SolarPanel panel;
 	private Vector3 releaseHarpPosition;
 	private Vector3 windUpOffset;
 	private Vector3 hurlAim;
@@ -191,35 +193,14 @@ public class Bird : MonoBehaviour {
 					other.GetComponent<Flyer> ().Die ();
 				}
 			}
-		} else if (other.tag == "Harpoonable") {
-			/*Item otherC = other.GetComponent<Item> ();
-			if (otherC) {
-				if (otherC.itemType == Item.ItemType.BIRD_SHIELD) {
-					if (!shield.gameObject.activeSelf) {
-						shield.ActivateShield ();
-						Destroy (other.gameObject);
-					}
-				}
-			}*/
+		} else if (other.tag == "BigBird") {
+			DockOnBigBird ();
 		}
 	}
 
 	void OnCollisionEnter2D (Collision2D coll) {
 		if (coll.gameObject.name == "BigBird") {
 			DockOnBigBird ();
-		} else if (coll.transform.tag == "Enemy") {
-			//TODO jousting
-			//print (rb.velocity.sqrMagnitude);
-			if (!invincible) {
-				if (shield.gameObject.activeSelf) {
-					//shield.DeactivateShield ();
-					//StartCoroutine (HitInvincibility (hitInvincibilityDuration));
-					//coll.gameObject.GetComponent<Flyer> ().Die ();
-				} else { 
-					//TakeDamage (coll.transform.GetComponent<Flyer> ().kamikazeDamage);
-					//coll.gameObject.GetComponent<Flyer> ().Die ();
-				}
-			}
 		} else if (coll.transform.tag == "Bird") {
 			if (inHeat) {
 				pregnant = true;
@@ -362,9 +343,13 @@ public class Bird : MonoBehaviour {
 		if (harp) {
 			harp.Die ();
 		}
+		if (panel) {
+			panel.DetachFromBird ();
+		}
 		if (p) {
 			p.Bubble (rb.velocity);
 		}
+
 		Destroy (gameObject);
 	}
 			
@@ -410,6 +395,10 @@ public class Bird : MonoBehaviour {
 			harp.SetRecalling (true);
 			Destroy (harp.gameObject);
 			hurledHarp = false;
+		}
+
+		if (panel) {
+			panel.Reset ();
 		}
 
 		DetachOtherHarps ();
@@ -804,8 +793,10 @@ public class Bird : MonoBehaviour {
 	public void LayEgg () {
 		if (!dock.item) {
 			GameObject eggObj = Instantiate (eggPrefab, transform.position, Quaternion.identity) as GameObject;
-			eggObj.transform.parent = dock.transform;
-			dock.item = eggObj.GetComponent<Egg> ().transform;
+			Egg freshEgg = eggObj.GetComponent<Egg> ();
+			freshEgg.transform.parent = dock.transform;
+			freshEgg.momsColor = color;
+			dock.item = freshEgg.transform;
 			pregnant = false;
 		}
 	}
@@ -916,9 +907,37 @@ public class Bird : MonoBehaviour {
 	}
 
 
+	public SolarPanel GetPanel () {
+		return panel;
+	}
 
+	public void CarryPanel (SolarPanel sp) {
+		panel = sp;
+		rb.mass += sp.GetComponent<Rigidbody2D> ().mass;
+	}
+
+	public void DropPanel () {
+		rb.mass -= panel.GetComponent<Rigidbody2D> ().mass;
+		panel = null;
+	}
 
 	public void HarpoonReleased (Harpoon h) {
 		RemoveHarp (h);
+	}
+
+	public void Drink (WaterSource ws) {
+		float thisGulp = Mathf.Min (drinkRate, ws.gallons);
+		gas += thisGulp;
+		ws.Gulp (thisGulp);
+		ranOutOfGas = false;
+		forceMag = hydratedForceMag;
+	}
+
+	public void Chug (SprayDrop sd) {
+		float thisGulp = sd.sprayGulp;
+		gas += thisGulp;
+		sd.Die ();
+		ranOutOfGas = false;
+		forceMag = hydratedForceMag;
 	}
 }

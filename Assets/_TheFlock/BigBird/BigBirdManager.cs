@@ -3,22 +3,27 @@ using UnityEngine.UI;
 using System.Collections;
 
 public class BigBirdManager : MonoBehaviour {
-	public int hp = 10000;
 	public int money = 0;
 	public int cannonballs = 99;
 	public int maxCannonballs = 99;
 	public int torpedoes = 40;
 	public int maxTorpedoes = 40;
 	public float waterTankCapacity = 10000f;
+	public float energyTankCapacity = 2000f;
 	public float sweatRate = .3f;
 	public float drinkRate = 20f;
+	public float absorbRate = 40f;
 	public bool cannonballsMaxed = true;
 	public bool torpedoesMaxed = true;
 	public bool drinking = false;
+	public bool absorbing = false;
+	public bool shieldUp = true;
 	public ResourceBar waterTank;
 	public ResourceBar energyTank;
 	public Text distance;
 	public Text coins;
+	public Transform bigBirdColliders;
+	public Transform flammableCompartments;
 
 	private GameManager gm;
 	private WaterSource localWater;
@@ -34,12 +39,13 @@ public class BigBirdManager : MonoBehaviour {
 	void Start () {
 		waterTank.capacity = waterTankCapacity;
 		waterTank.SetResource (waterTankCapacity);
-		energyTank.capacity = hp;
-		waterTank.current = hp;
-		energyTank.current = hp;
+		waterTank.current = waterTankCapacity;
+		energyTank.capacity = energyTankCapacity;
+		energyTank.SetResource (energyTankCapacity);
+		energyTank.current = energyTankCapacity;
+
 		distance.text = transform.position.y.ToString();
 		coins.text = 0.ToString ();
-
 	}
 
 
@@ -108,6 +114,16 @@ public class BigBirdManager : MonoBehaviour {
 		}
 	}
 
+	public void Absorb () {
+		if (energyTank.full) {
+			return;
+		} else {
+			energyTank.IncreaseResource (absorbRate);
+			shieldUp = true;
+		}
+	}
+
+
 	public void Sweat () {
 		waterTank.DecreaseResource (sweatRate);
 
@@ -116,7 +132,24 @@ public class BigBirdManager : MonoBehaviour {
 		}
 	}
 
+	public void GasOut (float amount) {
+		waterTank.DecreaseResource (amount);
+		if (waterTank.empty) {
+			Dehydrated ();
+		}
+	}
+
 	void Dehydrated () {
 		Debug.Log ("do dehydration");
+	}
+
+	public void SolarShieldDown () {
+		//activate flammable compartments
+		//toggle all box collidres? no. just turn off main ones and turn on flammables.
+		print ("SHIELD DOWN");
+		//Collider2D[] colls = bigBirdColliders.GetComponents<Collider2D> ();
+		bigBirdColliders.gameObject.SetActive (false);
+		flammableCompartments.gameObject.SetActive (true);
+		shieldUp = false;
 	}
 }

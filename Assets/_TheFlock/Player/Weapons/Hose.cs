@@ -4,13 +4,13 @@ using System.Collections;
 public class Hose : Weapon {
 
 	public int barrelAmount = 1;
-	public float scatter = .3f;
-	public float spread = .25f;
-	public float offset = .75f;
+	public float scatter = .1f;
+	public float spread = .15f;
+	public float offset = .5f;
 
 	public Hose (Holster hol) : base (hol) {
 		name = "Hose";
-		projectileSpeed = 25f;
+		projectileSpeed = 100f;
 		reloadSpeed = 1f;
 		fireRate = .001f;
 		clipSize = 1;
@@ -20,7 +20,7 @@ public class Hose : Weapon {
 
 	public override void  Fire (Vector3 dir) {
 		for (int i = 0; i < barrelAmount; i++) {
-			Drop drop = gm.dropPooler.GetPooledObject ().GetComponent<Drop> ();
+			SprayDrop drop = gm.dropPooler.GetPooledObject ().GetComponent<SprayDrop> ();
 			drop.gameObject.SetActive (true);
 			drop.forceMag = projectileSpeed;
 
@@ -34,6 +34,7 @@ public class Hose : Weapon {
 			float v = Random.Range (-spread, spread);
 			Vector3 s = hol.p.transform.position + new Vector3 (u, v, 0f) + dir * offset;
 			drop.Fire (s, dir);
+			gm.bbm.waterTank.DecreaseResource (drop.sprayGulp);
 		}
 	}
 }

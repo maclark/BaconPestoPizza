@@ -8,6 +8,7 @@ public class Sun : Projectile {
 	public float minLifeSpan = 0f;
 	public float rotationOfLight = 3f;
 	public float speedOfLight = 10f;
+
 	private float lifeSpan;
 
 
@@ -43,6 +44,12 @@ public class Sun : Projectile {
 	}
 
 	public override void Die () {
+		foreach (Transform t in gm.GetAlliedTransforms ()) {
+			SolarPanel sp = t.GetComponentInChildren<SolarPanel> ();
+			if (sp) {
+				sp.LeftSolarSource (this);
+			}
+		}
 		gameObject.SetActive (false);
 	}
 }

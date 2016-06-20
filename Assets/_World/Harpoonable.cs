@@ -10,7 +10,6 @@ public class Harpoonable : MonoBehaviour {
 
 	private GameManager gm;
 	private List<Harpoon> otherHarps = new List<Harpoon> ();
-	private GameObject destroyableObject;
 
 
 	public class RelRB {
@@ -28,23 +27,15 @@ public class Harpoonable : MonoBehaviour {
 	}
 
 	void Start () {
-		if (GetComponent<Joint2D> ()) {
-			destroyableObject = GetComponent<Joint2D> ().connectedBody.gameObject;
-		}
-
 		gm = GameObject.FindObjectOfType<GameManager> ();
 		relPos = transform.localPosition;
 	}
 
-	void OnJointBreak2D (Joint2D brokenJoint) {
-		GetComponent<BoxCollider2D> ().isTrigger = false;
-		transform.parent = null;
-		transform.localScale = new Vector3 (1, 1, 1);
-		gm.BrokeGate ();
-		Destroy (destroyableObject);
-	}
-
 	public Rigidbody2D RiBo () {
+		if (transform.GetComponent<SolarPanel> ()) {
+			return GetComponent<Rigidbody2D> ();
+		}
+
 		if (transform.parent) {
 			if (transform.parent.GetComponent<Rigidbody2D> ()) {
 				return transform.parent.GetComponent<Rigidbody2D> ();

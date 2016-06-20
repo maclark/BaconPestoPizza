@@ -2,7 +2,7 @@
 using System.Collections;
 
 public class SunMaker {
-	public float sunFrequency = 20f;
+	public float sunFrequency = 5f;
 	public float buffer = 5f;
 	public float speedOfLight = 10f;
 	public float rotationOfLight = 3f;

@@ -15,13 +15,12 @@ public class Harpoon : MonoBehaviour {
 	public float minWidthTetherLength = 3;
 	public float minTetherWidth = .05f;
 	public float maxTetherWidth = .2f;
-	public float waterHoseWidth = .4f;
-	public float radiationVacuumHoseWidth = .4f;
+	public float hoseWidth = .4f;
 	public bool recalling = false;
 	public bool gripping = true;
 	public bool taut = false;
-	public bool isHose = false;
-	public bool isVacuum = false;
+	public bool isWaterHose = false;
+	public bool isSolarHose = false;
 	public OrbWeb web = null;
 	public Circuit circuit;
 	public Powerbird powerbirdie = null;
@@ -38,6 +37,8 @@ public class Harpoon : MonoBehaviour {
 	private List<Bird> linkedBirds = new List<Bird> ();
 	private Vector3 tetherVector;
 	private int posis;
+	private float fullTetherLength;
+	private float fullTautLength;
 
 	void Awake () {
 		gm = GameObject.FindObjectOfType<GameManager> ();
@@ -48,6 +49,8 @@ public class Harpoon : MonoBehaviour {
 		lr = GetComponent<LineRenderer> ();
 		lr.sortingLayerName = GetComponentInChildren<SpriteRenderer>().sortingLayerName;
 		lr.material.color = harpooner.GetComponent<Bird> ().p.color;
+		fullTetherLength = maxTetherLength;
+		fullTautLength = tautLength;
 	}
 
 	void Update () {
@@ -131,8 +134,8 @@ public class Harpoon : MonoBehaviour {
 		} 
 
 		float tetherWidth;
-		if (isHose) {
-			tetherWidth = waterHoseWidth;
+		if (isWaterHose || isSolarHose) {
+			tetherWidth = hoseWidth;
 		} else {
 			tetherWidth = Mathf.Lerp (maxTetherWidth, minTetherWidth, (distance - minWidthTetherLength) / tautLength);
 		}
@@ -160,11 +163,15 @@ public class Harpoon : MonoBehaviour {
 		}
 		transform.position = harpooned.transform.position;
 		transform.parent = harpooned.transform;
+
+		if (harpoonRecipient.name == "WaterTank") {
+			ChangeTetherToHose (true, false);
+		} else if (harpoonRecipient.name == "EnergyTank") {
+			ChangeTetherToHose (false, true);
+		}
+
 		harpoonRecipient.SendMessageUpwards ("BeenHarpooned", this, SendMessageOptions.DontRequireReceiver);
 		harpoonRecipient.GetComponent<Harpoonable> ().SetSortingLayer ("Birds");
-		if (harpoonRecipient.name == "WaterTank") {
-			ChangeTetherToHose ();
-		}
 	}
 
 	public void ToggleRecalling () {
@@ -194,7 +201,7 @@ public class Harpoon : MonoBehaviour {
 			}
 		}
 
-		if (isHose) {
+		if (isWaterHose || isSolarHose) {
 			ChangeHoseToTether ();
 		}
 
@@ -269,6 +276,9 @@ public class Harpoon : MonoBehaviour {
 	}
 
 	void SetTautLength (float newLength) {
+		if (isWaterHose || isSolarHose) {
+			return;
+		}
 		//stretchiness should be some % set elsewhere of the tautlength
 		tautLength = Mathf.Min (tautLength, newLength);
 		maxTetherLength = Mathf.Min (maxTetherLength, tautLength + tautLength * stretchiness);
@@ -285,7 +295,7 @@ public class Harpoon : MonoBehaviour {
 				rb.AddForce (springForce);
 			} else {
 				//harpooned.GetComponent<Harpoonable> ().RiBo ().AddForce (springForce);
-				if (isHose) {
+				if (isWaterHose || isSolarHose) {
 					harpooned.GetComponent<Harpoonable> ().GetComponentInParent<Rigidbody2D> ().AddForce (springForce);
 				} else {
 					harpooned.GetComponent<Harpoonable> ().GetComponent<Rigidbody2D> ().AddForce (springForce);
@@ -359,17 +369,35 @@ public class Harpoon : MonoBehaviour {
 		circuit.posis.Add (posi);
 	}
 
-	void ChangeTetherToHose () {
-		isHose = true;
-		Player p = harpooner.GetComponentInChildren<Player> ();
-		p.Equip (new Hose (p.w.hol));
-		lr.material.color = Color.blue;
+	void ChangeTetherToHose (bool waterHose, bool solarHose) {
+		if (waterHose) {
+			isWaterHose = true;
+			lr.material.color = Color.blue;
+			Player p = harpooner.GetComponentInChildren<Player> ();
+			p.Equip (new Hose (p.w.hol));
+		} else if (solarHose) {
+			Player p = harpooner.GetComponentInChildren<Player> ();
+			p.Equip (new Unarmed (p.w.hol));
+			SolarPanel sp = p.b.GetPanel ();
+			if (sp) {
+				sp.AdjustAbsorbing ();
+			}
+			isSolarHose = true;
+			lr.material.color = Color.grey;
+		}
+		maxTetherLength = fullTetherLength;
+		tautLength = fullTautLength;
 	}
 
 	void ChangeHoseToTether () {
-		isHose = false;
+		isWaterHose = false;
+		isSolarHose = false;
 		Player p = harpooner.GetComponentInChildren<Player> ();
 		p.Unequip ();
 		lr.material.color = harpooner.GetComponentInChildren<Bird> ().p.color;
+	}
+
+	public void SetTetherColor (Color c) {
+		lr.material.color = c;
 	}
 }
