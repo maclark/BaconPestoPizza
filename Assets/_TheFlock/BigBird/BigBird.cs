@@ -184,8 +184,6 @@ public class BigBird : MonoBehaviour {
 			if (bbm.energyTank.empty) {
 				bbm.SolarShieldDown ();
 			}
-		} else {
-			print ("ON FIREEEE");
 		}
 	}
 

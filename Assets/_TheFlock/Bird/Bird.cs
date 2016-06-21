@@ -113,14 +113,11 @@ public class Bird : MonoBehaviour {
 
 	void Start () {
 		if (!colorSet) {
-			color = sr.color;
+			color = Color.black;
 			colorSet = true;
 		}
 
-
-
 		DockOnBigBird ();
-		LayEgg ();
 
 		gm.AddAlliedTransform (transform);
 	}

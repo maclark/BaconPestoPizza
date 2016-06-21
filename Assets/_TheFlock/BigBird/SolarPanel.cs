@@ -119,6 +119,7 @@ public class SolarPanel : MonoBehaviour {
 		}
 		rb.AddTorque (Random.Range (-detachTorque, detachTorque));
 		sr.sortingLayerName = "Birds";
+		hool.enabled = true;
 	}
 
 	public void AttachToBird (Bird carrierBird) {
@@ -134,6 +135,7 @@ public class SolarPanel : MonoBehaviour {
 		rb.angularVelocity = 0f;
 		sr.sortingLayerName = "Projectiles";
 		loose = false;
+		hool.enabled = false;
 
 		rb.isKinematic = true;
 		hool.BreakLoose ();

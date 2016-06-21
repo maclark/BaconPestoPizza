@@ -50,8 +50,8 @@ public class Player : MonoBehaviour {
 
 		b = bird;
 		b.p = this;
-		//b.color = GetComponent<SpriteRenderer> ().color;
-		//b.body.GetComponent<SpriteRenderer>().color = b.color;
+		b.color = GetComponent<SpriteRenderer> ().color;
+		b.body.GetComponent<SpriteRenderer>().color = b.color;
 		b.Shield.SetColor (color);
 		b.ReloadIndicator.SetColor (color);
 		pooler.enabled = true;
@@ -74,12 +74,11 @@ public class Player : MonoBehaviour {
 		if (b.Shield != null) {
 			b.GetComponentInChildren<Shield> (true).DeactivateShield ();
 		}
+		b.color = Color.grey;
+		b.body.GetComponent<SpriteRenderer>().color = Color.black;
 		b.transform.rotation = bigBird.transform.rotation;
 		b.p = null;
 		b = null;
-
-		//b.color = Color.black;
-		//b.body.GetComponent<SpriteRenderer>().color = Color.black;
 	}
 
 	public void BoardBigBird () {
@@ -94,10 +93,6 @@ public class Player : MonoBehaviour {
 	}
 
 	public void Bubble (Vector3 initialVelocity) {
-		if (b.harp) {
-			b.harp.SetGripping (false);
-			b.harp.SetRecalling (true);
-		}
 		if (itemHeld) {
 			Destroy (itemHeld.gameObject);
 			itemHeld = null;

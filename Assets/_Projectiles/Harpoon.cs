@@ -385,8 +385,8 @@ public class Harpoon : MonoBehaviour {
 			isSolarHose = true;
 			lr.material.color = Color.grey;
 		}
-		maxTetherLength = fullTetherLength;
-		tautLength = fullTautLength;
+		maxTetherLength = fullTetherLength * 2f;
+		tautLength = fullTautLength * 2f;
 	}
 
 	void ChangeHoseToTether () {
