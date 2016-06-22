@@ -22,24 +22,35 @@ public class Eaglehead : Item {
 	}
 
 	void OnCollisionEnter2D (Collision2D coll) {
+		Bird birdie = coll.transform.GetComponent<Bird> ();
+		if (birdie) {
+			if (birdie.damaged) {
+				birdie.Heal ();
+			}
+			SummonThePowerbird (coll.transform);
+		}
+		CollisionEnter2D (coll);
+	}
+
+	/*void OldOnCollisionEnter2D (Collision2D coll) {
 		if (ready) {
 			Bird birdie = coll.transform.GetComponent<Bird> ();
 			if (birdie) {
 				if (birdie.harp) {
 					if (birdie.harp.GetHarpooned ()) {
 						if (birdie.harp.GetHarpooned ().transform != transform) {
-							SummonThePowerbird (coll.transform.GetComponent<Bird> ());
+							SummonThePowerbird (coll.transform);
 						}
 					} else {
-						SummonThePowerbird (coll.transform.GetComponent<Bird> ());
+						SummonThePowerbird (coll.transform);
 					}
 				} else {
-					SummonThePowerbird (coll.transform.GetComponent<Bird> ());
+					SummonThePowerbird (coll.transform);
 				}
 			}
 		}
 		CollisionEnter2D (coll);
-	}
+	}*/
 
 	void OnCollisionExit2D (Collision2D coll) {
 		CollisionExit2D (coll);
@@ -70,7 +81,7 @@ public class Eaglehead : Item {
 		}
 	}
 
-	void SummonThePowerbird (Bird poweredBird) {
+	/*void OldSummonThePowerbird (Bird poweredBird) {
 		GameObject pbObj = Instantiate (powerbirdPrefab, transform.position, Quaternion.identity) as GameObject;
 		Powerbird pb = pbObj.GetComponent<Powerbird> ();
 		Transform[] powerers = new Transform[hool.GetOtherHarps ().Count];
@@ -80,10 +91,19 @@ public class Eaglehead : Item {
 			i++;
 		}
 		pb.thePowerbird = poweredBird.transform;
-		pb.SetPowerers (powerers);
+		//pb.SetPowerers (powerers);
 
 		poweredBird.Powered (pb);
 		poweredBird.GetComponent<Rigidbody2D> ().velocity = GetComponent<Rigidbody2D> ().velocity;
+		Destroy (gameObject);
+	}*/
+
+	void SummonThePowerbird (Transform birdToPower) {
+		GameObject pbObj = Instantiate (powerbirdPrefab, transform.position, Quaternion.identity) as GameObject;
+		Powerbird pb = pbObj.GetComponent<Powerbird> ();
+		pb.thePowerbird = birdToPower;
+		pb.transform.parent = birdToPower.transform;
+		pb.transform.position = birdToPower.transform.position;
 		Destroy (gameObject);
 	}
 }

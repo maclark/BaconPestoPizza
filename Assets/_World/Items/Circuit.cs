@@ -12,6 +12,7 @@ public class Circuit {
 
 	public Circuit () {
 	}
+		
 
 	public void AttemptCircuit (Bird birdie) {
 		birds.Add (birdie);
@@ -40,7 +41,7 @@ public class Circuit {
 	void CompleteCircuit () {
 		foreach (Bird b in birds) {
 			b.circuit = this;
-			b.harp.circuit = this;
+			//b.harp.circuit = this;
 			if (b.hasBattery) {
 				b.harp.InvokeRepeating ("SendPositron", 0f, 1 / amps);
 			}
@@ -52,7 +53,7 @@ public class Circuit {
 	public void BreakCircuit () {
 		foreach (Bird b in birds) {
 			b.circuit = null;
-			b.harp.circuit = null;
+			//b.harp.circuit = null;
 			b.harp.CancelInvoke ();
 		}
 

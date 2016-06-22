@@ -21,8 +21,10 @@ public class Harpoon : MonoBehaviour {
 	public bool taut = false;
 	public bool isWaterHose = false;
 	public bool isSolarHose = false;
+	public bool electrocuting = false;
 	public OrbWeb web = null;
-	public Circuit circuit;
+	//public List<Positron> posis = new List<Positron> ();
+	//public Circuit circuit;
 	public Powerbird powerbirdie = null;
 	public GameObject webPrefab;
 	public GameObject orbWebPrefab;
@@ -46,15 +48,27 @@ public class Harpoon : MonoBehaviour {
 	}
 
 	void Start () {
+		gameObject.name = "Harpoon";
 		lr = GetComponent<LineRenderer> ();
 		lr.sortingLayerName = GetComponentInChildren<SpriteRenderer>().sortingLayerName;
-		lr.material.color = harpooner.GetComponent<Bird> ().p.color;
+		lr.material.color = harpooner.GetComponent<Bird> ().rider.color;
 		fullTetherLength = maxTetherLength;
 		fullTautLength = tautLength;
+		Bird harpB = harpooner.GetComponent<Bird> ();
+		if (harpB.hasBattery) {
+			Electrocute ();
+		}
 	}
 
 	void Update () {
 		DrawTether ();
+		if (electrocuting) {
+			if (!harpooner.GetComponent<Bird> ().hasBattery) {
+				Ground ();
+			}
+		} else if (harpooner.GetComponent<Bird> ().hasBattery) {
+			//Electrocute ();
+		}
 	}
 
 	void FixedUpdate () {
@@ -112,11 +126,12 @@ public class Harpoon : MonoBehaviour {
 
 	public void Die () {
 		SetGripping (false);
+		CancelInvoke ();
 		Destroy (gameObject);
 	}
 
 	void DrawTether () {
-		tetherPositions [0] = harpooner.GetComponent<Bird> ().p.transform.position;
+		tetherPositions [0] = harpooner.GetComponent<Bird> ().rider.transform.position;
 
 		if (harpooned != null) {
 			tetherPositions [1] = harpooned.transform.position;
@@ -153,7 +168,11 @@ public class Harpoon : MonoBehaviour {
 	}
 
 	public GameObject GetHarpooned () {
-		return harpooned;
+		if (!harpooned) {
+			return null;
+		} else {
+			return harpooned;
+		}
 	}
 
 	public void HarpoonObject (GameObject harpoonRecipient) {
@@ -198,9 +217,9 @@ public class Harpoon : MonoBehaviour {
 
 	public void SetGripping (bool setGripping) {
 		if (setGripping == false) {
-			if (circuit != null) {
-				circuit.BreakCircuit ();
-			}
+			//if (circuit != null) {
+			//	circuit.BreakCircuit ();
+			//}
 		}
 
 		if (isWaterHose || isSolarHose) {
@@ -263,7 +282,7 @@ public class Harpoon : MonoBehaviour {
 	}
 
 	void HandleRecalling () {
-		Vector3 recallDir = harpooner.GetComponent<Bird> ().p.transform.position - transform.position;
+		Vector3 recallDir = harpooner.GetComponent<Bird> ().rider.transform.position - transform.position;
 		SetTautLength (recallDir.magnitude);
 		recallDir.Normalize ();
 
@@ -363,13 +382,31 @@ public class Harpoon : MonoBehaviour {
 	}
 
 	void SendPositron () {
-		Positron posi = gm.positronPooler.GetPooledObject ().GetComponent<Positron> ();
-		posi.gameObject.SetActive (true);
-		posi.circuit = circuit;
-		posi.circuitHolder = harpooner.GetComponent<Bird> ().p.transform;
-		posi.harpoonedTransform = harpooned.transform;
-		circuit.posis.Add (posi);
+		if (gm.positronContainer.GetComponentsInChildren<Transform> ().Length < 100) {
+			Positron posi = gm.positronPooler.GetPooledObject ().GetComponent<Positron> ();
+			posi.gameObject.SetActive (true);
+			posi.previousTarget = GetHarpooner ().GetComponent<Bird> ().rider.transform;
+			posi.transform.position = posi.previousTarget.position;
+			if (harpooned) {
+				posi.currentTarget = harpooned.transform;
+			} else {
+				posi.currentTarget = transform;
+			}
+			posi.distanceAway = Vector3.Distance (transform.position, posi.currentTarget.position);
+		}
+		//posis.Add (posi);
 	}
+
+	/*void DestroyPositrons () {
+		List<Positron> doomedPosis = new List<Positron> ();
+		foreach (Positron p in posis) {
+			doomedPosis.Add (p);
+		}
+
+		foreach (Positron p in doomedPosis) {
+			doomedPosis.Die ();
+		}
+	}*/
 
 	void ChangeTetherToHose (bool waterHose, bool solarHose) {
 		if (waterHose) {
@@ -396,10 +433,19 @@ public class Harpoon : MonoBehaviour {
 		isSolarHose = false;
 		Player p = harpooner.GetComponentInChildren<Player> ();
 		p.Unequip ();
-		lr.material.color = harpooner.GetComponentInChildren<Bird> ().p.color;
+		lr.material.color = harpooner.GetComponentInChildren<Bird> ().rider.color;
 	}
 
 	public void SetTetherColor (Color c) {
 		lr.material.color = c;
+	}
+
+	public void Electrocute () {
+		InvokeRepeating ("SendPositron", 0f, 1 / Positron.amps);
+	}
+
+	public void Ground () {
+		CancelInvoke ();
+		electrocuting = false;
 	}
 }

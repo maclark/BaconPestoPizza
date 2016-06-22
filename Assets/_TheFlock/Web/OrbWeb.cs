@@ -47,14 +47,14 @@ public class OrbWeb : MonoBehaviour {
 		for (int i = 0; i < webThrowers.Length; i++) {
 			webbers [i] = webThrowers [i];
 			Bird birdie = webbers [i].GetComponent<Bird> ();
-			birdie.p.HoldWebString (this);
+			birdie.rider.HoldWebString (this);
 			birdie.harp.web = this;
 
 			GameObject webString = new GameObject ("WebString");
 			webString.AddComponent<LineRenderer> ();
 			webString.transform.parent = transform;
 
-			Color c = webThrowers [i].GetComponent<Bird> ().p.color;
+			Color c = webThrowers [i].GetComponent<Bird> ().rider.color;
 
 			LineRenderer lr = webString.GetComponent<LineRenderer> ();
 			lr.material = stringMaterial;
@@ -71,7 +71,7 @@ public class OrbWeb : MonoBehaviour {
 
 		for (int i = 0; i < webbers.Length; i++) {
 			Bird birdie = webbers [i].GetComponent<Bird> ();
-			birdie.p.ReleaseWebString ();
+			birdie.rider.ReleaseWebString ();
 			birdie.harp.web = null;
 			birdie.harp.SetGripping (false);
 			birdie.harp.SetRecalling (true);

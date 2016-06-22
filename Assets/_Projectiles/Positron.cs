@@ -3,17 +3,21 @@ using System.Collections;
 
 public class Positron : Projectile {
 
+	public static float amps = 2f;
+	public static float targetingDelta = .25f;
+
 	public float launchTime;
 	public float intervalTime = 3f;
 
-	public Vector3 direction = Vector3.zero;
+	public Vector3 directionTowardTarget = Vector3.zero;
 	public float speed = 5f;
-	public float distance = 0f;
+	public float distanceAway = 0f;
 	public Transform circuitHolder;
-	public Transform harpoonedTransform;
+	public Transform currentTarget;
+	public Transform previousTarget;
 	public Vector3 previousStop;
 	public Vector3 nextStop;
-	public Circuit circuit;
+	//public Circuit circuit;
 
 	void Awake () {
 		base.OnAwake ();
@@ -23,47 +27,67 @@ public class Positron : Projectile {
 		launchTime = Time.time;
 		base.OnStart ();
 	}
-
-	void NewOldUpdate () {
-		transform.position = Vector3.Lerp (circuitHolder.position, harpoonedTransform.position, (Time.time - launchTime) / intervalTime);
-	}
-
+		
 	void Update () {
-		previousStop = circuitHolder.transform.position;
-		nextStop = harpoonedTransform.transform.position;
-		direction = nextStop - previousStop;
-		direction.Normalize ();
-		distance += speed * Time.deltaTime;
-		transform.position = previousStop + direction * distance;
+		if (currentTarget) {
+			directionTowardTarget = currentTarget.position - previousTarget.position;
+			distanceAway = Vector3.Distance (transform.position, currentTarget.position);
+			directionTowardTarget.Normalize ();
+			distanceAway -= speed * Time.deltaTime;
+			transform.position = currentTarget.position - directionTowardTarget * distanceAway;
+		} else {
+			Die ();
+		}
+
+		TargetProximityCheck ();
 	}
 
-	void OnTriggerEnter2D (Collider2D other) {
-		if (other.tag == "Bird") {
-			Bird b = other.GetComponent<Bird> ();
-			if (b.hasBattery && b.p.transform != circuitHolder.transform) {
-				Die ();	
-			} else if (b.transform == harpoonedTransform) {
-				FinishLength ();
-			}
-		}
+	void OnTriggerEnter2D (Collider2D other) {		
 		base.TriggerEnter2D (other);
 	}
 
-	public void FinishLength () {
-		circuitHolder = harpoonedTransform.GetComponent<Bird> ().p.transform;
-		harpoonedTransform = harpoonedTransform.GetComponent<Bird> ().harp.GetHarpooned ().transform;
-		distance = 0f;
-	}
-
 	public override void Die () {
-		distance = 0f;
-		circuitHolder = null;
-		harpoonedTransform = null;
-		circuit.posis.Remove (this);
+		previousTarget = null;
+		currentTarget = null;
 		gameObject.SetActive (false);
 	}
 
 	void OnBecameInvisible () {
-		Die ();//gameObject.SetActive (false);
+		Die ();
+	}
+
+	void TargetProximityCheck () {
+		if (currentTarget) {
+			if (Mathf.Abs (transform.position.x - currentTarget.position.x) < targetingDelta &&
+				Mathf.Abs (transform.position.y - currentTarget.position.y) < targetingDelta &&
+				Mathf.Abs (transform.position.z - currentTarget.position.z) < targetingDelta) {
+				FindNewTargetOrDie ();
+			}
+		} else {
+			Die ();
+		}
+	}
+
+	void FindNewTargetOrDie () {
+		Bird birdie = currentTarget.GetComponent<Bird> ();
+		if (birdie != null) {
+			Harpoon birdsHarp = birdie.harp;
+			if (birdsHarp != null) {
+				GameObject harpsHarpooned = birdsHarp.GetHarpooned ();
+				if (harpsHarpooned != null) {
+					previousTarget = birdie.transform;
+					currentTarget = harpsHarpooned.transform;
+					distanceAway = Vector3.Distance (transform.position, currentTarget.position);
+				} else {
+					previousTarget = birdie.transform;
+					currentTarget = birdsHarp.transform;
+					distanceAway = Vector3.Distance (transform.position, currentTarget.position);
+				}
+			} else {
+				Die ();
+			}
+		} else {
+			Die ();
+		}
 	}
 }

@@ -6,7 +6,7 @@ using System.Collections.Generic;
 public class Bird : MonoBehaviour {
 
 	public LayerMask releaseMask;
-	public Player p;
+	public Player rider;
 	public int health = 100;
 	public int maxHealth = 100;
 	public float forceMag = 60f;
@@ -67,10 +67,9 @@ public class Bird : MonoBehaviour {
 	public GameObject gasLightPrefab;
 	public GameObject eggPrefab;
 	public GameObject lovePrefab;
-	public Sprite powerbird;
 	public Sprite greyhound;
 	public OrbWeb webTrap;
-	public Powerbird power;
+	public Powerbird powerbird;
 	public Circuit circuit;
 	public List<Bird> linkedBirds = new List<Bird> ();
 	public List<Harpoon> otherHarps = new List<Harpoon> ();
@@ -121,9 +120,8 @@ public class Bird : MonoBehaviour {
 			color = Color.black;
 			colorSet = true;
 		}
-
+		greyhound = sr.sprite;
 		DockOnBigBird ();
-		gm.AddAlliedTransform (transform);
 	}
 
 	void Update () {
@@ -158,7 +156,7 @@ public class Bird : MonoBehaviour {
 	}
 
 	void FixedUpdate () {
-		if (!docked && !webbed && !powered) {
+		if (!docked && !webbed) {
 			HandleFlying ();
 		}
 
@@ -204,7 +202,6 @@ public class Bird : MonoBehaviour {
 			if (inHeat) {
 				pregnant = true;
 				MakeLove ();
-				inHeat = false;
 			}
 		}
 	}
@@ -317,7 +314,9 @@ public class Bird : MonoBehaviour {
 	/// </summary>
 	/// <param name="dam">Dam.</param> testing this
 	public void TakeDamage (int dam) {
-		if (damaged) {
+		if (powered) {
+			powerbird.TakeDamage ();
+		} else if (damaged) {
 			//#TODO explodeee
 			Die ();
 		} else {
@@ -359,8 +358,8 @@ public class Bird : MonoBehaviour {
 		if (panel) {
 			panel.DetachFromBird ();
 		}
-		if (p) {
-			p.Bubble (rb.velocity);
+		if (rider) {
+			rider.Bubble (rb.velocity);
 		}
 
 		if (follower) {
@@ -386,6 +385,10 @@ public class Bird : MonoBehaviour {
 	}
 			
 	public bool DockOnBigBird () {
+		if (powered) {
+			return false;
+		}
+
 		dock = bigBird.GetNearestOpenDock (transform.position);
 
 		if (!dock) {
@@ -430,8 +433,8 @@ public class Bird : MonoBehaviour {
 		dock.gameObject.layer = LayerMask.NameToLayer ("Stations");
 		docked = true;
 
-		if (p) {
-			p.DockOnBigBird (dock);
+		if (rider) {
+			rider.DockOnBigBird (dock);
 		}
 			
 		if (follower) {
@@ -493,7 +496,7 @@ public class Bird : MonoBehaviour {
 		Invoke ("EnableColliders", undockColliderDelay);
 		sr.sortingLayerName = "Birds";
 		sr.sortingOrder = 0;
-		p.Undock ();
+		rider.Undock ();
 		EmptyNest ();
 		if (follower) {
 			follower.transform.position = transform.position + followerOffset;
@@ -568,10 +571,10 @@ public class Bird : MonoBehaviour {
 		invincible = true;
 		Color startColor = sr.color;
 		sr.color = new Color (startColor.r, startColor.g, startColor.b, .1f);
-		p.GetComponent<SpriteRenderer> ().color = sr.color;
+		rider.GetComponent<SpriteRenderer> ().color = sr.color;
 		yield return new WaitForSeconds (duration);
-		if (p) { 
-			p.GetComponent<SpriteRenderer> ().color = Color.white;
+		if (rider) { 
+			rider.GetComponent<SpriteRenderer> ().color = Color.white;
 		} 
 
 		sr.color = startColor;
@@ -695,11 +698,11 @@ public class Bird : MonoBehaviour {
 			harp.transform.parent = null;
 
 			////Offset harp so it doesn't immediately collide with ship
-			releaseHarpPosition = p.transform.position + p.aim * harpHurlOffset;
+			releaseHarpPosition = rider.transform.position + rider.aim * harpHurlOffset;
 
 			//simple launch (not swinging or winding up)
 			harp.transform.position = releaseHarpPosition;
-			harp.Fire (harp.transform, p.aim);
+			harp.Fire (harp.transform, rider.aim);
 			harp.GetComponent<BoxCollider2D> ().enabled = true;
 
 			hurledHarp = true;
@@ -715,7 +718,7 @@ public class Bird : MonoBehaviour {
 			harp.transform.parent = null;
 
 			////Offset harp so it doesn't immediately collide with ship
-			releaseHarpPosition = p.transform.position + p.aim * harpHurlOffset;
+			releaseHarpPosition = rider.transform.position + rider.aim * harpHurlOffset;
 
 			//simple launch (not swinging or winding up)
 			swingingHarp = true;
@@ -734,12 +737,12 @@ public class Bird : MonoBehaviour {
 	}
 
 	public void LoadHarp () {
-		p.w.firing = false;
-		p.CancelInvoke ();
-		p.GetComponent<PlayerInput> ().CancelInvoke ();
+		rider.w.firing = false;
+		rider.CancelInvoke ();
+		rider.GetComponent<PlayerInput> ().CancelInvoke ();
 
 
-		GameObject harpoon = Instantiate (harpoonPrefab, p.transform.position + p.aim, transform.rotation) as GameObject;
+		GameObject harpoon = Instantiate (harpoonPrefab, rider.transform.position + rider.aim, transform.rotation) as GameObject;
 		harpoon.name = "Harpoon";
 		harp = harpoon.GetComponent<Harpoon> ();
 		harp.SetHarpooner (gameObject);
@@ -760,13 +763,13 @@ public class Bird : MonoBehaviour {
 	}
 
 	public void AimHarp () {
-		harp.transform.position = p.transform.position + p.aim;
+		harp.transform.position = rider.transform.position + rider.aim;
 	}
 
 	public void SwingHarp () {
 		if (!swingStarted) {
 			swingStarted = true;
-			releaseTheta = Mathf.Atan2 (releaseHarpPosition.y - p.transform.position.y, releaseHarpPosition.x - p.transform.position.x);
+			releaseTheta = Mathf.Atan2 (releaseHarpPosition.y - rider.transform.position.y, releaseHarpPosition.x - rider.transform.position.x);
 			theta = releaseTheta + 2 * Mathf.PI;
 			float aimTheta = releaseTheta + aimThetaModifier;
 			hurlAim.x = Mathf.Cos (aimTheta);
@@ -779,8 +782,8 @@ public class Bird : MonoBehaviour {
 			harp.GetComponent<BoxCollider2D> ().enabled = true;
 		} else {
 			theta = theta - swingSpeed * Time.deltaTime;
-			float x = p.transform.position.x + Mathf.Cos (theta) * harpHurlOffset;
-			float y = p.transform.position.y + Mathf.Sin (theta) * harpHurlOffset;
+			float x = rider.transform.position.x + Mathf.Cos (theta) * harpHurlOffset;
+			float y = rider.transform.position.y + Mathf.Sin (theta) * harpHurlOffset;
 			harp.transform.position = new Vector3 (x, y, 0);
 		}
 	}
@@ -789,14 +792,14 @@ public class Bird : MonoBehaviour {
 		if (!windUpStarted) {
 			windUpStarted = true;
 			windUpStartTime = Time.time;
-			hurlAim = p.aim;
+			hurlAim = rider.aim;
 		} else if ((Time.time - windUpStartTime) > windUpTime) {
 			harp.Fire (harp.transform, hurlAim);
 			windingUp = false;
 			windUpStarted = false;
 			Invoke ("EnableHarpCollider", .5f);
 		} else {
-			harp.transform.position = p.transform.position + Vector3.Lerp (hurlAim, -hurlAim * 2, (Time.time - windUpStartTime) / windUpTime);
+			harp.transform.position = rider.transform.position + Vector3.Lerp (hurlAim, -hurlAim * 2, (Time.time - windUpStartTime) / windUpTime);
 		}
 	}
 
@@ -822,6 +825,7 @@ public class Bird : MonoBehaviour {
 	}
 
 	public void LayEgg () {
+		inHeat = false;
 		GameObject eggObj = Instantiate (eggPrefab, transform.position, Quaternion.identity) as GameObject;
 		Egg freshEgg = eggObj.GetComponent<Egg> ();
 		freshEgg.gameObject.layer = LayerMask.NameToLayer ("Flyers");
@@ -874,8 +878,8 @@ public class Bird : MonoBehaviour {
 		rb.Sleep ();
 		//DisableColliders ();
 
-		if (p) {
-			p.Webbed (ow);
+		if (rider) {
+			rider.Webbed (ow);
 		}
 	}
 
@@ -884,13 +888,13 @@ public class Bird : MonoBehaviour {
 		webTrap = null;
 		transform.parent = null;
 		//EnableColliders ();
-		if (p) {
-			p.Unwebbed ();
+		if (rider) {
+			rider.Unwebbed ();
 		}
 	}
 
 	public void Powered (Powerbird pb) {
-		power = pb;
+		powerbird = pb;
 		powered = true;
 		if (rolling) {
 			transform.rotation = Quaternion.identity;
@@ -903,27 +907,35 @@ public class Bird : MonoBehaviour {
 			Destroy (harp.gameObject);
 			hurledHarp = false;
 		}
-		GetComponent<Rigidbody2D> ().mass = .5f;
-		GetComponent<Rigidbody2D> ().drag = 0f;
+
+		if (follower) {
+			follower.transform.position = transform.position;
+		}
+
+		GetComponent<Rigidbody2D> ().mass = powerbird.mass;
+		GetComponent<Rigidbody2D> ().drag = powerbird.drag;
 		DetachOtherHarps ();
-		transform.parent = pb.transform;
 		rb.Sleep ();
 
-		if (p) {
-			p.Powered (pb);
+		if (rider) {
+			rider.Powered (pb);
 		}
 		
 	}
 
 	public void Unpowered () { 
+		if (follower) {
+			follower.transform.position = transform.position + followerOffset;
+		}
+
 		powered = false;
-		power = null;
+		powerbird = null;
 		transform.parent = null;
 		GetComponent<Rigidbody2D> ().mass = 1f;
 		GetComponent<Rigidbody2D> ().drag = 5f;
 		//EnableColliders ();
-		if (p) {
-			p.Unpowered ();
+		if (rider) {
+			rider.Unpowered ();
 		}
 	}
 
@@ -935,13 +947,13 @@ public class Bird : MonoBehaviour {
 	}
 
 	public void BeenHarpooned (Harpoon h) {
-		Bird birdie = h.GetHarpooner ().GetComponent<Bird> ();
+		//Bird birdie = h.GetHarpooner ().GetComponent<Bird> ();
 
-		linkedBirds.Clear ();
+		//linkedBirds.Clear ();
 		//AttemptWeb (birdie);
 
-		Circuit circ = new Circuit ();
-		circ.AttemptCircuit (birdie);
+		//Circuit circ = new Circuit ();
+		//circ.AttemptCircuit (birdie);
 	}
 
 
@@ -981,7 +993,7 @@ public class Bird : MonoBehaviour {
 
 	public void TurnBlack () {
 		print ("turning black");
-		if (!p) {
+		if (!rider) {
 			print ("no p");
 			body.GetComponent<SpriteRenderer> ().color = Color.black;
 			color = Color.black;
@@ -1003,5 +1015,16 @@ public class Bird : MonoBehaviour {
 
 	public bool GetDead () {
 		return dead;
+	}
+
+	public void Heal () {
+		if (rider) {
+			sr.color = rider.color;
+		} else {
+			sr.color = Color.black;
+		}
+		damaged = false;
+		health = maxHealth;
+		CancelInvoke ("Flash");
 	}
 }

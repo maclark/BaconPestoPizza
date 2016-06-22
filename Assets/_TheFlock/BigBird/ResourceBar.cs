@@ -3,7 +3,7 @@ using System.Collections;
 
 public class ResourceBar : MonoBehaviour {
 
-	public Transform holder;
+	public Transform scaler;
 	public float capacity = 1;
 	public float current = 1;
 	public bool full = false;
@@ -15,7 +15,7 @@ public class ResourceBar : MonoBehaviour {
 			current = capacity;
 			full = true;
 		}
-		holder.localScale = new Vector3 (current / capacity, 1, 1);
+		scaler.localScale = new Vector3 (current / capacity, 1, 1);
 	}
 
 	public void IncreaseResource (float increase) {
@@ -30,7 +30,7 @@ public class ResourceBar : MonoBehaviour {
 			current = capacity;
 			full = true;
 		}
-		holder.localScale = new Vector3 (current / capacity, 1, 1);
+		scaler.localScale = new Vector3 (current / capacity, 1, 1);
 	}
 
 	public void DecreaseResource (float decrease) {
@@ -45,6 +45,6 @@ public class ResourceBar : MonoBehaviour {
 			empty = true;
 		}
 
-		holder.localScale = new Vector3 (current / capacity, 1, 1);
+		scaler.localScale = new Vector3 (current / capacity, 1, 1);
 	}
 }

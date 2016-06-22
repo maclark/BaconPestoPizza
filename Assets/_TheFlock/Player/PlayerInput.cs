@@ -535,15 +535,24 @@ public class PlayerInput : MonoBehaviour {
 	}
 
 	void HandlePowerbirdInput () {
-		Vector2 rightStick = new Vector2( Input.GetAxis(RSHorizontal), Input.GetAxis(RSVertical));
+		p.b.direction = new Vector2 (Input.GetAxis (LSHorizontal), Input.GetAxis (LSVertical));
+
+		Vector2 rightStick = new Vector2 (Input.GetAxis (RSHorizontal), Input.GetAxis (RSVertical));
 		if (rightStick != Vector2.zero) {
 			p.aim = rightStick;
-		}  
-		else if (p.aim == Vector3.zero) {
+		}  else if (p.aim == Vector3.zero) {
 			if (p.b.direction != Vector2.zero) {
 				p.aim = new Vector3 (p.b.direction.x, p.b.direction.y, 0);
 			}
 		}
+		p.aim.Normalize ();
+
+		if (Input.GetButtonDown (RB)) {
+			if (p.b.canBoost) {
+				StartCoroutine( p.b.Boost ());
+			}
+		}
+
 		HandleWeaponFiring ();
 	}
 

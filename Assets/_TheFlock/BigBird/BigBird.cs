@@ -55,6 +55,10 @@ public class BigBird : MonoBehaviour {
 		color = sr.color;
 	}
 
+	void Start () {
+		gm.AddAlliedTransform (transform);
+	}
+
 	void Update () {
 		if (landing) {
 			LandingApproach ();
@@ -172,7 +176,7 @@ public class BigBird : MonoBehaviour {
 		float closestDockDistance = 10000f;
 		Dock closestDock = null;
 		foreach (Dock k in dockTransforms) {
-			if (k.bird && k.bird.p == null) {
+			if (k.bird && k.bird.rider == null) {
 				float d = Vector3.Distance (k.transform.position, playerPos);
 				if (d < closestDockDistance) {
 					closestDock = k;
@@ -187,7 +191,7 @@ public class BigBird : MonoBehaviour {
 		dockTransforms = GetComponentsInChildren<Dock> ();
 		foreach (Dock k in dockTransforms) {
 			if (k.bird) {
-				if (!k.bird.p) {
+				if (!k.bird.rider) {
 					return k.bird;
 				}
 			}
@@ -309,6 +313,8 @@ public class BigBird : MonoBehaviour {
 	}
 
 	public void LiftOff () {
+		gm.AddAlliedTransform (transform);
+		Camera.main.GetComponent <CameraFollow> ().followBigBird = true;
 		landing = false;
 		rb.isKinematic = false;
 		TurnEngineOn ();
@@ -331,12 +337,14 @@ public class BigBird : MonoBehaviour {
 		translationDirection.Normalize ();
 		transform.Translate (translationDirection * landingSpeed * Time.deltaTime);
 		transform.rotation = Quaternion.RotateTowards (transform.rotation, nearestPad.transform.rotation, landingRotate);
-		if (transform.position.x - nearestPad.transform.position.x < landingDelta &&
-			transform.position.y - nearestPad.transform.position.y < landingDelta &&
-			transform.position.z - nearestPad.transform.position.z < landingDelta) 
+		if (Mathf.Abs (transform.position.x - nearestPad.transform.position.x) < landingDelta &&
+			Mathf.Abs (transform.position.y - nearestPad.transform.position.y) < landingDelta &&
+			Mathf.Abs (transform.position.z - nearestPad.transform.position.z) < landingDelta) 
 		{
 			landing = false;
 			landed = true;
+			gm.RemoveAlliedTransform (transform);
+			Camera.main.GetComponent <CameraFollow> ().followBigBird = false;
 			transform.parent = nearestPad.transform;
 			transform.rotation = nearestPad.transform.rotation;
 			rb.velocity = Vector3.zero;

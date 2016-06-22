@@ -114,6 +114,7 @@ public class Item : MonoBehaviour {
 			} else if (pState == PlayerInput.State.IN_HOLD || pState == PlayerInput.State.ON_PLATFORM) {
 				GetComponent<Collider2D> ().isTrigger = true;
 				GetComponent<Rigidbody2D> ().isKinematic = true;
+				sortOrder = 1;
 				transform.parent = gm.bigBird.hold.transform;
 				droppedItem = true;
 			}

@@ -5,6 +5,7 @@ public class Player : MonoBehaviour {
 
 	public bool isPlaying = false;
 	public bool isCaptain = false;
+	public bool female = false;
 	public float reticleOffset = 2f;
 	public Color color;
 	public Vector3 ridingOffset;
@@ -45,11 +46,17 @@ public class Player : MonoBehaviour {
 
 	public void StartPlayer () {
 		isPlaying = true;
+		gm.AddAlliedTransform (transform);
 		if (gm.captain == null) {
 			isCaptain = true;
 			gm.captain = this;
 		}
-		sprites = Random.Range(0, 1f) > .5 ? finnSprites : fionaSprites;
+		female = Random.Range(0, 1f) > .5 ? true : false;
+		if (female) {
+			sprites = fionaSprites;
+		} else {
+			sprites = finnSprites;
+		}
 		sr.enabled = true;
 		color = gm.playerColors [pi.playerNum - 1];
 		pooler = GetComponent<ObjectPooler> ();
@@ -88,7 +95,7 @@ public class Player : MonoBehaviour {
 		sr.enabled = true;
 
 		b = bird;
-		b.p = this;
+		b.rider = this;
 		b.color = color;
 		b.body.GetComponent<SpriteRenderer>().color = b.color;
 		b.Shield.SetColor (color);
@@ -112,7 +119,6 @@ public class Player : MonoBehaviour {
 		sr.color = Color.white;
 		sr.sprite = sprites [0];
 		sr.sortingLayerName = newParent.GetComponent<SpriteRenderer> ().sortingLayerName;
-		sr.sortingOrder = 1;
 
 		transform.parent = newParent;
 		transform.position = pi.station.position;
@@ -129,7 +135,7 @@ public class Player : MonoBehaviour {
 			}
 		}
 		b.transform.rotation = bigBird.transform.rotation;
-		b.p = null;
+		b.rider = null;
 		b = null;
 	}
 
@@ -301,7 +307,7 @@ public class Player : MonoBehaviour {
 	public void Webbed (OrbWeb ow) {
 		if (ow.webType == OrbWeb.WebType.POWERBIRD) {
 			storedWeapon = w;
-			b.GetComponent<SpriteRenderer> ().sprite = b.powerbird;
+			//b.GetComponent<SpriteRenderer> ().sprite = b.thunderbird;
 			w = new PowerWeapon (hol);
 		}
 		b.InvokeRepeating ("RandomColor", Eaglehead.colorSwapSpeed, Eaglehead.colorSwapSpeed);
@@ -340,9 +346,11 @@ public class Player : MonoBehaviour {
 
 	public void Powered (Powerbird pb) {
 		storedWeapon = w;
-		b.GetComponentInChildren<SpriteRenderer> ().sprite = b.powerbird;
 		w = new PowerWeapon (hol);
-		pb.InvokeRepeating ("FlashColors", Eaglehead.colorSwapSpeed, Eaglehead.colorSwapSpeed);
+		sr.sprite = sprites [0];
+		transform.position = transform.parent.position;
+		b.GetComponentInChildren<SpriteRenderer> ().sprite = pb.thunderbird;
+		pb.InvokeRepeating ("FlashColors", Eaglehead.readySwapSpeed, Eaglehead.readySwapSpeed);
 		pi.state = PlayerInput.State.POWERBIRD;
 		pi.CancelInvoke ();
 	}
@@ -351,6 +359,8 @@ public class Player : MonoBehaviour {
 		pi.CancelInvoke ();
 		w = storedWeapon;
 		storedWeapon = null;
+		sr.sprite = sprites [1];
+		transform.position = transform.parent.position + ridingOffset;
 		b.GetComponentInChildren<SpriteRenderer> ().sprite = b.greyhound;
 		b.GetComponentInChildren<SpriteRenderer> ().color = b.color;
 		//pb.CancelInvoke ();
@@ -382,5 +392,17 @@ public class Player : MonoBehaviour {
 		w = storedWeapon;
 		storedWeapon = null;
 		pi.CancelInvoke ();
+	}
+
+	void OnBecameInvisible () {
+		//start ticker, then ghost
+		Ghost ();
+	}
+
+	void OnBecameVisible () {
+		//if ghost then Unghost, if ticking, stop ticker
+	}
+
+	void Ghost () {
 	}
 }

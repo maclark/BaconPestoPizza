@@ -58,7 +58,6 @@ public class GameManager : MonoBehaviour {
 		bbm.money = 500;
 		tetrisGod = GameObject.FindObjectOfType<Tetris> ();
 		sunGod = new SunMaker ();
-		AddAlliedTransform (bigBird.transform);
 		MakeInvisibleTarget ();
 		MakeContainers ();
 		SetPlayerColors ();
@@ -148,8 +147,8 @@ public class GameManager : MonoBehaviour {
 
 	public Vector3 ClampToScreen (Vector3 position) {
 		
-		Vector3 bottomLeft = Camera.main.ScreenToWorldPoint(Vector3.zero);
-		Vector3 topRight = Camera.main.ScreenToWorldPoint(new Vector3(
+		Vector3 bottomLeft = Camera.main.ScreenToWorldPoint (Vector3.zero);
+		Vector3 topRight = Camera.main.ScreenToWorldPoint (new Vector3(
 			Camera.main.pixelWidth, Camera.main.pixelHeight));
 
 		Rect cameraRect = new Rect (
