@@ -7,12 +7,15 @@ public class Hatchling : Item {
 	public float flyTime = 0f;
 	public float flyTimeRequired = 20f;
 	public float assistsNeeded = 1;
+	public float goodbyeTime = 2f;
 	public Vector3 pupOffset;
 	public GameObject birdPrefab;
+	public Bird mom;
 
 	private int assists = 0;
 	private bool isKiller = false;
 	private bool isFlyer = false;
+	private bool dead = false;
 
 	void Awake () {
 		base.OnAwake ();
@@ -22,15 +25,16 @@ public class Hatchling : Item {
 	}
 	
 	void Update () {
-		if (flying) {
+		if (!isFlyer && flying) {
 			flyTime += Time.deltaTime;
 			if (flyTime > flyTimeRequired) {
 				isFlyer = true;
-				if (isKiller) {
-					Evolve ();
-				}
 			}
 		}
+	}
+
+	public bool CheckEvolutionRequirements () {
+		return (isKiller && isFlyer);
 	}
 
 	public void OnTriggerEnter2D (Collider2D other) {
@@ -38,7 +42,6 @@ public class Hatchling : Item {
 			print ("hatch touching: " + other.transform.name);
 			other.transform.parent.GetComponentInChildren<Player> ().itemTouching = transform;
 		} else */ if (other.tag == "EnemyBullet" || other.tag == "Enemy") {
-			transform.parent.GetComponent<Bird> ().pup = null;
 			Die ();
 		}
 	}
@@ -63,40 +66,20 @@ public class Hatchling : Item {
 		base.CollisionExit2D (coll);
 	}
 
-	void Evolve () {
+	public void Evolve () {
 		GameObject obj = Instantiate (birdPrefab, transform.position, Quaternion.identity) as GameObject;
-		if (transform.parent) {
-			obj.transform.parent = transform.parent;
-		}
-		obj.GetComponentInChildren<SpriteRenderer> ().color = sr.color;
-		obj.GetComponent<Bird> ().color = sr.color;
+		obj.GetComponentInChildren<SpriteRenderer> ().color = mom.color;
+		obj.GetComponent<Bird> ().color = mom.color;
 		obj.GetComponent<Bird> ().colorSet = true;
-		Destroy (gameObject);
+		Die ();
 	}
-
-	public void Die () {
-		Destroy (gameObject);
-	}
-
+		
 	public void IncrementAssists () {
 		print ("pup got an assist");
 		assists++;
 		if (assists > assistsNeeded) {
 			isKiller = true;
-			if (isFlyer) {
-				Evolve ();
-			}
 		}
-	}
-
-	public void UndockFromBigBird (Bird b) {
-		gameObject.layer = LayerMask.NameToLayer ("Flyers");
-		GetComponent<Rigidbody2D> ().isKinematic = true;
-		GetComponent<Collider2D> ().isTrigger = true;
-		transform.rotation = Quaternion.identity;
-		transform.position = b.transform.position + pupOffset;
-		transform.parent = b.transform;
-		flying = true;
 	}
 
 	public override void Drop (Player p, string sortLayerName, int sortOrder, bool droppedItem=false, bool canDrop=true) {
@@ -139,4 +122,30 @@ public class Hatchling : Item {
 	public Color GetColor () {
 		return sr.color;
 	}
+
+	public void Die () {
+		if (dead) {
+			return;
+		}
+		dead = true;
+
+		if (mom.follower == transform) {
+			mom.follower = null;
+		}
+
+		if (!mom.docked) {
+			transform.parent = null;
+			GetComponent<Rigidbody2D> ().isKinematic = false;
+			GetComponent<Rigidbody2D> ().velocity = mom.GetComponent<Rigidbody2D> ().velocity;
+			GetComponent<Rigidbody2D> ().AddTorque (Random.Range (-mom.deathTorque, mom.deathTorque));
+			sr.color = new Color (1f, 0, 0, .5f);
+			sr.sortingLayerName = "Buildings";
+			CancelInvoke ();
+			gameObject.layer = LayerMask.NameToLayer ("Dead");
+			this.enabled = false;
+		} else {
+			Destroy (gameObject);
+		}
+	}
+
 }

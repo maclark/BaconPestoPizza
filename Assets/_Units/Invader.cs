@@ -47,4 +47,9 @@ public class Invader : Flyer {
 		Vector2 aim = target.position - transform.position;
 		bullet.Fire (transform.position, aim + skewVector);	
 	}
+
+	public override void Die ()
+	{
+		base.Die ();
+	}
 }

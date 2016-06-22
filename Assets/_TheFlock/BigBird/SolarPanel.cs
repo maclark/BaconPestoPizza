@@ -2,36 +2,29 @@
 using System.Collections;
 
 public class SolarPanel : MonoBehaviour {
-	//public float absorptionRate = 1000f;
-	public float detachTorque = 10f;
 	public Vector3 carryOffset;
 	public Bird b;
 
 	private GameManager gm;
 	private SpriteRenderer sr;
 	private Rigidbody2D rb;
-	private BoxCollider2D bc;
 	private Harpoonable hool;
-	private Joint2D jo;
 	private Sun localSun;
 	private Quaternion initialLocalRot;
 	private float xOffset;
 	private float yOffset;
-	private float breakForce;
 	private bool loose;
+	private bool affixedToBigBird = true;
 	private bool absorbing;
 
 	void Awake () {
 		gm = GameObject.FindObjectOfType<GameManager> ();
 		sr = GetComponent<SpriteRenderer> ();
 		rb = GetComponent<Rigidbody2D> ();
-		bc = GetComponent<BoxCollider2D> ();
 		hool = GetComponent<Harpoonable> ();
-		jo = GetComponent<Joint2D> ();
 		xOffset = transform.localPosition.x;
 		yOffset = transform.localPosition.y;
 		initialLocalRot = transform.localRotation;
-		breakForce = jo.breakForce;
 	}
 
 	void Update () {
@@ -41,9 +34,12 @@ public class SolarPanel : MonoBehaviour {
 	}
 
 	void OnTriggerEnter2D (Collider2D other) {
-		if (loose) {
-			if (other.tag == "Bird") {
-				Bird birdie = other.GetComponent<Bird> ();
+		if (other.tag == "Bird") {
+			Bird birdie = other.GetComponent<Bird> ();
+			if (affixedToBigBird && !birdie.GetPanel () && !birdie.follower) {
+				DetachFromBigBird ();
+				AttachToBird (birdie);
+			} else if (loose) {
 				AttachToBird (birdie);
 			}
 		}
@@ -100,26 +96,13 @@ public class SolarPanel : MonoBehaviour {
 			gm.bbm.absorbing = false;
 		}
 	}
-		
-	public void BeenHarpooned (Harpoon h) {
-		
-	}
-
-	void OnJointBreak2D (Joint2D brokenJoint) {
-		DetachFromBigBird ();
-	}
 
 	public void DetachFromBigBird () {
 		transform.parent = null;
-		rb.isKinematic = false;
-		bc.enabled = true;
-		loose = true;
 		if (localSun) {
 			LeftSolarSource (localSun);
 		}
-		rb.AddTorque (Random.Range (-detachTorque, detachTorque));
-		sr.sortingLayerName = "Birds";
-		hool.enabled = true;
+		affixedToBigBird = false;
 	}
 
 	public void AttachToBird (Bird carrierBird) {
@@ -168,11 +151,6 @@ public class SolarPanel : MonoBehaviour {
 		transform.parent = gm.bigBird.transform;
 		sr.sortingLayerName = "BigBird";
 		sr.sortingOrder = 1;
-
-		gameObject.AddComponent<HingeJoint2D> ();
-		jo = GetComponent<HingeJoint2D> ();
-		jo.breakForce = breakForce;
-		jo.connectedBody = gm.bigBird.GetComponent<Rigidbody2D> ();
 	}
 
 	void MoveToBigBirdShoulder () {
@@ -181,5 +159,6 @@ public class SolarPanel : MonoBehaviour {
 		transform.position = gm.bigBird.transform.position + rightOffset + upOffset;
 		transform.rotation = gm.bigBird.transform.rotation;
 		transform.localRotation = initialLocalRot;
+		affixedToBigBird = true;
 	}
 }

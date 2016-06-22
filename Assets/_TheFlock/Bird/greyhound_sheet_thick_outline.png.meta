@@ -1,0 +1,255 @@
+fileFormatVersion: 2
+guid: f949f56d7b431084498a3820004ff57d
+timeCreated: 1466524486
+licenseType: Free
+TextureImporter:
+  fileIDToRecycleName:
+    21300000: greyhound_sheet_thick_outline_0
+    21300002: greyhound_sheet_thick_outline_1
+    21300004: greyhound_sheet_thick_outline_2
+    21300006: greyhound_sheet_thick_outline_3
+    21300008: greyhound_sheet_thick_outline_4
+    21300010: greyhound_sheet_thick_outline_5
+    21300012: greyhound_sheet_thick_outline_6
+    21300014: greyhound_sheet_thick_outline_7
+    21300016: greyhound_sheet_thick_outline_8
+    21300018: greyhound_sheet_thick_outline_9
+  serializedVersion: 2
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 1
+    linearTexture: 0
+    correctGamma: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+  isReadable: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 0
+  cubemapConvolution: 0
+  cubemapConvolutionSteps: 7
+  cubemapConvolutionExponent: 1.5
+  seamlessCubemap: 0
+  textureFormat: -3
+  maxTextureSize: 2048
+  textureSettings:
+    filterMode: -1
+    aniso: 16
+    mipBias: -1
+    wrapMode: 1
+  nPOTScale: 0
+  lightmap: 0
+  rGBM: 0
+  compressionQuality: 50
+  allowsAlphaSplitting: 0
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spritePixelsToUnits: 200
+  alphaIsTransparency: 1
+  textureType: 8
+  buildTargetSettings: []
+  spriteSheet:
+    sprites:
+    - name: greyhound_sheet_thick_outline_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 187
+        width: 256
+        height: 119
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: -93, y: 59.5}
+        - {x: -128, y: 28.5}
+        - {x: -128, y: -59.5}
+        - {x: 48, y: -59.5}
+        - {x: 128, y: -19.5}
+        - {x: 128, y: 59.5}
+    - name: greyhound_sheet_thick_outline_1
+      rect:
+        serializedVersion: 2
+        x: 302
+        y: 179
+        width: 264
+        height: 127
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: -58, y: 63.5}
+        - {x: -130, y: 19.5}
+        - {x: -132, y: 17.5}
+        - {x: -132, y: -33.5}
+        - {x: -95, y: -63.5}
+        - {x: 37, y: -63.5}
+        - {x: 132, y: 22.5}
+        - {x: 132, y: 63.5}
+    - name: greyhound_sheet_thick_outline_2
+      rect:
+        serializedVersion: 2
+        x: 627
+        y: 181
+        width: 264
+        height: 125
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: 117, y: 62.5}
+        - {x: -58, y: 62.5}
+        - {x: -130, y: 20.5}
+        - {x: -132, y: 14.5}
+        - {x: -132, y: -9.5}
+        - {x: -116, y: -28.5}
+        - {x: -70, y: -62.5}
+        - {x: 46, y: -62.5}
+        - {x: 132, y: 29.5}
+        - {x: 132, y: 55.5}
+        - {x: 130, y: 61.5}
+    - name: greyhound_sheet_thick_outline_3
+      rect:
+        serializedVersion: 2
+        x: 935
+        y: 183
+        width: 264
+        height: 123
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: -82, y: 61.5}
+        - {x: -132, y: 24.5}
+        - {x: -132, y: -40.5}
+        - {x: -101, y: -61.5}
+        - {x: 55, y: -61.5}
+        - {x: 132, y: 13.5}
+        - {x: 132, y: 59.5}
+        - {x: 131, y: 61.5}
+    - name: greyhound_sheet_thick_outline_4
+      rect:
+        serializedVersion: 2
+        x: 1230
+        y: 184
+        width: 258
+        height: 122
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: -42, y: 61}
+        - {x: -129, y: 45}
+        - {x: -129, y: -19}
+        - {x: -87, y: -61}
+        - {x: 54, y: -61}
+        - {x: 129, y: 25}
+        - {x: 129, y: 61}
+    - name: greyhound_sheet_thick_outline_5
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 262
+        height: 124
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: -65, y: 62}
+        - {x: -131, y: 17}
+        - {x: -131, y: -9}
+        - {x: -110, y: -43}
+        - {x: -85, y: -62}
+        - {x: 38, y: -62}
+        - {x: 131, y: 21}
+        - {x: 131, y: 62}
+    - name: greyhound_sheet_thick_outline_6
+      rect:
+        serializedVersion: 2
+        x: 305
+        y: 0
+        width: 264
+        height: 122
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: -72, y: 61}
+        - {x: -132, y: 16}
+        - {x: -132, y: -36}
+        - {x: -96, y: -61}
+        - {x: 45, y: -61}
+        - {x: 132, y: 20}
+        - {x: 132, y: 61}
+    - name: greyhound_sheet_thick_outline_7
+      rect:
+        serializedVersion: 2
+        x: 614
+        y: 0
+        width: 264
+        height: 119
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: -83, y: 59.5}
+        - {x: -132, y: 13.5}
+        - {x: -132, y: -31.5}
+        - {x: -119, y: -42.5}
+        - {x: -95, y: -59.5}
+        - {x: 44, y: -59.5}
+        - {x: 132, y: 18.5}
+        - {x: 132, y: 59.5}
+    - name: greyhound_sheet_thick_outline_8
+      rect:
+        serializedVersion: 2
+        x: 937
+        y: 3
+        width: 264
+        height: 127
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: -58, y: 63.5}
+        - {x: -130, y: 19.5}
+        - {x: -132, y: 17.5}
+        - {x: -132, y: -33.5}
+        - {x: -95, y: -63.5}
+        - {x: 37, y: -63.5}
+        - {x: 132, y: 22.5}
+        - {x: 132, y: 63.5}
+    - name: greyhound_sheet_thick_outline_9
+      rect:
+        serializedVersion: 2
+        x: 1232
+        y: 1
+        width: 256
+        height: 127
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: -128, y: 18.5}
+        - {x: -128, y: -63.5}
+        - {x: 92, y: -63.5}
+        - {x: 128, y: -45.5}
+        - {x: 128, y: 63.5}
+        - {x: -61, y: 63.5}
+        - {x: -64, y: 62.5}
+    outline: []
+  spritePackingTag: 
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

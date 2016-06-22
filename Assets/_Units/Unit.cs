@@ -31,7 +31,6 @@ public class Unit : MonoBehaviour {
 	public virtual void Die () {
 		if (attacker) {
 			attacker.SendMessage ("Killed", transform, SendMessageOptions.DontRequireReceiver);
-			print ("attacker: " + attacker.name);
 		}
 		Destroy (gameObject);
 	}

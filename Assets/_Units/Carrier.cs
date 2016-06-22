@@ -19,7 +19,7 @@ public class Carrier : Unit {
 	}
 
 	protected override void OnStart () {
-		InvokeRepeating ("SpawnEnemy", 0f, spawnRate);
+		InvokeRepeating ("SpawnInterceptor", 0f, spawnRate);
 	}
 
 	protected override void OnUpdate () {
@@ -41,13 +41,14 @@ public class Carrier : Unit {
 		}
 	}
 
-	protected void SpawnEnemy () {
+	protected void SpawnInterceptor () {
 		spawning = true;
 		if (interceptors.Count < maxInterceptors) {
 			GameObject enemyObj = Instantiate (enemyPrefab, GetComponentInChildren<Dock> ().transform.position, Quaternion.identity) as GameObject;
 			if (transform.parent) {
 				enemyObj.transform.parent = transform.parent;
 			}
+			enemyObj.GetComponent <Flyer> ().mother = this;
 			interceptors.Add (enemyObj.transform);
 		}
 
@@ -60,7 +61,7 @@ public class Carrier : Unit {
 	public void LoseInterceptor (Transform interceptor) {
 		interceptors.Remove (interceptor);
 		if (interceptors.Count < 2 && !spawning) {
-			InvokeRepeating ("SpawnEnemy", 0f, spawnRate);
+			InvokeRepeating ("SpawnInterceptor", 0f, spawnRate);
 		}
 	}
 

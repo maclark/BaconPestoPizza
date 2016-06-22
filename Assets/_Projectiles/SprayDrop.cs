@@ -2,6 +2,7 @@
 using System.Collections;
 
 public class SprayDrop : Projectile {
+	public float extinguishChance = .1f;
 	public float sprayGulp = 1f;
 	public float maxLifeSpan = 1f;
 	public float minLifeSpan = 0f;

@@ -83,7 +83,6 @@ public class ObjectPooler : MonoBehaviour
 
 	public void SetPooledObjectsColor (Color poolerColor) {
 		color = poolerColor;
-
 		foreach (GameObject obj in pooledObjects) {
 			obj.GetComponent<SpriteRenderer> ().color = color;
 		}

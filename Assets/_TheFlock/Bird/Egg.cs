@@ -8,8 +8,10 @@ public class Egg : Item {
 	public GameObject hatchlingPrefab;
 	public bool inCoop = false;
 	public Color momsColor;
+	public Bird mom;
 
 	private Coop coo;
+	private bool dead = false;
 
 	void Awake () {
 		base.OnAwake ();
@@ -21,9 +23,7 @@ public class Egg : Item {
 	}
 	
 	void Update () {
-		if (inCoop) {
-			layTime += Time.deltaTime;
-		}
+		layTime += Time.deltaTime;
 		if (layTime > gestationTime) {
 			Hatch ();
 		}
@@ -59,18 +59,24 @@ public class Egg : Item {
 	}
 
 	public void Hatch () {
-		if (inCoop) {
-			GameObject newPup = Instantiate (hatchlingPrefab, transform.position, Quaternion.identity) as GameObject;
+		GameObject newPup = Instantiate (hatchlingPrefab, transform.position, Quaternion.identity) as GameObject;
+		newPup.GetComponent<Hatchling> ().mom = mom;
+		newPup.transform.parent = transform.parent;
+		newPup.transform.rotation = transform.rotation;
+		if (!mom.docked) {
 			newPup.GetComponent<Hatchling> ().SetColor (momsColor);
+		} else {
+			newPup.GetComponent<Hatchling> ().SetColor (Color.grey);
+			newPup.GetComponent<Collider2D> ().enabled = false;
+		}
+
+
+		mom.follower = newPup.transform;
+		if (inCoop) {
 			coo.RemoveOccupant (transform);
 			coo.AddOccupant (newPup.transform);
-			if (transform.parent) {
-				newPup.transform.parent = transform.parent;
-			}
-		} else {
-			print ("hatching not in coop");
 		}
-		Destroy (gameObject);
+		Die ();
 	}
 
 	public override void Drop (Player p, string sortLayerName, int sortOrder, bool droppedItem=false, bool canDrop=true) {
@@ -115,5 +121,30 @@ public class Egg : Item {
 		}
 		*/
 		base.Drop (p, sortLayerName, sortOrder, droppedItem, canDrop);
+	}
+
+	public void Die () {
+		if (dead) {
+			return;
+		}
+		dead = true;
+
+		if (mom.follower == transform) {
+			mom.follower = null;
+		}
+
+		if (mom.GetDead () || mom.damaged) {
+			transform.parent = null;
+			GetComponent<Rigidbody2D> ().isKinematic = false;
+			GetComponent<Rigidbody2D> ().velocity = mom.GetComponent<Rigidbody2D> ().velocity;
+			sr.color = new Color (0f, 0f, 0f, .5f);
+			sr.sortingLayerName = "Buildings";
+			GetComponent<Rigidbody2D> ().AddTorque (Random.Range (-mom.deathTorque, mom.deathTorque));
+			CancelInvoke ();
+			gameObject.layer = LayerMask.NameToLayer ("Dead");
+			this.enabled = false;
+		} else {
+			Destroy (gameObject);
+		}
 	}
 }

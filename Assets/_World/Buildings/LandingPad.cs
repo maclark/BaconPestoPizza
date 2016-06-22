@@ -9,10 +9,13 @@ public class LandingPad : MonoBehaviour {
 	public List<Transform> rampParts = new List<Transform> ();
 	public Transform boardingZone;
 	public Transform occupant;
+	public bool hasRamp = true;
 
 	void Start () {
 		disembarkPoint = boardingZone.position;
-		WithdrawRamp ();
+		if (hasRamp) {
+			WithdrawRamp ();
+		}
 	}
 
 	public void OnTriggerStay2D (Collider2D other) {

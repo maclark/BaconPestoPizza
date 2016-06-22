@@ -9,6 +9,7 @@ public class Flyer : Unit {
 	public float fireRate = 1f;
 	public float attackRange = 6f;
 	public float bulletForce = 60f;
+	public Carrier mother;
 
 	protected Rigidbody2D rb;
 	protected GameManager gm;
@@ -74,10 +75,8 @@ public class Flyer : Unit {
 	}
 
 	public override void Die() {
-		if (transform.parent) {
-			if (transform.parent.GetComponent<Carrier> ()) {
-				transform.parent.GetComponent<Carrier> ().LoseInterceptor (transform);
-			}
+		if (mother) {
+			mother.LoseInterceptor (transform);
 		}
 		CancelInvoke ();
 		base.Die ();

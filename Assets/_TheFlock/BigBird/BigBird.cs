@@ -26,8 +26,10 @@ public class BigBird : MonoBehaviour {
 	private GameManager gm;
 	private BigBirdManager bbm;
 	private Rigidbody2D rb;
+	private SpriteRenderer sr;
 	private Component[] dockTransforms;
 	private Quaternion targetRotation = Quaternion.identity;
+	private Color color;
 	private bool engineOn = false;
 	private bool landed = false;
 
@@ -44,10 +46,13 @@ public class BigBird : MonoBehaviour {
 		gm = GameObject.FindObjectOfType<GameManager> ();
 		bbm = GetComponent<BigBirdManager> ();
 		rb = GetComponent<Rigidbody2D> ();
+		sr = GetComponent<SpriteRenderer> ();
 		pump = GetComponentInChildren<Pump> ();
 		medkit = GetComponentInChildren<Medkit> ();
 		hold = GetComponentInChildren<CargoHold> ();
 		thrusters = GetComponentsInChildren<Thruster> ();
+
+		color = sr.color;
 	}
 
 	void Update () {
@@ -178,16 +183,37 @@ public class BigBird : MonoBehaviour {
 		return closestDock.bird;
 	}
 
+	public Bird GetUnboardedBird () {
+		dockTransforms = GetComponentsInChildren<Dock> ();
+		foreach (Dock k in dockTransforms) {
+			if (k.bird) {
+				if (!k.bird.p) {
+					return k.bird;
+				}
+			}
+		}
+		return null;
+	}
+
+
 	public void TakeDamage (int dam) {
 		if (bbm.shieldUp) {
 			bbm.energyTank.DecreaseResource (dam);
+			StartCoroutine (Flash (.1f, Color.yellow));
 			if (bbm.energyTank.empty) {
 				bbm.SolarShieldDown ();
 			}
 		}
 	}
 
-
+	public IEnumerator Flash (float flashLength, Color c) {
+		if (sr.color == c) {
+			yield break;
+		}
+		sr.color = c;
+		yield return new WaitForSeconds (flashLength);
+		sr.color = color;
+	}
 
 	void Die() {
 		//gm.RemoveAlliedTransform (transform);
@@ -275,7 +301,9 @@ public class BigBird : MonoBehaviour {
 	public void BigDock () {
 		TurnEngineOff ();
 		landing = true;
-		nearestPad.ExtendRamp ();
+		if (nearestPad.hasRamp) {
+			nearestPad.ExtendRamp ();
+		}
 		LandingApproach ();
 		nearestPad.occupant = this.transform;	
 	}
@@ -284,7 +312,9 @@ public class BigBird : MonoBehaviour {
 		landing = false;
 		rb.isKinematic = false;
 		TurnEngineOn ();
-		nearestPad.WithdrawRamp ();
+		if (nearestPad.hasRamp) {
+			nearestPad.WithdrawRamp ();
+		}
 		transform.parent = null;
 		nearestPad.occupant = null;
 		landed = false;

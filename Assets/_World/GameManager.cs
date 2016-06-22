@@ -32,6 +32,7 @@ public class GameManager : MonoBehaviour {
 	public float screenClampBuffer = 1;
 	public float gallonsPerSquareUnit = 14;
 	public float warpDelay = 2f;public Vector3 appointment1 = new Vector3 (100, 0, 0);
+	public Player captain;
 	public Text goldText;
 	public ObjectPooler positronPooler;
 	public ObjectPooler dropPooler;
@@ -42,6 +43,7 @@ public class GameManager : MonoBehaviour {
 	public Vector3 endOfPortalTailOffset = new Vector3 (0, 67.08f, 0);
 	public Vector3 lastPortalPosition = new Vector3 (0, 0, 0);
 	public List<Transform> appointments = new List<Transform> ();
+	public Color[] playerColors = new Color[8];
 
 	private List<Transform> alliedTransforms = new List<Transform> (); 
 	private bool paused = false;
@@ -59,6 +61,7 @@ public class GameManager : MonoBehaviour {
 		AddAlliedTransform (bigBird.transform);
 		MakeInvisibleTarget ();
 		MakeContainers ();
+		SetPlayerColors ();
 	}
 
 	void Start () {
@@ -223,5 +226,37 @@ public class GameManager : MonoBehaviour {
 		flameContainer = new GameObject ();
 		flameContainer.transform.name = "flameContainer";
 		flameContainer.transform.parent = transform;
+	}
+
+	void SetPlayerColors () {
+		playerColors[0] = new Color (234f/255, 100f/255, 100f/255);
+		playerColors[1] = new Color (96f/255, 103f/255, 255f/255);
+		playerColors[2] = new Color (50f/255, 187f/255, 206f/255);
+		playerColors[3] = new Color (255f/255, 180f/255, 253f/255);
+		playerColors[4] = new Color (34f/255, 114f/255, 34f/255);
+		playerColors[5] = new Color (216f/255, 218f/255, 130f/255);
+		playerColors[6] = new Color (254f/255, 159f/255, 113f/255);
+		playerColors[7] = new Color (255f/255, 255f/255, 255f/255);
+		/*
+
+		playerColors[0] = Color.FromRgb (234f, 100f, 100f);
+		playerColors[1] = Color.FromRgb (96f, 103f, 255f);
+		playerColors[2] = Color.FromRgb (50f, 187f, 206f);
+		playerColors[3] = Color.FromRgb (255f, 180f, 253f);
+		playerColors[4] = Color.FromRgb (34f, 114f, 34f);
+		playerColors[5] = Color.FromRgb (216f, 218f, 130f);
+		playerColors[6] = Color.FromRgb (254f, 159f, 113f);
+		playerColors[7] = Color.FromRgb (255f, 255f, 255f);
+
+		
+		playerColors [0] = Color.red;
+		playerColors[1] = Color.blue;
+		playerColors [2] = Color.green;
+		playerColors[3] = Color.white;
+		playerColors[4] = Color.grey;
+		playerColors[5] = Color.cyan;
+		playerColors[6] = Color.magenta;
+		playerColors[7] = Color.clear;
+		*/
 	}
 }

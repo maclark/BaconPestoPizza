@@ -4,16 +4,21 @@ using System.Collections;
 public class Player : MonoBehaviour {
 
 	public bool isPlaying = false;
+	public bool isCaptain = false;
+	public float reticleOffset = 2f;
 	public Color color;
 	public Vector3 ridingOffset;
 	public Bird b = null;
 	public Weapon w = null;
 	public Weapon storedWeapon = null;
 	public Vector3 aim = Vector3.zero;
+	public Sprite[] finnSprites = new Sprite[2];
+	public Sprite[] fionaSprites = new Sprite[2];
 	public Sprite[] sprites = new Sprite[2];
 	public PlayerBody body;
 	public Transform itemHeld;
 	public Transform itemTouching;
+	public Transform reticle;
 
 	private bool holdingString = false;
 	private bool reigningPowerbird = false;
@@ -31,17 +36,51 @@ public class Player : MonoBehaviour {
 		sr = GetComponent<SpriteRenderer> ();
 		bigBird = GameObject.FindObjectOfType<BigBird> ();
 		hol = new Holster (this);
-		color = sr.color;
+
+	}
+
+	void Start () {
 		body = gm.GetBody (this);
-		pooler = GetComponent<ObjectPooler> ();
-		pooler.SetPooledObjectsColor (color);
-		pooler.SetPooledObjectsOwner (transform);
 	}
 
 	public void StartPlayer () {
 		isPlaying = true;
+		if (gm.captain == null) {
+			isCaptain = true;
+			gm.captain = this;
+		}
+		sprites = Random.Range(0, 1f) > .5 ? finnSprites : fionaSprites;
 		sr.enabled = true;
-		pi.state = PlayerInput.State.NEUTRAL;
+		color = gm.playerColors [pi.playerNum - 1];
+		pooler = GetComponent<ObjectPooler> ();
+		pooler.SetPooledObjectsColor (color);
+		pooler.SetPooledObjectsOwner (transform);
+		reticle.GetComponent<SpriteRenderer> ().color = color;
+		MountAndCharge ();
+	}
+
+	void Update () {
+		if (pi.state == PlayerInput.State.NEUTRAL ||
+		    pi.state == PlayerInput.State.CHANGING_STATIONS ||
+		    pi.state == PlayerInput.State.IN_HOLD ||
+		    pi.state == PlayerInput.State.ON_PLATFORM ||
+		    pi.state == PlayerInput.State.IN_COOP) {
+			transform.rotation = Quaternion.identity;
+		} else if (pi.state == PlayerInput.State.FLYING ||
+			pi.state == PlayerInput.State.POWERBIRD) {
+			reticle.transform.position = transform.position + aim * reticleOffset;
+		}
+	}
+
+	void MountAndCharge () {
+		Bird mount = gm.bigBird.GetUnboardedBird ();
+		if (mount) {
+			BoardBird (mount);
+			mount.UndockFromBigBird ();
+			if (!b.docked) {
+				pi.state = PlayerInput.State.FLYING;
+			}
+		}
 	}
 
 	public void BoardBird (Bird bird) {
@@ -50,7 +89,7 @@ public class Player : MonoBehaviour {
 
 		b = bird;
 		b.p = this;
-		b.color = GetComponent<SpriteRenderer> ().color;
+		b.color = color;
 		b.body.GetComponent<SpriteRenderer>().color = b.color;
 		b.Shield.SetColor (color);
 		b.ReloadIndicator.SetColor (color);
@@ -60,10 +99,17 @@ public class Player : MonoBehaviour {
 		transform.rotation = b.transform.rotation;
 		transform.position = b.transform.position + ridingOffset;
 		transform.parent = b.body;
+		if (b.follower) {
+			Hatchling pup = b.follower.GetComponent<Hatchling> ();
+			if (pup) {
+				pup.GetComponent<SpriteRenderer> ().color = color;
+				pup.transform.rotation = b.transform.rotation;
+			}
+		}
 	}
 
 	public void Debird (Transform newParent) {
-		sr.color = color;
+		sr.color = Color.white;
 		sr.sprite = sprites [0];
 		sr.sortingLayerName = newParent.GetComponent<SpriteRenderer> ().sortingLayerName;
 		sr.sortingOrder = 1;
@@ -74,8 +120,14 @@ public class Player : MonoBehaviour {
 		if (b.Shield != null) {
 			b.GetComponentInChildren<Shield> (true).DeactivateShield ();
 		}
-		b.color = Color.grey;
+		b.color = Color.black;
 		b.body.GetComponent<SpriteRenderer>().color = Color.black;
+		if (b.follower) {
+			Hatchling pup = b.follower.GetComponent<Hatchling> ();
+			if (pup) {
+				pup.GetComponent<SpriteRenderer> ().color = Color.grey;
+			}
+		}
 		b.transform.rotation = bigBird.transform.rotation;
 		b.p = null;
 		b = null;
@@ -93,6 +145,7 @@ public class Player : MonoBehaviour {
 	}
 
 	public void Bubble (Vector3 initialVelocity) {
+		reticle.gameObject.SetActive (false);
 		if (itemHeld) {
 			Destroy (itemHeld.gameObject);
 			itemHeld = null;
@@ -102,8 +155,8 @@ public class Player : MonoBehaviour {
 		gm.AddAlliedTransform (bub.transform);
 		bub.GetComponent<Bubble> ().p = this;
 		bub.GetComponent<Rigidbody2D> ().velocity = initialVelocity;
-		bub.GetComponent<SpriteRenderer> ().color = new Color (color.r, color.g, color.b, .5f);
-		sr.color = color;
+		bub.GetComponentInChildren<SpriteRenderer> ().color = new Color (color.r, color.g, color.b, .5f);
+		sr.color = Color.white;
 		transform.parent = bub.transform;
 		pi.CancelInvoke ();
 		pi.state = PlayerInput.State.IN_BUBBLE;
@@ -119,6 +172,7 @@ public class Player : MonoBehaviour {
 	}
 
 	public void DockOnBigBird (Dock d) {
+		reticle.gameObject.SetActive (false);
 		sr.sortingLayerName = "BigBird";
 		sr.sortingOrder = 2;
 		if (itemHeld) {
@@ -133,6 +187,9 @@ public class Player : MonoBehaviour {
 	}
 
 	public void Undock () {
+		reticle.gameObject.SetActive (true);
+		aim = Vector3.right;
+		reticle.transform.position = transform.position + aim * reticleOffset;
 		itemTouching = null;
 		sr.sortingLayerName = "Birds";
 		sr.sortingOrder = 1;
@@ -231,10 +288,12 @@ public class Player : MonoBehaviour {
 	}
 
 	public void Killed (Transform t) {
-		print (name + " killed " + t.name);
 		if (b) {
-			if (b.pup) {
-				b.pup.IncrementAssists ();
+			if (b.follower) {
+				Hatchling pup = b.follower.GetComponent<Hatchling> ();
+				if (pup) {
+					pup.IncrementAssists ();
+				}
 			}
 		}
 	}

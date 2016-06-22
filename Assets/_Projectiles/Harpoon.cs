@@ -74,6 +74,12 @@ public class Harpoon : MonoBehaviour {
 	void OnTriggerEnter2D (Collider2D other) { 
 		Bird pBird = other.transform.GetComponent<Bird> ();
 		Harpoonable hool = other.GetComponent<Harpoonable> ();
+		if (!hool) {
+			return;
+		} else if (!hool.enabled) {
+			return;
+		}
+
 		if (!pBird) {
 			if (other.transform.parent) {
 				pBird = other.transform.parent.GetComponent<Bird> ();
@@ -92,19 +98,15 @@ public class Harpoon : MonoBehaviour {
 					pBird.otherHarps.Add (this);
 				}
 			}
-		} else if (hool) {
-			if (hool.enabled) {
-				if (gripping) {
-					HarpoonObject (other.gameObject);
-				}
-			}
+		} else if (gripping) {
+			HarpoonObject (other.gameObject);
 		}
 	}
 
 	public void Fire (Transform start, Vector2 aim) {
 		transform.position = start.position;
 		transform.rotation = start.rotation;
-		aim.Normalize ();
+		//aim.Normalize ();
 		rb.AddForce (aim * forceMag);
 	}
 
