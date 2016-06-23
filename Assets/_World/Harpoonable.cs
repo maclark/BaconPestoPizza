@@ -9,7 +9,7 @@ public class Harpoonable : MonoBehaviour {
 	public Vector2 relPos;
 
 	private GameManager gm;
-	private List<Harpoon> otherHarps = new List<Harpoon> ();
+	public List<Harpoon> otherHarps = new List<Harpoon> ();
 
 
 	public class RelRB {
@@ -58,12 +58,13 @@ public class Harpoonable : MonoBehaviour {
 	}
 
 	public void BreakLoose () {
-		List<Harpoon> toRemove = new List<Harpoon> ();
+		List<Harpoon> toUngrip = new List<Harpoon> ();
 		foreach (Harpoon har in otherHarps) {
-			toRemove.Add (har);
+			print ("removing harp");
+			toUngrip.Add (har);
 		}
 
-		foreach (Harpoon har in toRemove) {
+		foreach (Harpoon har in toUngrip) {
 			har.SetGripping (false);
 		}
 	}

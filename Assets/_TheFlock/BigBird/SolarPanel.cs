@@ -36,7 +36,7 @@ public class SolarPanel : MonoBehaviour {
 	void OnTriggerEnter2D (Collider2D other) {
 		if (other.tag == "Bird") {
 			Bird birdie = other.GetComponent<Bird> ();
-			if (affixedToBigBird && !birdie.GetPanel () && !birdie.follower) {
+			if (affixedToBigBird && !birdie.GetPanel ()) {
 				DetachFromBigBird ();
 				AttachToBird (birdie);
 			} else if (loose) {

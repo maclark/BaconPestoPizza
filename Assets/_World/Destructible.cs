@@ -27,10 +27,11 @@ public class Destructible : MonoBehaviour {
 	}
 
 	void Die () {
-		Harpoonable hpl = GetComponent<Harpoonable> ();
-		if (hpl) {
-			hpl.BreakLoose ();
+		Harpoonable[] hpls = GetComponentsInChildren<Harpoonable> ();
+		for (int i = 0; i < hpls.Length; i++) {
+			hpls [i].BreakLoose ();
 		}
+
 		if (babies != null) {
 			foreach (GameObject obj in babies) {
 				GiveBirth (obj);
@@ -47,6 +48,9 @@ public class Destructible : MonoBehaviour {
 		float y = transform.position.y + Random.Range (-birthRange, birthRange);
 		Vector3 birthplace = new Vector3 (x, y, 0);
 		GameObject obj = Instantiate (baby, birthplace, Quaternion.identity) as GameObject;
+		obj.GetComponent<Collider2D> ().isTrigger = false;
+		obj.GetComponent<Rigidbody2D> ().isKinematic = false;
+		obj.GetComponent<Harpoonable> ().enabled = true;
 		if (transform.parent) {
 			obj.transform.parent = transform.parent;
 		}

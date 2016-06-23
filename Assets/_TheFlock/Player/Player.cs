@@ -156,16 +156,19 @@ public class Player : MonoBehaviour {
 			Destroy (itemHeld.gameObject);
 			itemHeld = null;
 		}
+
 		sr.sprite = sprites [0];
 		GameObject bub = Instantiate (gm.bubblePrefab, transform.position, transform.rotation) as GameObject;
 		gm.AddAlliedTransform (bub.transform);
 		bub.GetComponent<Bubble> ().p = this;
 		bub.GetComponent<Rigidbody2D> ().velocity = initialVelocity;
-		bub.GetComponentInChildren<SpriteRenderer> ().color = new Color (color.r, color.g, color.b, .5f);
 		sr.color = Color.white;
+		bub.GetComponentInChildren<SpriteRenderer> ().color = new Color (color.r, color.g, color.b, .5f);
 		transform.parent = bub.transform;
 		pi.CancelInvoke ();
 		pi.state = PlayerInput.State.IN_BUBBLE;
+		b.rider = null;
+		b = null;
 	}
 
 	public void CycleWeapons () {

@@ -44,6 +44,7 @@ public class GameManager : MonoBehaviour {
 	public Vector3 lastPortalPosition = new Vector3 (0, 0, 0);
 	public List<Transform> appointments = new List<Transform> ();
 	public Color[] playerColors = new Color[8];
+	public List<Bird> birds = new List<Bird> (); 
 
 	private List<Transform> alliedTransforms = new List<Transform> (); 
 	private bool paused = false;

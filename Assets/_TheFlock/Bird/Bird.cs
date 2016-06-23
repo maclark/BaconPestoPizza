@@ -121,6 +121,7 @@ public class Bird : MonoBehaviour {
 			colorSet = true;
 		}
 		greyhound = sr.sprite;
+		gm.birds.Add (this);
 		DockOnBigBird ();
 	}
 
@@ -351,6 +352,7 @@ public class Bird : MonoBehaviour {
 		dead = true;
 
 		gm.RemoveAlliedTransform (transform);
+		gm.birds.Remove (this);
 		DetachOtherHarps ();
 		if (harp) {
 			harp.Die ();
@@ -450,8 +452,6 @@ public class Bird : MonoBehaviour {
 	}
 
 	public void UndockFromBigBird () {
-		Invoke ("LayEgg", eggLayDelay);
-
 		if (health < maxHealth) {
 			Debug.Log ("Can't undock unhealthy bird.");
 			return;
@@ -826,6 +826,9 @@ public class Bird : MonoBehaviour {
 
 	public void LayEgg () {
 		inHeat = false;
+		if (follower) {
+			return;
+		}
 		GameObject eggObj = Instantiate (eggPrefab, transform.position, Quaternion.identity) as GameObject;
 		Egg freshEgg = eggObj.GetComponent<Egg> ();
 		freshEgg.gameObject.layer = LayerMask.NameToLayer ("Flyers");
@@ -991,10 +994,9 @@ public class Bird : MonoBehaviour {
 		forceMag = hydratedForceMag;
 	}
 
-	public void TurnBlack () {
-		print ("turning black");
+	public IEnumerator TurnBlack (float delay) {
+		yield return new WaitForSeconds (delay);
 		if (!rider) {
-			print ("no p");
 			body.GetComponent<SpriteRenderer> ().color = Color.black;
 			color = Color.black;
 		}

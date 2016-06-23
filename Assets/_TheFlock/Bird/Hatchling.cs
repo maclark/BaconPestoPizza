@@ -3,21 +3,25 @@ using System.Collections;
 
 public class Hatchling : Item {
 
-	public bool flying = false;
+	public float forceMag = 50f;
 	public float flyTime = 0f;
 	public float flyTimeRequired = 20f;
 	public float assistsNeeded = 1;
 	public float goodbyeTime = 2f;
+	public bool flying = false;
+	public bool goingHome = false;
 	public Vector3 pupOffset;
 	public GameObject birdPrefab;
 	public Bird mom;
 
 	private int assists = 0;
-	private bool isKiller = false;
-	private bool isFlyer = false;
+	public bool isKiller = false;
+	public bool isFlyer = false;
 	private bool dead = false;
+	private Rigidbody2D rb;
 
 	void Awake () {
+		rb = GetComponent<Rigidbody2D> ();
 		base.OnAwake ();
 	}
 	void Start () {
@@ -25,23 +29,39 @@ public class Hatchling : Item {
 	}
 	
 	void Update () {
-		if (!isFlyer && flying) {
-			flyTime += Time.deltaTime;
-			if (flyTime > flyTimeRequired) {
-				isFlyer = true;
+		if (goingHome) {
+			Vector3 directionHome = gm.bigBird.transform.position - transform.position;
+			directionHome.Normalize ();
+			rb.AddForce (directionHome * forceMag);
+		} else {
+			if (!isFlyer && flying) {
+				flyTime += Time.deltaTime;
+				if (flyTime > flyTimeRequired) {
+					isFlyer = true;
+				}
 			}
-		}
+
+			if (CheckEvolutionRequirements ()) {
+				goingHome = true;
+				transform.parent = null;
+				rb.isKinematic = false;
+				GetComponent<Collider2D> ().isTrigger = false;
+			}
+		} 
+
+
 	}
 
 	public bool CheckEvolutionRequirements () {
-		return (isKiller && isFlyer);
+		return (isKiller && isFlyer && gm.birds.Count < 8);
 	}
 
 	public void OnTriggerEnter2D (Collider2D other) {
 		/*if (other.tag == "Player") {
 			print ("hatch touching: " + other.transform.name);
 			other.transform.parent.GetComponentInChildren<Player> ().itemTouching = transform;
-		} else */ if (other.tag == "EnemyBullet" || other.tag == "Enemy") {
+		} else */ 
+		if (other.tag == "EnemyBullet" || other.tag == "Enemy") {
 			Die ();
 		}
 	}
@@ -59,6 +79,9 @@ public class Hatchling : Item {
 	}
 
 	void OnCollisionEnter2D (Collision2D coll) {
+		if (coll.transform.tag == "BigBird") {
+			Evolve ();
+		}
 		base.CollisionEnter2D (coll);
 	}
 
@@ -67,17 +90,22 @@ public class Hatchling : Item {
 	}
 
 	public void Evolve () {
+		if (mom.follower == transform) {
+			mom.follower = null;
+		}		
 		GameObject obj = Instantiate (birdPrefab, transform.position, Quaternion.identity) as GameObject;
 		obj.GetComponentInChildren<SpriteRenderer> ().color = mom.color;
-		obj.GetComponent<Bird> ().color = mom.color;
-		obj.GetComponent<Bird> ().colorSet = true;
-		Die ();
+		Bird grownUp = obj.GetComponent<Bird> ();
+		grownUp.color = mom.color;
+		grownUp.colorSet = true;
+		grownUp.StartCoroutine ("TurnBlack", goodbyeTime);
+		Destroy (gameObject);
 	}
 		
 	public void IncrementAssists () {
 		print ("pup got an assist");
 		assists++;
-		if (assists > assistsNeeded) {
+		if (assists >= assistsNeeded) {
 			isKiller = true;
 		}
 	}
@@ -91,8 +119,8 @@ public class Hatchling : Item {
 				this.transform.parent = coo.transform;
 				gameObject.layer = LayerMask.NameToLayer ("OnBoard");
 				GetComponent<Collider2D> ().isTrigger = false;
-				GetComponent<Rigidbody2D> ().isKinematic = false;
-				GetComponent<Rigidbody2D> ().drag = 0f;
+				rb.isKinematic = false;
+				rb.drag = 0f;
 				droppedItem = true;
 			} else {
 				canDrop = false;
@@ -135,9 +163,10 @@ public class Hatchling : Item {
 
 		if (!mom.docked) {
 			transform.parent = null;
-			GetComponent<Rigidbody2D> ().isKinematic = false;
-			GetComponent<Rigidbody2D> ().velocity = mom.GetComponent<Rigidbody2D> ().velocity;
-			GetComponent<Rigidbody2D> ().AddTorque (Random.Range (-mom.deathTorque, mom.deathTorque));
+			rb.constraints = RigidbodyConstraints2D.None;
+			rb.isKinematic = false;
+			rb.velocity = mom.GetComponent<Rigidbody2D> ().velocity;
+			rb.AddTorque (Random.Range (-mom.deathTorque, mom.deathTorque));
 			sr.color = new Color (1f, 0, 0, .5f);
 			sr.sortingLayerName = "Buildings";
 			CancelInvoke ();
