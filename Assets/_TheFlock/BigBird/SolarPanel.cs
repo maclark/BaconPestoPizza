@@ -118,10 +118,10 @@ public class SolarPanel : MonoBehaviour {
 		rb.angularVelocity = 0f;
 		sr.sortingLayerName = "Projectiles";
 		loose = false;
-		hool.enabled = false;
 
 		rb.isKinematic = true;
 		hool.BreakLoose ();
+		hool.enabled = false;
 	}
 
 	public void DetachFromBird () {
@@ -135,18 +135,15 @@ public class SolarPanel : MonoBehaviour {
 
 		rb.isKinematic = false;
 		loose = true;
-		//Invoke ("SetLoose", 1f);
+		hool.enabled = true;
 	}
 
-	void SetLoose () {
-		loose = true;
-	}
 
 	public void Reset () {
 		DetachFromBird ();
 		CancelInvoke ();
 		loose = false;
-
+		hool.enabled = false;
 		MoveToBigBirdShoulder ();
 		transform.parent = gm.bigBird.transform;
 		sr.sortingLayerName = "BigBird";

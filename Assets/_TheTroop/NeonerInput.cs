@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class PlayerInput : MonoBehaviour {
+public class Neoner : MonoBehaviour {
 
 	public int playerNum = 0;
 	public bool checkingInput = false;
@@ -38,10 +38,7 @@ public class PlayerInput : MonoBehaviour {
 
 	private GameManager gm;
 	private SpriteRenderer sr;
-	private BigBird bigBird;
-	private StickHandler sh;
-	private SystemsHandler sysH;
-	private Player p;
+	private Neoner n;
 	private Turret turret;
 	private bool releasedRightTrigger = true;
 	private bool isXboxController = false;
@@ -51,50 +48,10 @@ public class PlayerInput : MonoBehaviour {
 	void Awake () {
 		gm = GameObject.FindGameObjectWithTag ("GameManager").GetComponent<GameManager> ();
 		sr = GetComponent<SpriteRenderer> ();
-		bigBird = GameObject.FindObjectOfType<BigBird>() as BigBird;
-		p = GetComponent<Player> ();
-		sh = new StickHandler ();
-	}
-
-	void Start () {
-		sysH = new SystemsHandler (bigBird.rightCans, bigBird.leftCans, bigBird.cannonballPrefab);
+		n = GetComponent<Neoner> ();
 	}
 
 	void Update () {
-		if (joystick == "unset") {
-			for (int i = 1; i < 12; i++) { 
-
-				if (Input.GetKeyDown ("joystick " + i + " button 7")) {
-					if (playerNum == i) {
-						isXboxController = true;
-						joystick = "_p" + i;
-					}
-				}  else if (Input.GetKeyDown ("joystick " + i + " button 9")) {
-					if (playerNum == i) {
-						isXboxController = false;
-						joystick = "_p" + i;
-					}
-				}
-			}
-
-			//joystick is set, so player has hit start
-			if (joystick != "unset") {
-				SetButtonNames ();
-				p.StartPlayer ();
-				StartCoroutine (p.HighlightSecs ());
-			}
-
-			return;
-		}  
-
-		if (canHighlight) {
-			if (Input.GetButtonDown (startButton)) {
-				p.Highlight ();
-			} else if (Input.GetButtonUp (startButton)) {
-				p.Unhighlight ();
-			}
-		}
-
 		if (state == State.NEUTRAL) {
 			HandleNeutralInput ();
 		}  else if (state == State.FLYING) {
@@ -105,20 +62,6 @@ public class PlayerInput : MonoBehaviour {
 			HandleTurretInput ();
 		}  else if (state == State.DOCKED) {
 			HandleDockedInput ();
-		}  else if (state == State.PILOTING) {
-			HandlePilotingInput ();
-		}  else if (state == State.NAVIGATING) {
-			HandleNavigationInput ();
-		}  else if (state == State.IN_WEB) {
-			HandleInWebInput ();
-		}  else if (state == State.POWERBIRD) {
-			HandlePowerbirdInput ();
-		}  else if (state == State.IN_HOLD) {
-			HandleInHoldInput ();
-		}  else if (state == State.ON_PLATFORM) {
-			HandleOnPlatformInput ();
-		}  else if (state == State.IN_COOP) {
-			HandleInCoopInput ();
 		}  else if (state == State.ON_FOOT) {
 			HandleOnFootInput ();
 		}
@@ -131,20 +74,10 @@ public class PlayerInput : MonoBehaviour {
 		}  else if (state == State.ON_TURRET) {
 			turret.transform.GetComponentInChildren<SpriteRenderer> ().color = Color.grey;
 		}  else if (state == State.DOCKED) {
-			if (p.b) {
-				p.Debird (bigBird.transform);
+			if (n.kanga) {
+				n.Dekanga ();
 			}		
-		}  else if (state == State.PILOTING) {
-			bigBird.turn = 0;
-			station.GetComponentInChildren<SpriteRenderer> ().color = Color.grey;
-			sr.sortingOrder = 2;
-		}  else if (state == State.NAVIGATING) {
-			HandleNavigationInput ();
-		}  else if (state == State.IN_HOLD) {
-			gm.bigBird.hold.Occupy (false);
-		}  else if (state == State.ON_PLATFORM) {
-			gm.bigBird.hold.Occupy (false);
-		}
+		} 
 
 		if (station) {
 			station.GetComponent<BoxCollider2D> ().enabled = true;
@@ -160,14 +93,8 @@ public class PlayerInput : MonoBehaviour {
 			station.GetComponentInChildren<SpriteRenderer> ().color = new Color(.37f, .26f, .15f);
 			sr.sortingOrder = 0;
 			return;
-		}  else if (state == State.IN_COOP) {
-			sr.enabled = true;
-			p.ManifestFlesh (transform.position, "BigBird", 1);
-			p.body.trigger.SetActive (true);
-			p.body.transform.parent = station.transform;
-			return;
 		}  else if (state == State.ON_FOOT) {
-			p.Disembark (station.transform.position);
+			n.Disembark (station.transform.position);
 			return;
 		}
 
@@ -202,7 +129,7 @@ public class PlayerInput : MonoBehaviour {
 
 		RaycastHit2D hit = Physics2D.Raycast (transform.position, new Vector2 (horizontalness, verticalness), stationChangeDistance, mask);
 		if (hit) {
-			if (hit.collider.name == "BoardingZone" && !bigBird.Landed) {
+			if (hit.collider.name == "BoardingZone") {
 				return;
 			}
 
@@ -220,12 +147,6 @@ public class PlayerInput : MonoBehaviour {
 			}  else if (hit.collider.name == "Turret") {
 				turret = station.GetComponent<Turret> ();
 				selectedState = State.ON_TURRET;
-			}  else if (hit.collider.name == "CargoPlatform") {
-				selectedState = State.ON_PLATFORM;
-			}  else if (hit.collider.name == "CargoHold") {
-				selectedState = State.IN_HOLD;
-			}  else if (hit.collider.name == "Coop") {
-				selectedState = State.IN_COOP;
 			}  else if (hit.collider.name == "BoardingZone") {
 				selectedState = State.ON_FOOT;
 			}
@@ -240,62 +161,62 @@ public class PlayerInput : MonoBehaviour {
 	}
 
 	void HandleFlyingInput () {
-		p.b.direction = new Vector2 (Input.GetAxis (LSHorizontal), Input.GetAxis (LSVertical));
+		n.kanga.direction = new Vector2 (Input.GetAxis (LSHorizontal), Input.GetAxis (LSVertical));
 
 		Vector2 rightStick = new Vector2 (Input.GetAxis (RSHorizontal), Input.GetAxis (RSVertical));
 		if (rightStick != Vector2.zero) {
-			p.aim = rightStick;
-		}  else if (p.aim == Vector3.zero) {
-			if (p.b.direction != Vector2.zero) {
-				p.aim = new Vector3 (p.b.direction.x, p.b.direction.y, 0);
+			n.aim = rightStick;
+		}  else if (n.aim == Vector3.zero) {
+			if (n.kanga.direction != Vector2.zero) {
+				n.aim = new Vector3 (n.kanga.direction.x, n.kanga.direction.y, 0);
 			}
 		}
-		p.aim.Normalize ();
+		n.aim.Normalize ();
 
-		if (!p.b.hurledHarp && !p.b.harpLoaded && !p.b.catchingHarp) {
+		if (!n.kanga.hurledHarp && !n.kanga.harpLoaded && !n.kanga.catchingHarp) {
 			if (Input.GetAxisRaw (leftTrigger) > 0) {
-				p.b.LoadHarp ();
+				n.kanga.LoadHarp ();
 			}  
-		}  else if (p.b.hurledHarp) {
+		}  else if (n.kanga.hurledHarp) {
 			if (Input.GetAxisRaw (leftTrigger) > 0) {
-				p.b.harp.SetRecalling (true);
+				n.kanga.harp.SetRecalling (true);
 			}  else if (Input.GetAxis (leftTrigger) <= 0) {
-				p.b.harp.SetRecalling (false);
+				n.kanga.harp.SetRecalling (false);
 			}
-		}  else if (p.b.harpLoaded) {
+		}  else if (n.kanga.harpLoaded) {
 			if (Input.GetAxisRaw (leftTrigger) <= 0) {
-				p.b.SwingHurlHarpoon ();
+				n.kanga.SwingHurlHarpoon ();
 			}
-		}  else if (p.b.catchingHarp) {
+		}  else if (n.kanga.catchingHarp) {
 			if (Input.GetAxisRaw (leftTrigger) <= 0) {
-				p.b.catchingHarp = false;
+				n.kanga.catchingHarp = false;
 			}
 		}
 
-		if (!p.GetHoldingString () && !p.b.harpLoaded) {
+		if (!n.kanga.harpLoaded) {
 			HandleWeaponFiring ();
 		}
 
 		if (Input.GetButtonDown (LB)) {
-			if (p.b.canRoll) {
-				p.b.rolling = true;
-				p.b.canRoll = false;
-				StartCoroutine (p.b.EndRoll ());
+			if (n.kanga.canRoll) {
+				n.kanga.rolling = true;
+				n.kanga.canRoll = false;
+				StartCoroutine (n.kanga.EndRoll ());
 			}
 		}
 
 		if (Input.GetButtonDown (yTriangleButton)) {
-			if (p.b.harpLoaded) {
-				p.b.UnloadHarp ();
-				p.b.catchingHarp = true;
+			if (n.kanga.harpLoaded) {
+				n.kanga.UnloadHarp ();
+				n.kanga.catchingHarp = true;
 			}  else {
-				p.CycleWeapons ();
+				n.CycleWeapons ();
 			}
 		}
 
 		if (Input.GetButtonDown (xSquareButton)) {
-			if (p.w.roundsLeftInClip < p.w.clipSize && !p.w.reloading) {
-				p.StartCoroutine (p.w.Reload ());
+			if (n.w.roundsLeftInClip <n.w.clipSize && !n.w.reloading) {
+				n.StartCoroutine (n.w.Reload ());
 			}
 		}
 

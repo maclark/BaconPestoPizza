@@ -12,7 +12,7 @@ public class Bubble : MonoBehaviour {
 	}
 
 	void Update () {
-		transform.position = gm.ClampToScreen (transform.position);
+		transform.position = gm.ClampToScreen (transform.position, gm.screenClampBuffer);
 	}
 
 	void OnCollisionEnter2D (Collision2D coll) {

@@ -7,8 +7,11 @@ public class Player : MonoBehaviour {
 	public bool isCaptain = false;
 	public bool female = false;
 	public float reticleOffset = 2f;
+	public float highlightSecs = 4f;
 	public Color color;
 	public Vector3 ridingOffset;
+	public Vector3 playerHighlightPos = new Vector3 (-.1f, 0f, 0f);
+	public Vector3 birdHighlightPos = new Vector3 (-.1f, 0f, 0f);
 	public Bird b = null;
 	public Weapon w = null;
 	public Weapon storedWeapon = null;
@@ -20,7 +23,9 @@ public class Player : MonoBehaviour {
 	public Transform itemHeld;
 	public Transform itemTouching;
 	public Transform reticle;
+	public Transform highlighter;
 
+	private bool highlighting;
 	private bool holdingString = false;
 	private bool reigningPowerbird = false;
 	private GameManager gm;
@@ -63,6 +68,7 @@ public class Player : MonoBehaviour {
 		pooler.SetPooledObjectsColor (color);
 		pooler.SetPooledObjectsOwner (transform);
 		reticle.GetComponent<SpriteRenderer> ().color = color;
+		highlighter.GetComponent<SpriteRenderer> ().color = new Color (color.r, color.g, color.b, .75f);
 		MountAndCharge ();
 	}
 
@@ -124,7 +130,7 @@ public class Player : MonoBehaviour {
 		transform.position = pi.station.position;
 
 		if (b.Shield != null) {
-			b.GetComponentInChildren<Shield> (true).DeactivateShield ();
+			b.Shield.SetColor (new Color (0f, 0f, 0f, .5f));
 		}
 		b.color = Color.black;
 		b.body.GetComponent<SpriteRenderer>().color = Color.black;
@@ -392,9 +398,11 @@ public class Player : MonoBehaviour {
 	}
 
 	public void Unequip () {
-		w = storedWeapon;
-		storedWeapon = null;
-		pi.CancelInvoke ();
+		if (storedWeapon != null) {
+			w = storedWeapon;
+			storedWeapon = null;
+			pi.CancelInvoke ();
+		}
 	}
 
 	void OnBecameInvisible () {
@@ -407,5 +415,35 @@ public class Player : MonoBehaviour {
 	}
 
 	void Ghost () {
+	}
+
+	public IEnumerator HighlightSecs () {
+		if (b) {
+			highlighter.transform.position = transform.position + birdHighlightPos;
+		} else {
+			highlighter.transform.position = transform.position + playerHighlightPos;
+		}
+		highlighter.gameObject.SetActive (true);
+		yield return new WaitForSeconds (highlightSecs);
+		if (!highlighting) {
+			highlighter.gameObject.SetActive (false);
+		}
+		pi.canHighlight = true;
+	}
+
+	public void Highlight () {
+		highlighting = true;
+		if (b) {
+			highlighter.transform.position = transform.position + birdHighlightPos;
+		} else {
+			highlighter.transform.position = transform.position + playerHighlightPos;
+		}
+		highlighter.gameObject.SetActive (true);
+
+	}
+
+	public void Unhighlight () {
+		highlighting = false;
+		highlighter.gameObject.SetActive (false);
 	}
 }

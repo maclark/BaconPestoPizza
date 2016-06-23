@@ -1,19 +1,15 @@
 ﻿using UnityEngine;
-using UnityEditor;
 using System.Collections;
 using System.Collections.Generic;
 
-public class Bird : MonoBehaviour {
-
-	public LayerMask releaseMask;
-	public Player rider;
-	public int health = 100;
-	public int maxHealth = 100;
-	public float forceMag = 60f;
-	public float hydratedForceMag = 100f;
-	public float dehydratedForceMag = 60f;
-
-	public float boostForceMag = 60f;
+public class Kanga : Flyer {
+	public float skew = 2f;
+	public Neoner rider;
+	public int health;
+	public int maxHealth;
+	public float forceMag;
+	public float hydratedForceMag;
+	public float boostForceMag;
 	public float flashGap = 1f;
 	public float flashDuration = .2f;
 	public float damageDuration = 10f;
@@ -22,16 +18,7 @@ public class Bird : MonoBehaviour {
 	public float boostCooldown = 2f;
 	public float dockRayLength = 8f;
 	public float undockColliderDelay = .2f;
-	
 
-	public float fullTank = 60f;
-	public float lowGasWarning = 10f;
-	public float gas = 60f;
-	public float gasPerSecond = 1f;
-	public float gasPerBoost = 2f;
-	public float drinkRate = 20f;
-	public float gasLightDelay = .2f;
-	public float iconAboveOffset = 5f;
 	public float harpHurlOffset = 1f;
 	public float swingSpeed = 3f;
 	public float windUpTime = 1f;
@@ -40,69 +27,40 @@ public class Bird : MonoBehaviour {
 	public float rollDuration = 1f;
 	public float rerollDelay = 1f;
 	public float rollSpeed = 1f;
-	public float loveLasts = 2f;
 	public float eggLayDelay = 3f;
 	public float deathTorque = 25f;
 
 	public bool docked = false;
-	public bool webbed = false;
-	public bool powered = false;
 	public bool harpLoaded = false;
 	public bool aimingHarp = false;
 	public bool swingingHarp = false;
-	public bool windingUp = false;
 	public bool throwingHarp = false;
 	public bool catchingHarp = false;
-	public bool pregnant = false;
-	public bool inHeat = false;
-	public bool hasBattery = false;
-	public bool ranOutOfGas = false;
 	public bool colorSet = false;
 
-	public Vector3 followerOffset;
-
-	public Transform follower;
 	public Transform body;
 	public GameObject harpoonPrefab;
-	public GameObject gasLightPrefab;
-	public GameObject eggPrefab;
-	public GameObject lovePrefab;
-	public Sprite greyhound;
-	public OrbWeb webTrap;
-	public Powerbird powerbird;
-	public Circuit circuit;
-	public List<Bird> linkedBirds = new List<Bird> ();
+	public Sprite kanga;
 	public List<Harpoon> otherHarps = new List<Harpoon> ();
 
-	[HideInInspector]
 	public Color color;
-	[HideInInspector]
 	public bool damaged = false, invincible = false, canBoost = true, hurledHarp = false, canRoll = true, rolling = false;
-	[HideInInspector]
 	public Vector2 direction = Vector2.zero, pullDir = Vector2.zero, orthoPullDir = Vector2.zero;
-	[HideInInspector]
 	public Harpoon harp;
 
 	private Rigidbody2D rb;
 	private GameManager gm;
 	private SpriteRenderer sr;
-	private BigBird bigBird;
 	private Dock dock = null;
 	private Shield shield;
 	private ReloadIndicator reloadIndicator;
-	private GameObject gasLight;
 	private Harpoon loadedHarp;
-	private SolarPanel panel;
 	private Vector3 releaseHarpPosition;
-	private Vector3 windUpOffset;
 	private Vector3 hurlAim;
 	private float swingStartTime;
-	private float windUpStartTime;
 	private float theta;
 	private float releaseTheta;
-	private bool gasLightFlashing = false;
 	private bool swingStarted = false;
-	private bool windUpStarted = false;
 	private bool dead = false;
 
 
@@ -110,54 +68,34 @@ public class Bird : MonoBehaviour {
 		rb = GetComponent<Rigidbody2D> ();
 		gm = GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager> ();
 		sr = body.GetComponent<SpriteRenderer> ();
-		bigBird = GameObject.FindObjectOfType<BigBird>() as BigBird;
 		shield = GetComponentInChildren<Shield> (true);
-		reloadIndicator = GetComponentInChildren<ReloadIndicator> (true);
+		base.OnAwake ();
 	}
 
 	void Start () {
 		if (!colorSet) {
-			color = Color.black;
+			color = Color.magenta;
 			colorSet = true;
 		}
-		greyhound = sr.sprite;
-		gm.birds.Add (this);
-		DockOnBigBird ();
+		kanga = sr.sprite;
+		base.OnStart ();
 	}
 
 	void Update () {
-		if (!docked) {
-			if (!ranOutOfGas) {
-				gas -= gasPerSecond * Time.deltaTime;
-				if (gas <= lowGasWarning) {
-					if (!gasLightFlashing) {
-						LowOnGas ();
-					} else if (gas <= 0) {
-						ranOutOfGas = true;
-						forceMag = dehydratedForceMag;
-					}
-				}
-			}
-
-			if (aimingHarp) {
-				AimHarp ();
-			} else if (swingingHarp) {
-				SwingHarp ();
-			} else if (windingUp) {
-				WindUp ();
-			}
-
-			if (rolling) {
-				AileronRoll ();
-			}
+		if (aimingHarp) {
+			AimHarp ();
+		} else if (swingingHarp) {
+			SwingHarp ();
 		}
-		if (!docked) {
-			transform.position = gm.ClampToScreen (transform.position, gm.screenClampBuffer);
+
+		if (rolling) {
+			AileronRoll ();
 		}
+		base.OnUpdate ();
 	}
 
 	void FixedUpdate () {
-		if (!docked && !webbed) {
+		if (!docked) {
 			HandleFlying ();
 		}
 
@@ -165,11 +103,50 @@ public class Bird : MonoBehaviour {
 		if (!canBoost) {
 			forceMag = hydratedForceMag;
 		}	
+		base.OnFixedUpdate ();
+	}
+
+	void OnTriggerEnter2D (Collider2D other) {
+		base.TriggerEnter2D (other);
+	}
+
+	void OnBecameVisible () {
+		base.BecameVisible ();
+	}
+
+	void OnBecameInvisible () {
+		base.BecameInvisible ();
+	}
+
+	public override void FireBullet() {
+		if (target == null) {
+			SetNearestTarget ();
+			if (target == null) {
+				CancelInvoke ();
+				stopFiring = true;
+				return;
+			}
+		}
+		Bullet bullet = gm.GetComponent<ObjectPooler> ().GetPooledObject ().GetComponent<Bullet> ();
+		bullet.gameObject.SetActive (true);
+		Vector2 skewVector = new Vector2 (Random.Range (-skew, skew), Random.Range (-skew, skew));
+		Vector2 aim = target.position - transform.position;
+		bullet.Fire (transform.position, aim + skewVector);	
+	}
+
+	public override void Die ()
+	{
+		base.Die ();
+	}
+
+
+	void FixedUpdate () {
+		
 	}
 
 
 	void OnTriggerEnter2D (Collider2D other) {
-		if (other.tag == "EnemyBullet") {
+		if (other.tag == "PlayerBullet") {
 			if (rolling) {
 				BounceBullets (other);
 			} else if (!invincible) {
@@ -198,32 +175,12 @@ public class Bird : MonoBehaviour {
 
 	void OnCollisionEnter2D (Collision2D coll) {		
 		if (coll.collider.gameObject.name == "DockableColliders") {
-			DockOnBigBird ();
-		} else if (coll.transform.tag == "Bird") {
-			if (inHeat) {
-				pregnant = true;
-				InvokeRepeating ("MakeLove", 0f, loveLasts / 4);
-				Invoke ("LayEgg", eggLayDelay);
-			}
+			DockOnHeavyHippo ();
 		}
-
-		/*
-		if (coll.transform.tag == "Bird") {
-			coll.transform.GetComponent<Bird> ().TakeOneShotKill ();
-		} else if (rb.velocity.sqrMagnitude > meleeVelThresh) {
-			if (coll.transform.tag == "BigBird") {
-				coll.transform.GetComponent<BigBird> ().TakeDamage (meleeDamage);
-			}
-			if (coll.transform.tag == "Enemy") {
-				coll.transform.GetComponent<Unit> ().TakeDamage (meleeDamage, Color.red);
-			}
-		}*/
 	}
 
 	void OnCollisionExit2D (Collision2D coll) {
-		if (coll.transform.tag == "Bird") {
-			CancelInvoke ("MakeLove");
-		}
+
 	}
 
 	void HandleFlying () {
@@ -331,9 +288,7 @@ public class Bird : MonoBehaviour {
 	/// </summary>
 	/// <param name="dam">Dam.</param> testing this
 	public void TakeDamage (int dam) {
-		if (powered) {
-			powerbird.TakeDamage ();
-		} else if (damaged) {
+		if (damaged) {
 			//#TODO explodeee
 			Die ();
 		} else {
@@ -342,19 +297,6 @@ public class Bird : MonoBehaviour {
 			StartCoroutine (HitInvincibility (hitInvincibilityDuration));
 			StartCoroutine (Flash (Time.time));
 		}
-
-		if (follower) {
-			Hatchling puppy = follower.GetComponent<Hatchling> ();
-			if (puppy) {
-				puppy.Die ();
-			} else {
-				Egg eggy = follower.GetComponent<Egg> ();
-				if (eggy) {
-					eggy.Die ();
-				}
-			}
-		}
-
 	}
 
 	public void TakeOneShotKill () {
@@ -373,23 +315,9 @@ public class Bird : MonoBehaviour {
 		if (harp) {
 			harp.Die ();
 		}
-		if (panel) {
-			panel.DetachFromBird ();
-		}
+
 		if (rider) {
 			rider.Bubble (rb.velocity);
-		}
-
-		if (follower) {
-			Egg e = follower.GetComponent<Egg> ();
-			if (e) {
-				e.Die ();
-			} else {
-				Hatchling pup = follower.GetComponent<Hatchling> ();
-				if (pup) {
-					pup.Die ();
-				}
-			}
 		}
 
 		rb.drag = .5f;
@@ -401,13 +329,10 @@ public class Bird : MonoBehaviour {
 		gameObject.layer = LayerMask.NameToLayer ("Dead");
 		this.enabled = false;
 	}
-			
-	public bool DockOnBigBird () {
-		if (powered) {
-			return false;
-		}
 
-		dock = bigBird.GetNearestOpenDock (transform.position);
+	public bool DockOnHeavyHippo (Dock d) {
+		
+		dock = d;
 
 		if (!dock) {
 			docked = false;
@@ -427,10 +352,6 @@ public class Bird : MonoBehaviour {
 			hurledHarp = false;
 		}
 
-		if (panel) {
-			panel.Reset ();
-		}
-
 		DetachOtherHarps ();
 		transform.position = dock.transform.position;
 		transform.rotation = dock.transform.rotation;
@@ -441,63 +362,32 @@ public class Bird : MonoBehaviour {
 		sr.sortingOrder = 1;
 		damaged = false;
 		invincible = false;
-		gasLightFlashing = false;
-		ranOutOfGas = false;
-		Destroy (gasLight);
 		CancelInvoke ();
 		rb.Sleep ();
-		bigBird.AddToDockedBirds (this);
 		dock.bird = this;
 		dock.gameObject.layer = LayerMask.NameToLayer ("Stations");
 		docked = true;
 
 		if (rider) {
-			rider.DockOnBigBird (dock);
+			rider.Dock (dock);
 		}
 			
-		if (follower) {
-			follower.transform.position = transform.position;
-			follower.GetComponent<SpriteRenderer> ().sortingLayerName = sr.sortingLayerName;
-			follower.GetComponent<SpriteRenderer> ().sortingOrder = sr.sortingOrder + 1;
-			Hatchling pup = follower.GetComponent<Hatchling> ();
-			if (pup) {
-				pup.flying = false;
-			}
-		}
 		return docked;
 	}
 
-	public void UndockFromBigBird () {
+	public void Undock () {
 		if (health < maxHealth) {
 			Debug.Log ("Can't undock unhealthy bird.");
 			return;
 		}
 
-		Vector3 releaseDirection = transform.position - bigBird.transform.position;
+		Vector3 releaseDirection = transform.position - dock.transform.position;
 		releaseDirection.Normalize ();
 		RaycastHit2D hit = Physics2D.Raycast (dock.transform.position, releaseDirection, dockRayLength, releaseMask);
 		if (hit.transform != null) {
 			print ("undock blocked by " + hit.transform.name);
 			return;
 		}
-
-		if (dock.transform.parent == bigBird.transform) {
-			bigBird.RemoveFromDockedBirds (this);
-		} else {
-			dock.gameObject.layer = LayerMask.NameToLayer ("Default");
-		}
-
-			/*if (dock.item) {
-				Hatchling h = dock.item.GetComponent<Hatchling> ();
-				if (h && !pup) {
-					pup = h;
-					pup.UndockFromBigBird (this);
-					dock.item = null;
-				}
-			}*/
-
-
-
 
 		dock.GetComponent<BoxCollider2D> ().enabled = true;
 		docked = false;
@@ -513,16 +403,6 @@ public class Bird : MonoBehaviour {
 		sr.sortingLayerName = "Birds";
 		sr.sortingOrder = 0;
 		rider.Undock ();
-		EmptyNest ();
-		if (follower) {
-			follower.transform.position = transform.position + followerOffset;
-			follower.GetComponent<SpriteRenderer> ().sortingLayerName = sr.sortingLayerName;
-			follower.GetComponent<SpriteRenderer> ().sortingOrder = sr.sortingOrder + 1;
-			Hatchling pup = follower.GetComponent<Hatchling> ();
-			if (pup) {
-				pup.flying = true;
-			}
-		}
 	}
 
 	void EnableColliders () {
@@ -598,11 +478,7 @@ public class Bird : MonoBehaviour {
 	}
 
 	public IEnumerator Boost () {
-		if (ranOutOfGas || direction == Vector2.zero) {
-			yield break;
-		}
 		canBoost = false;
-		gas -= gasPerBoost;
 		forceMag = boostForceMag;
 		yield return new WaitForSeconds (boostCooldown);
 		canBoost = true;
@@ -624,32 +500,7 @@ public class Bird : MonoBehaviour {
 		}
 	}
 
-	void LowOnGas () {
-		Vector3 position = new Vector3 (transform.position.x, transform.position.y + iconAboveOffset, 0f);
-		gasLight = Instantiate (gasLightPrefab, position, transform.rotation) as GameObject;
-		gasLight.transform.parent = transform;
-		gasLightFlashing = true;
-		StartCoroutine (FlashGasLight());
-	}
 
-	IEnumerator FlashGasLight () {
-		if (gasLight) {
-			if (ranOutOfGas) {
-				gasLight.GetComponent<SpriteRenderer> ().enabled = true;
-				gasLightFlashing = false;
-			} else if (gasLight.GetComponent<SpriteRenderer> ().enabled == true) {
-				gasLight.GetComponent<SpriteRenderer> ().enabled = false;
-				yield return new WaitForSeconds (gasLightDelay / 2);
-			} else if (gasLight.GetComponent<SpriteRenderer> ().enabled == false) {
-				gasLight.GetComponent<SpriteRenderer> ().enabled = true;
-				yield return new WaitForSeconds (gasLightDelay);
-			}
-		}
-
-		if (gasLight && gasLightFlashing) {
-			StartCoroutine (FlashGasLight ());
-		}
-	}
 
 	public void RemoveHarp (Harpoon harpy) {
 		otherHarps.Remove (harpy);
@@ -706,7 +557,7 @@ public class Bird : MonoBehaviour {
 			}
 		}
 	}
-		
+
 
 	public void HurlHarpoon () {
 		if (!hurledHarp) {
@@ -725,7 +576,7 @@ public class Bird : MonoBehaviour {
 			aimingHarp = false;
 			harpLoaded = false;
 		}
-	
+
 	}
 
 	public void SwingHurlHarpoon () {
@@ -804,21 +655,6 @@ public class Bird : MonoBehaviour {
 		}
 	}
 
-	public void WindUp () {
-		if (!windUpStarted) {
-			windUpStarted = true;
-			windUpStartTime = Time.time;
-			hurlAim = rider.aim;
-		} else if ((Time.time - windUpStartTime) > windUpTime) {
-			harp.Fire (harp.transform, hurlAim);
-			windingUp = false;
-			windUpStarted = false;
-			Invoke ("EnableHarpCollider", .5f);
-		} else {
-			harp.transform.position = rider.transform.position + Vector3.Lerp (hurlAim, -hurlAim * 2, (Time.time - windUpStartTime) / windUpTime);
-		}
-	}
-
 	void EnableHarpCollider () {
 		harp.GetComponent<BoxCollider2D> ().enabled = true;
 		throwingHarp = false;
@@ -840,197 +676,15 @@ public class Bird : MonoBehaviour {
 		return totalMass;
 	}
 
-	public void LayEgg () {
-		inHeat = false;
-		CancelInvoke ("MakeLove");
-		if (follower) {
-			return;
-		}
-		GameObject eggObj = Instantiate (eggPrefab, transform.position, Quaternion.identity) as GameObject;
-		Egg freshEgg = eggObj.GetComponent<Egg> ();
-		freshEgg.gameObject.layer = LayerMask.NameToLayer ("Flyers");
-		freshEgg.transform.parent = transform;
-		freshEgg.transform.rotation = transform.rotation;
-		freshEgg.mom = this;
-		freshEgg.momsColor = color;
-		freshEgg.GetComponent<Rigidbody2D> ().isKinematic = true;
-		freshEgg.GetComponent<Collider2D> ().isTrigger = true;
-		if (!docked) {
-			freshEgg.transform.position = transform.position + followerOffset;
-			freshEgg.GetComponent<Collider2D> ().enabled = false;
-		} else {
-			freshEgg.transform.position = transform.position;
-		}
-
-		follower = freshEgg.transform;
-		pregnant = false;
-	}
-
-	public void EatGreens () {
-		inHeat = true;
-	}
-
-	void MakeLove () {
-		Vector3 spawnPosition = new Vector3 (transform.position.x, transform.position.y + iconAboveOffset, 0f);
-		GameObject love = Instantiate (lovePrefab, spawnPosition, Quaternion.identity) as GameObject;
-		Destroy (love, loveLasts);
-	}
-		
-	public void Webbed (OrbWeb ow) {
-		ow.captive = transform;
-		webTrap = ow;
-		webbed = true;
-		if (rolling) {
-			transform.rotation = Quaternion.identity;
-			rolling = false;
-			canRoll = true;
-		}
-		if (harp) {
-			harp.SetGripping (false);
-			harp.SetRecalling (true);
-			Destroy (harp.gameObject);
-			hurledHarp = false;
-		}
-		DetachOtherHarps ();
-		transform.position = ow.transform.position;
-		transform.parent = ow.transform;
-		rb.Sleep ();
-		//DisableColliders ();
-
-		if (rider) {
-			rider.Webbed (ow);
-		}
-	}
-
-	public void Unwebbed () {
-		webbed = false;
-		webTrap = null;
-		transform.parent = null;
-		//EnableColliders ();
-		if (rider) {
-			rider.Unwebbed ();
-		}
-	}
-
-	public void Powered (Powerbird pb) {
-		powerbird = pb;
-		powered = true;
-		if (rolling) {
-			transform.rotation = Quaternion.identity;
-			rolling = false;
-			canRoll = true;
-		}
-		if (harp) {
-			harp.SetGripping (false);
-			harp.SetRecalling (true);
-			Destroy (harp.gameObject);
-			hurledHarp = false;
-		}
-
-		if (follower) {
-			follower.transform.position = transform.position;
-		}
-
-		GetComponent<Rigidbody2D> ().mass = powerbird.mass;
-		GetComponent<Rigidbody2D> ().drag = powerbird.drag;
-		DetachOtherHarps ();
-		rb.Sleep ();
-
-		if (rider) {
-			rider.Powered (pb);
-		}
-		
-	}
-
-	public void Unpowered () { 
-		if (follower) {
-			follower.transform.position = transform.position + followerOffset;
-		}
-
-		powered = false;
-		powerbird = null;
-		transform.parent = null;
-		GetComponent<Rigidbody2D> ().mass = 1f;
-		GetComponent<Rigidbody2D> ().drag = 5f;
-		//EnableColliders ();
-		if (rider) {
-			rider.Unpowered ();
-		}
-	}
-
-	void SetRigidbodiesKinematic (bool set) {
-		Rigidbody2D[] rigs = GetComponentsInChildren<Rigidbody2D> ();
-		for (int i = 0; i < rigs.Length; i++) {
-			rigs [i].isKinematic = set;
-		}
-	}
 
 	public void BeenHarpooned (Harpoon h) {
-		//Bird birdie = h.GetHarpooner ().GetComponent<Bird> ();
-
-		//linkedBirds.Clear ();
-		//AttemptWeb (birdie);
-
-		//Circuit circ = new Circuit ();
-		//circ.AttemptCircuit (birdie);
 	}
-
-
-	public SolarPanel GetPanel () {
-		return panel;
-	}
-
-	public void CarryPanel (SolarPanel sp) {
-		panel = sp;
-		rb.mass += sp.GetComponent<Rigidbody2D> ().mass;
-	}
-
-	public void DropPanel () {
-		rb.mass -= panel.GetComponent<Rigidbody2D> ().mass;
-		panel = null;
-	}
+		
 
 	public void HarpoonReleased (Harpoon h) {
 		RemoveHarp (h);
 	}
-
-	public void Drink (WaterSource ws) {
-		float thisGulp = Mathf.Min (drinkRate, ws.gallons);
-		gas += thisGulp;
-		ws.Gulp (thisGulp);
-		ranOutOfGas = false;
-		forceMag = hydratedForceMag;
-	}
-
-	public void Chug (SprayDrop sd) {
-		float thisGulp = sd.sprayGulp;
-		gas += thisGulp;
-		sd.Die ();
-		ranOutOfGas = false;
-		forceMag = hydratedForceMag;
-	}
-
-	public IEnumerator TurnBlack (float delay) {
-		yield return new WaitForSeconds (delay);
-		if (!rider) {
-			body.GetComponent<SpriteRenderer> ().color = Color.black;
-			color = Color.black;
-		}
-	}
-
-	void EmptyNest () {
-		if (follower) {
-			Hatchling pup = follower.GetComponent<Hatchling> ();
-			if (pup) {
-				if (pup.CheckEvolutionRequirements ()) {
-					if (bigBird.GetNearestOpenDock (transform.position) != null) {
-						pup.Evolve ();
-					}
-				}
-			}
-		}
-	}
-
+		
 	public bool GetDead () {
 		return dead;
 	}

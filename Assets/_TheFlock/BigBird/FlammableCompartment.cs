@@ -61,7 +61,8 @@ public class FlammableCompartment : MonoBehaviour {
 	void Burn () {
 		hp -= flames.Count * burnDamage * Time.deltaTime;
 		if (hp <= 0) {
-			BurnedUp ();
+			print ("BURNED UP: " + transform.name);
+			//BurnedUp ();
 		}
 		/*for (int i = 0; i < flames.Count; i++) {
 			StartFire (spreadChance);

@@ -16,6 +16,7 @@ public class Harpoon : MonoBehaviour {
 	public float minTetherWidth = .05f;
 	public float maxTetherWidth = .2f;
 	public float hoseWidth = .4f;
+	public float nosePullMod = 100f;
 	public bool recalling = false;
 	public bool gripping = true;
 	public bool taut = false;
@@ -287,8 +288,13 @@ public class Harpoon : MonoBehaviour {
 		recallDir.Normalize ();
 
 		if (harpooned) {
+			float mod = 1f;
 			//TODO need to create a function AddEffectiveForcess or something for effective mass handling
-			harpooned.GetComponent<Harpoonable> ().RiBo ().AddForce (recallDir * recallMag);
+			if (harpooned.name == "Nose") {
+				mod = nosePullMod;
+			}
+			harpooned.GetComponent<Harpoonable> ().RiBo ().AddForce (recallDir * recallMag * mod);
+
 		} else {
 			rb.AddForce (recallDir * recallMag);
 		}
@@ -319,7 +325,11 @@ public class Harpoon : MonoBehaviour {
 				if (isWaterHose || isSolarHose) {
 					harpooned.GetComponent<Harpoonable> ().GetComponentInParent<Rigidbody2D> ().AddForce (springForce);
 				} else {
-					harpooned.GetComponent<Harpoonable> ().GetComponent<Rigidbody2D> ().AddForce (springForce);
+					float modifier = 1;
+					if (harpooned.transform.name == "Nose") {
+						modifier = nosePullMod;
+					}
+					harpooned.GetComponent<Harpoonable> ().GetComponent<Rigidbody2D> ().AddForce (springForce * modifier);
 				}
 			}
 			//harpooner.GetComponent<Harpoonable> ().RiBo ().AddForce (-springForce);
@@ -416,7 +426,7 @@ public class Harpoon : MonoBehaviour {
 			p.Equip (new Hose (p.w.hol));
 		} else if (solarHose) {
 			Player p = harpooner.GetComponentInChildren<Player> ();
-			p.Equip (new Unarmed (p.w.hol));
+			//p.Equip (new Unarmed (p.w.hol));
 			SolarPanel sp = p.b.GetPanel ();
 			if (sp) {
 				sp.AdjustAbsorbing ();

@@ -35,9 +35,9 @@ public class CameraFollow : MonoBehaviour {
 			foreach (Transform t in targetTransforms) {
 				xSum += t.position.x;
 				ySum += t.position.y;
-				Vector3 worldPos = Camera.main.WorldToScreenPoint (t.position);
-				if (worldPos.x > Screen.width * widthThreshPercent || worldPos.x < Screen.width * (1 - widthThreshPercent) ||
-					worldPos.y > Screen.height * heightThreshPercent || worldPos.y < Screen.height * (1 - heightThreshPercent)) {
+				Vector3 screenPos = Camera.main.WorldToScreenPoint (t.position);
+				if (screenPos.x > Screen.width * widthThreshPercent || screenPos.x < Screen.width * (1 - widthThreshPercent) ||
+					screenPos.y > Screen.height * heightThreshPercent || screenPos.y < Screen.height * (1 - heightThreshPercent)) {
 					increaseSize = true;
 				}
 			}

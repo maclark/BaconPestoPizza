@@ -167,7 +167,7 @@ public class Hatchling : Item {
 			rb.isKinematic = false;
 			rb.velocity = mom.GetComponent<Rigidbody2D> ().velocity;
 			rb.AddTorque (Random.Range (-mom.deathTorque, mom.deathTorque));
-			sr.color = new Color (1f, 0, 0, .5f);
+			sr.color = new Color (mom.color.r, mom.color.g, mom.color.b, .25f);
 			sr.sortingLayerName = "Buildings";
 			CancelInvoke ();
 			gameObject.layer = LayerMask.NameToLayer ("Dead");

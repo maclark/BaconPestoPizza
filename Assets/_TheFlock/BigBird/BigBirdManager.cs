@@ -24,6 +24,7 @@ public class BigBirdManager : MonoBehaviour {
 	public Text coins;
 	public Transform bigBirdColliders;
 	public Transform flammableCompartments;
+	public Transform bigBirdIndicator;
 
 	private GameManager gm;
 	private WaterSource localWater;

@@ -23,10 +23,15 @@ public class GateOperator : MonoBehaviour {
 		}
 	}
 
+	void Update () {
+		if (occupants.Count > 0) {
+			RaiseGate ();
+		}
+	}
+
 	void OnTriggerEnter2D (Collider2D other) {
 		if (other.tag == "Player") {
 			occupants.Add (other.transform);
-			RaiseGate ();
 		}
 	}
 

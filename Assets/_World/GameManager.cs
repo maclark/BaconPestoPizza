@@ -146,7 +146,7 @@ public class GameManager : MonoBehaviour {
 		invisibleTarget.name = "InvisibleTarget";
 	}
 
-	public Vector3 ClampToScreen (Vector3 position) {
+	public Vector3 ClampToScreen (Vector3 position, float buffer) {
 		
 		Vector3 bottomLeft = Camera.main.ScreenToWorldPoint (Vector3.zero);
 		Vector3 topRight = Camera.main.ScreenToWorldPoint (new Vector3(
@@ -159,8 +159,8 @@ public class GameManager : MonoBehaviour {
 			topRight.y - bottomLeft.y);
 		
 		return new Vector3 (
-			Mathf.Clamp(position.x, cameraRect.xMin + screenClampBuffer, cameraRect.xMax - screenClampBuffer),
-			Mathf.Clamp(position.y, cameraRect.yMin + screenClampBuffer, cameraRect.yMax - screenClampBuffer),
+			Mathf.Clamp(position.x, cameraRect.xMin + buffer, cameraRect.xMax - buffer),
+			Mathf.Clamp(position.y, cameraRect.yMin + buffer, cameraRect.yMax - buffer),
 			transform.position.z);
 	}
 

@@ -75,10 +75,10 @@ public class Hunter : Flyer {
 	}
 
 	void OnCollisionEnter2D (Collision2D coll) {
-		if (coll.transform.tag == "Bird") {
+		if (rb.velocity.sqrMagnitude > meleeVelThresh) {
+			if (coll.transform.tag == "Bird") {
 			coll.transform.GetComponent<Bird> ().TakeOneShotKill ();
-		} else if (rb.velocity.sqrMagnitude > meleeVelThresh) {
-			if (coll.transform.tag == "BigBird") {
+			} else if (coll.transform.tag == "BigBird") {
 				coll.transform.GetComponent<BigBird> ().TakeDamage (meleeDamage);
 			}
 			if (coll.transform.tag == "Enemy") {
