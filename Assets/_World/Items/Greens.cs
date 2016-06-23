@@ -10,7 +10,7 @@ public class Greens : Item {
 	void OnCollisionEnter2D (Collision2D coll) {
 		if (coll.transform.tag == "Bird") {
 			Bird birdie = coll.transform.GetComponent<Bird> ();
-			if (!birdie.inHeat || !birdie.pregnant || !birdie.follower) {
+			if (!birdie.inHeat && !birdie.pregnant && !birdie.follower) {
 				birdie.EatGreens ();
 				Destroy (gameObject);
 			}

@@ -53,7 +53,7 @@ public class Friend : Item {
 	}
 
 	void SpawnKangas () {
-		for (int i = 0; i < gm.GetAlliedTransforms ().Count; i++) {
+		for (int i = 0; i < gm.GetAlliedTransforms ().Count + gm.zoneNumber; i++) {
 			Instantiate (kangaPrefab, startPosition, Quaternion.identity);
 		}
 		Invoke ("LowerWalls", 10f);

@@ -419,8 +419,8 @@ public class Tetris : MonoBehaviour {
 		int icAtts = Mathf.RoundToInt (Mathf.Log (invaderCarrierAttempts * difficultyMod * (gm.zoneNumber + 1)));
 		int ecAtts = Mathf.RoundToInt (Mathf.Log (eliteCarrierAttempts * difficultyMod * (gm.zoneNumber - 1)));
 		int pufAtts = Mathf.RoundToInt (Mathf.Log (pufferAttempts * difficultyMod * (gm.zoneNumber + 1)));
-		int bpufAtts = Mathf.RoundToInt (Mathf.Log (bigPufferAttempts * difficultyMod * (gm.zoneNumber - 2)));
-		int huntPairAtts = Mathf.RoundToInt (Mathf.Log (hunterPairAttempts * difficultyMod * (gm.zoneNumber + 1)));
+		int bpufAtts = Mathf.RoundToInt (Mathf.Log (bigPufferAttempts * difficultyMod * (gm.zoneNumber)));
+		int huntPairAtts = Mathf.RoundToInt (Mathf.Log (hunterPairAttempts * difficultyMod * (gm.zoneNumber - 2)));
 		int alkAtts = Mathf.RoundToInt (Mathf.Log (alakazamAttempts * difficultyMod * (gm.zoneNumber + 1)));
 
 		SpawnEnemies (botLeft, fieldWidth, fieldHeight, iAtts, eiAtts, icAtts, ecAtts, pufAtts, bpufAtts, huntPairAtts, alkAtts);

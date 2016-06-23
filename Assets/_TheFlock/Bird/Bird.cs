@@ -499,7 +499,7 @@ public class Bird : MonoBehaviour {
 
 
 
-		dock.GetComponent<BoxCollider2D> ().enabled = true;
+		dock.GetComponent<BoxCollider2D> ().enabled = false;
 		docked = false;
 		dock.bird = null;
 		dock = null;

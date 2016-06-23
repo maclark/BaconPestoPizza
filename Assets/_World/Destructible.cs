@@ -7,9 +7,15 @@ public class Destructible : MonoBehaviour {
 	public int hp = 500;
 	public float birthRange = 5f;
 	public float epxlosionMag = 100f;
-	public float chanceForRuby = .33f;
+	public float chanceForRuby = .05f;
+	public float chanceForGreens = .1f;
+	public float chanceForShield = .15f;
+	public float chanceForEaglehead = .02f;
 	public List<GameObject> babies;
 	public GameObject ruby;
+	public GameObject greens;
+	public GameObject shield;
+	public GameObject eaglehead;
 
 	void OnTriggerEnter2D (Collider2D other) {
 		Projectile proj = other.GetComponent<Projectile> ();
@@ -40,6 +46,15 @@ public class Destructible : MonoBehaviour {
 		if (Random.Range (0f, 1f) < chanceForRuby) {
 			GiveBirth (ruby);
 		}
+		if (Random.Range (0f, 1f) < chanceForGreens) {
+			GiveBirth (greens);
+		}
+		if (Random.Range (0f, 1f) < chanceForShield) {
+			GiveBirth (shield);
+		}
+		if (Random.Range (0f, 1f) < chanceForEaglehead) {
+			GiveBirth (eaglehead);
+		}
 		Destroy (gameObject);
 	}
 
@@ -50,7 +65,9 @@ public class Destructible : MonoBehaviour {
 		GameObject obj = Instantiate (baby, birthplace, Quaternion.identity) as GameObject;
 		obj.GetComponent<Collider2D> ().isTrigger = false;
 		obj.GetComponent<Rigidbody2D> ().isKinematic = false;
-		obj.GetComponent<Harpoonable> ().enabled = true;
+		if (obj.GetComponent<Harpoonable> ()) {
+			obj.GetComponent<Harpoonable> ().enabled = true;
+		}
 		if (transform.parent) {
 			obj.transform.parent = transform.parent;
 		}
