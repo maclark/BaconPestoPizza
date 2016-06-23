@@ -69,11 +69,6 @@ public class PlayerInput : MonoBehaviour {
 						isXboxController = true;
 						joystick = "_p" + i;
 					}
-				}  else if (Input.GetKeyDown ("joystick " + i + " button 9")) {
-					if (playerNum == i) {
-						isXboxController = false;
-						joystick = "_p" + i;
-					}
 				}
 			}
 

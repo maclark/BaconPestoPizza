@@ -197,7 +197,7 @@ public class Bird : MonoBehaviour {
 	}
 
 	void OnCollisionEnter2D (Collision2D coll) {		
-		if (coll.collider.gameObject.name == "DockableColliders") {
+		if (coll.collider.gameObject.name == "DockableColliders" || coll.collider.transform.tag == "FlameDocks") {
 			DockOnBigBird ();
 		} else if (coll.transform.tag == "Bird") {
 			if (inHeat) {

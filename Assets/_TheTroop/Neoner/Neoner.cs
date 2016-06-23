@@ -16,20 +16,18 @@ public class Neoner : MonoBehaviour {
 
 	private GameManager gm;
 	private SpriteRenderer sr;
-	private NeonerInput pi;
-	private Holster hol;
+	private NeonerInput ni;
 
 
 	void Awake () {
 		gm = GameObject.FindObjectOfType<GameManager> ();
-		pi = GetComponent<PlayerInput> ();
+		ni = GetComponent<NeonerInput> ();
 		sr = GetComponent<SpriteRenderer> ();
-		hol = new Holster (this);
-
 	}
 
 	void Start () {
 		body = gm.GetNeonerBody (this);
+		kanga = GetComponentInParent<Kanga> ();
 		color = sr.color;
 		reticle.GetComponent<SpriteRenderer> ().color = color;
 	}
@@ -61,7 +59,7 @@ public class Neoner : MonoBehaviour {
 		sr.sortingLayerName = newParent.GetComponent<SpriteRenderer> ().sortingLayerName;
 
 		transform.parent = newParent;
-		transform.position = pi.station.position;
+		transform.position = ni.station.position;
 
 		if (kanga.Shield != null) {
 			kanga.Shield.SetColor (new Color (0f, 0f, 0f, .5f));
@@ -73,22 +71,13 @@ public class Neoner : MonoBehaviour {
 		kanga = null;
 	}
 
-	public void CycleWeapons () {
-		kanga.TurnOffReloadIndicator ();
-		hol.CycleWeapons ();
-	}
-
-	public void CockWeapon () {
-		w.CockWeapon ();
-	}
-
 	public void Dock (Dock d) {
 		reticle.gameObject.SetActive (false);
 		sr.sortingLayerName = "BigBird";
 		sr.sortingOrder = 2;
-		pi.station = d.transform;
-		pi.state = PlayerInput.State.DOCKED;
-		pi.CancelInvoke ();
+		ni.station = d.transform;
+		ni.state = NeonerInput.State.DOCKED;
+		ni.CancelInvoke ();
 		w.firing = false;
 		d.GetComponent<BoxCollider2D> ().enabled = false;
 	}
@@ -112,18 +101,18 @@ public class Neoner : MonoBehaviour {
 		sr.sortingOrder = sortingOrd;
 	}
 
-	public void SpiritAway (Transform master, PlayerInput.State s) {
+	public void SpiritAway (Transform master, NeonerInput.State s) {
 		transform.parent = master;
 		body.gameObject.SetActive (false);
 		sr.sortingLayerName = "BigBird";
 		sr.sortingOrder = 1;
-		pi.state = s;
+		ni.state = s;
 	}
 
 	public void Disembark (Vector3 disembarkPoint) {
-		pi.AbandonStation ();
+		ni.AbandonStation ();
 		sr.enabled = true;
 		ManifestFlesh (disembarkPoint, "Buildings", 2);
-		pi.state = PlayerInput.State.ON_FOOT;
+		ni.state = NeonerInput.State.ON_FOOT;
 	}
 }

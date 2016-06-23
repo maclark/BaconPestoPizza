@@ -22,6 +22,7 @@ public class BigBirdManager : MonoBehaviour {
 	public ResourceBar energyTank;
 	public Text distance;
 	public Text coins;
+	public Friend friend;
 	public Transform bigBirdColliders;
 	public Transform flammableCompartments;
 	public Transform bigBirdIndicator;

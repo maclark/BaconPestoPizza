@@ -251,7 +251,8 @@ public class Spelunky {
 		if (gm.nextPortal) {
 			gm.lastPortalPosition = gm.nextPortal.transform.position;
 		}
-		gm.nextPortal = GameObject.Instantiate (portalPrefab, topExitVector, Quaternion.identity) as GameObject;
+		Vector3 spawnPoint = caveExitVectors [Random.Range (1, caveExitVectors.Count)];
+		gm.nextPortal = GameObject.Instantiate (portalPrefab, spawnPoint, Quaternion.identity) as GameObject;
 		gm.nextPortal.transform.parent = gm.boundaryContainer.transform;
 	}
 

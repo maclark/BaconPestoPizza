@@ -3,7 +3,7 @@ using System.Collections;
 
 public class Item : MonoBehaviour {
 
-	public enum ItemType {BATTERY, EAGLEHEAD, BIRD_SHIELD, RUBY, CANNONBALLS, TORPEDO, EGG, TON_WATER, SUN, GREENS}
+	public enum ItemType {FRIEND, BATTERY, EAGLEHEAD, BIRD_SHIELD, RUBY, CANNONBALLS, TORPEDO, EGG, TON_WATER, SUN, GREENS}
 	public ItemType itemType;
 	public Sprite diamond;
 	public Sprite birdhead;

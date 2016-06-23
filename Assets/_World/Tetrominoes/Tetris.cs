@@ -24,8 +24,11 @@ public class Tetris : MonoBehaviour {
 	public GameObject portalPrefab;
 	public GameObject gateSpaceSaverPrefab;
 	public GameObject invaderPrefab;
+	public GameObject eliteInvaderPrefab;
 	public GameObject invaderCarrierPrefab;
+	public GameObject eliteCarrierPrefab;
 	public GameObject pufferPrefab;
+	public GameObject bigPufferPrefab;
 	public GameObject hunterPairPrefab;
 	public GameObject alakazamPrefab;
 	public GameObject waterPrefab;
@@ -39,8 +42,11 @@ public class Tetris : MonoBehaviour {
 	public int destructibleAttsPerSpot;
 	public int difficultyMod;
 	public int invaderAttempts;
+	public int eliteInvaderAttempts;
 	public int invaderCarrierAttempts;
+	public int eliteCarrierAttempts;
 	public int pufferAttempts;
+	public int bigPufferAttempts;
 	public int hunterPairAttempts;
 	public int alakazamAttempts;
 	public int waterAttempts;
@@ -69,7 +75,6 @@ public class Tetris : MonoBehaviour {
 
 	void Start () {
 		SpawnNewZone ();
-		gm.StartCoroutine (gm.WarpBigBird (spelunkyGod.bottomExitVector));
 	}
 	
 	void Update () {
@@ -93,15 +98,18 @@ public class Tetris : MonoBehaviour {
 		spelunkyGod.BuildCave ();
 		spelunkyGod.SaveCaveExits ();
 		spelunkyGod.PlacePortal ();
-		spelunkyGod.PlaceTunnel ();
+		SpawnCastleField (origin, columns * roomWidth, rows * roomHeight, shopAttempts);
 		SpawnMegaTetrosOffTrail ();
 		SpawnWaterField (origin, columns * roomWidth, rows * roomHeight, waterAttempts);
 		SpawnRectangleField (origin, columns * roomWidth, rows * roomHeight, tetroAttempts);
-		spelunkyGod.OutlineCave ();
+		//spelunkyGod.OutlineCave ();
 		SpawnShopField (origin, columns * roomWidth, rows * roomHeight, shopAttempts);
 		SpawnEnemyField (origin, columns * roomWidth, rows * roomHeight);
 		SpawnDestructibles (origin, columns * roomWidth, rows * roomHeight, destructibleSpots, destructibleAttsPerSpot);
 		spelunkyGod.DestroySpaceSavers ();
+		if (gm.zoneNumber > 0) {
+			gm.StartCoroutine (gm.WarpBigBird (spelunkyGod.bottomExitVector));
+		}
 	}
 
 	public GameObject GetRandomMegaTetromino () {
@@ -283,12 +291,21 @@ public class Tetris : MonoBehaviour {
 		}
 	}
 
-	void SpawnEnemies (Vector2 botLeft, float fieldWidth, float fieldHeight, int invAttempts, int invCarAttempts, int puffAttempts, int hunterAttempts, int alkAtts) {
+	void SpawnEnemies (Vector2 botLeft, float fieldWidth, float fieldHeight, int invAttempts, int eInvAttempts, int invCarAttempts, 
+		int eCarAttempts, int puffAttempts, int bigPuffAttempts, int hunterAttempts, int alkAtts) {
+
 		for (int i = 0; i < invAttempts; i++) {
 			float x = Random.Range (botLeft.x, botLeft.x + fieldWidth);
 			float y = Random.Range (botLeft.y, botLeft.y+ fieldHeight);
 			transform.position = new Vector2 (x, y);
 			SpawnObject (invaderPrefab, gm.enemyContainer.transform);
+		}
+
+		for (int i = 0; i < eInvAttempts; i++) {
+			float x = Random.Range (botLeft.x, botLeft.x + fieldWidth);
+			float y = Random.Range (botLeft.y, botLeft.y+ fieldHeight);
+			transform.position = new Vector2 (x, y);
+			SpawnObject (eliteInvaderPrefab, gm.enemyContainer.transform);
 		}
 
 		for (int i = 0; i < invCarAttempts; i++) {
@@ -298,11 +315,25 @@ public class Tetris : MonoBehaviour {
 			SpawnObject (invaderCarrierPrefab, gm.enemyContainer.transform);
 		}
 
+		for (int i = 0; i < eCarAttempts; i++) {
+			float x = Random.Range (botLeft.x, botLeft.x + fieldWidth);
+			float y = Random.Range (botLeft.y, botLeft.y+ fieldHeight);
+			transform.position = new Vector2 (x, y);
+			SpawnObject (eliteCarrierPrefab, gm.enemyContainer.transform);
+		}
+
 		for (int i = 0; i < puffAttempts; i++) {
 			float x = Random.Range (botLeft.x, botLeft.x + fieldWidth);
 			float y = Random.Range (botLeft.y, botLeft.y+ fieldHeight);
 			transform.position = new Vector2 (x, y);
 			SpawnObject (pufferPrefab, gm.enemyContainer.transform);
+		}
+
+		for (int i = 0; i < bigPuffAttempts; i++) {
+			float x = Random.Range (botLeft.x, botLeft.x + fieldWidth);
+			float y = Random.Range (botLeft.y, botLeft.y+ fieldHeight);
+			transform.position = new Vector2 (x, y);
+			SpawnObject (bigPufferPrefab, gm.enemyContainer.transform);
 		}
 
 		for (int i = 0; i < hunterAttempts; i++) {
@@ -351,6 +382,27 @@ public class Tetris : MonoBehaviour {
 		}
 	}
 
+	void SpawnCastleField (Vector2 botLeft, float fieldWidth, float fieldHeight, int attempts) {
+		int loops = 0;
+		while (true) {
+			loops++;
+			if (loops > 300) {
+				return;
+			}
+			float x = Random.Range (botLeft.x, botLeft.x + fieldWidth);
+			float y = Random.Range (botLeft.y, botLeft.y + fieldHeight);
+			transform.position = new Vector2 (x, y);
+			BoxCollider2D[] colls = gm.castlePrefab.GetComponentInChildren<Castle> ().GetColliderChild ();
+			if (CheckSpaceClear(colls, 0f)) {
+				GameObject go = Instantiate (gm.castlePrefab, transform.position, transform.rotation) as GameObject;
+				go.transform.parent = gm.buildingContainer.transform;
+
+				//cap one shop per spawnshopfield call
+				return;
+			}
+		}
+	}
+
 	void SpawnWaterField (Vector2 botLeft, float fieldWidth, float fieldHeight, int attempts) {
 		for (int i = 0; i < attempts; i++) {
 			float x = Random.Range (botLeft.x, botLeft.x + fieldWidth);
@@ -363,12 +415,15 @@ public class Tetris : MonoBehaviour {
 
 	void SpawnEnemyField (Vector2 botLeft, float fieldWidth, float fieldHeight) {
 		int iAtts = Mathf.RoundToInt (Mathf.Log (invaderAttempts * difficultyMod * (gm.zoneNumber + 1)));
+		int eiAtts = Mathf.RoundToInt (Mathf.Log (eliteInvaderAttempts * difficultyMod * (gm.zoneNumber)));
 		int icAtts = Mathf.RoundToInt (Mathf.Log (invaderCarrierAttempts * difficultyMod * (gm.zoneNumber + 1)));
+		int ecAtts = Mathf.RoundToInt (Mathf.Log (eliteCarrierAttempts * difficultyMod * (gm.zoneNumber - 1)));
 		int pufAtts = Mathf.RoundToInt (Mathf.Log (pufferAttempts * difficultyMod * (gm.zoneNumber + 1)));
+		int bpufAtts = Mathf.RoundToInt (Mathf.Log (bigPufferAttempts * difficultyMod * (gm.zoneNumber - 2)));
 		int huntPairAtts = Mathf.RoundToInt (Mathf.Log (hunterPairAttempts * difficultyMod * (gm.zoneNumber + 1)));
 		int alkAtts = Mathf.RoundToInt (Mathf.Log (alakazamAttempts * difficultyMod * (gm.zoneNumber + 1)));
 
-		SpawnEnemies (botLeft, fieldWidth, fieldHeight, iAtts, icAtts, pufAtts, huntPairAtts, alkAtts);
+		SpawnEnemies (botLeft, fieldWidth, fieldHeight, iAtts, eiAtts, icAtts, ecAtts, pufAtts, bpufAtts, huntPairAtts, alkAtts);
 	}
 
 	public void SpawnCircleField (Vector2 origin, float radius, float circleAttempts) {

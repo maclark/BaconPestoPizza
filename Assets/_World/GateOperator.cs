@@ -7,6 +7,7 @@ public class GateOperator : MonoBehaviour {
 	public bool pickRandomColor = false;
 	public bool pickRandomGate = false;
 	public bool pressureGate = false;
+	public Kanga kanga;
 
 	private List<Transform> occupants = new List<Transform> ();
 	private Vector3 startPosition;
@@ -57,6 +58,9 @@ public class GateOperator : MonoBehaviour {
 		float x = startPosition.x;
 		float y = startPosition.y + transform.localScale.y * 2;
 		gate.position = new Vector3 (x, y, 0);
+		if (kanga) {
+			kanga.gameObject.SetActive (true);
+		}
 	}
 
 	void LowerGate () {

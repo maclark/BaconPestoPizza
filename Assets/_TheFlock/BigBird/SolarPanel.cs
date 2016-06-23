@@ -77,10 +77,12 @@ public class SolarPanel : MonoBehaviour {
 
 	public void AdjustAbsorbing () { 
 		if (b) {
-			if (localSun && b.harp.isSolarHose) {
-				b.harp.SetTetherColor (Color.yellow);
-				GetComponent<Animator> ().SetBool ("isAbsorbing", true);
-				gm.bbm.absorbing = true;
+			if (b.harp) {
+				if (localSun && b.harp.isSolarHose) {
+					b.harp.SetTetherColor (Color.yellow);
+					GetComponent<Animator> ().SetBool ("isAbsorbing", true);
+					gm.bbm.absorbing = true;
+				}
 			} else {
 				if (b.harp && b.harp.isSolarHose) {
 					b.harp.SetTetherColor (Color.grey);

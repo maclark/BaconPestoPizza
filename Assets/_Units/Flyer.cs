@@ -10,12 +10,12 @@ public class Flyer : Unit {
 	public float attackRange = 6f;
 	public float bulletForce = 60f;
 	public Carrier mother;
+	public Transform target;
 
 	protected Rigidbody2D rb;
 	protected GameManager gm;
-	protected Transform target;
-	protected bool startAttacking = false;
-	protected bool stopFiring = false;
+	public bool startAttacking = false;
+	public bool stopFiring = false;
 
 	// Use this for initialization
 	protected override void OnAwake() {
@@ -41,7 +41,7 @@ public class Flyer : Unit {
 		}
 
 		if (stopFiring) {
-			CancelInvoke ();
+			CancelInvoke ("FireBullet");
 			stopFiring = false;
 		}
 	}
@@ -130,6 +130,4 @@ public class Flyer : Unit {
 
 	protected void Kamikaze() {
 	}
-
-
 }

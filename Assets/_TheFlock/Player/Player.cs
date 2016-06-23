@@ -76,7 +76,8 @@ public class Player : MonoBehaviour {
 		if (pi.state == PlayerInput.State.NEUTRAL ||
 		    pi.state == PlayerInput.State.CHANGING_STATIONS ||
 		    pi.state == PlayerInput.State.IN_HOLD ||
-		    pi.state == PlayerInput.State.ON_PLATFORM ||
+			pi.state == PlayerInput.State.ON_PLATFORM ||
+			pi.state == PlayerInput.State.PILOTING ||
 		    pi.state == PlayerInput.State.IN_COOP) {
 			transform.rotation = Quaternion.identity;
 		} else if (pi.state == PlayerInput.State.FLYING ||
@@ -191,6 +192,10 @@ public class Player : MonoBehaviour {
 		sr.sortingLayerName = "BigBird";
 		sr.sortingOrder = 2;
 		if (itemHeld) {
+			if (itemHeld.GetComponent<Friend> ()) {
+				gm.bbm.friend = itemHeld.GetComponent<Friend> ();
+				Debug.Log ("RESCUEED FRIEDN BUT ITS NOT COURTNEY");
+			}
 			itemHeld.GetComponent<SpriteRenderer> ().sortingLayerName = sr.sortingLayerName;
 			itemHeld.GetComponent<SpriteRenderer> ().sortingOrder = sr.sortingOrder + 1;
 		}
@@ -272,6 +277,9 @@ public class Player : MonoBehaviour {
 
 		if (!itemHeld) {
 			Item it = itemTouching.GetComponent<Item> ();
+			if (it.itemType == Item.ItemType.FRIEND) {
+				it.GetComponent<Friend> ().Rescued ();
+			}
 			if (it.forSale) {
 				if (!it.keeper.SellToPlayer (it)) {
 					return;

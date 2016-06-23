@@ -6,14 +6,19 @@ public class Unit : MonoBehaviour {
 	public int hp;
 	public float wakeUpRange = 300f;
 	public Transform attacker;
+	public Color color;
 
 	protected SpriteRenderer sr;
-	private Color color;
 
 	protected virtual void OnAwake () {
+		
 		sr = GetComponent<SpriteRenderer> ();
+		if (!sr) {
+			sr = GetComponentInChildren<SpriteRenderer> ();
+		}
 		color = sr.color;
 	}
+
 	protected virtual void OnStart () {
 	}
 

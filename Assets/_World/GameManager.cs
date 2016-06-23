@@ -11,8 +11,10 @@ public class GameManager : MonoBehaviour {
 	public GameObject navPrefab;
 	public GameObject invisibleTarget;
 	public GameObject bodyPrefab;
+	public GameObject neonBodyPrefab;
 	public GameObject tunnelPrefab;
 	public GameObject shopPrefab;
+	public GameObject castlePrefab;
 	public GameObject nextPortal;
 	public GameObject poolerObject;
 	public GameObject positronPrefab;
@@ -179,7 +181,42 @@ public class GameManager : MonoBehaviour {
 		return pBody;
 	}
 
+	public NeonerBody GetNeonerBody (Neoner n) {
+		GameObject obj = Instantiate (neonBodyPrefab, transform.position, Quaternion.identity) as GameObject;
+		obj.SetActive (false);
+		obj.transform.parent = bodyContainer.transform;
+		NeonerBody nBody = obj.GetComponent<NeonerBody> ();
+		//nBody.SetNeoner (n);
+		return nBody;
+	}
+
 	public IEnumerator WarpBigBird (Vector3 warpExit) {
+		foreach (Transform t in alliedTransforms) {
+			Bird b = t.GetComponentInChildren<Bird> ();
+			if (b) {
+				print ("t has b, docking it");
+				b.DockOnBigBird ();
+			} else {
+				Bird b2 = t.GetComponentInParent<Bird>();
+				if (b2) {
+					print ("t's parent has bird");
+					b2.DockOnBigBird ();
+				} else {
+					Bubble bub = t.GetComponent<Bubble> ();
+					if (bub) {
+						print ("p is bubbed");
+						bub.p.BoardBigBird ();
+						Destroy (bub.gameObject);
+					} else {
+						Player p = t.GetComponentInChildren<Player> ();
+						if (p) {
+							print ("p doesn't have b, board it");
+							p.BoardBigBird ();
+						} 
+					}
+				}
+			}
+		}
 		yield return new WaitForSeconds (warpDelay);
 		bigBird.transform.position = warpExit;
 	}
