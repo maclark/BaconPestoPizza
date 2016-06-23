@@ -19,10 +19,6 @@ public class Portal : MonoBehaviour {
 				Destroy (gm.bbm.friend.gameObject);
 				gm.bbm.friend = null;
 				bigBirdWarped = true;
-			} else if (!bigBirdWarped) {
-				gm.SpawnNewZone ();
-				gm.bbm.friend = null;
-				bigBirdWarped = true;
 			}
 		}
 	}

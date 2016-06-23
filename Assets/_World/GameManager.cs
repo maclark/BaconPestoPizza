@@ -4,7 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 
 public class GameManager : MonoBehaviour {
-
+	public Portal currentPortal;
 	public GameObject bubblePrefab;
 	public GameObject bigBirdWaterTank;
 	public GameObject bigBirdEnergyTank;
@@ -295,5 +295,10 @@ public class GameManager : MonoBehaviour {
 		playerColors[6] = Color.magenta;
 		playerColors[7] = Color.clear;
 		*/
+	}
+
+	public void RescueFriend (Friend f) {
+		bbm.friend = f;
+		currentPortal.GetComponent<SpriteRenderer> ().color = Color.white;
 	}
 }

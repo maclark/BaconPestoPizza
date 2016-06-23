@@ -193,7 +193,7 @@ public class Player : MonoBehaviour {
 		sr.sortingOrder = 2;
 		if (itemHeld) {
 			if (itemHeld.GetComponent<Friend> ()) {
-				gm.bbm.friend = itemHeld.GetComponent<Friend> ();
+				gm.RescueFriend (itemHeld.GetComponent<Friend> ());
 				Debug.Log ("RESCUEED FRIEDN BUT ITS NOT COURTNEY");
 			}
 			itemHeld.GetComponent<SpriteRenderer> ().sortingLayerName = sr.sortingLayerName;
