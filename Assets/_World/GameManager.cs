@@ -297,8 +297,13 @@ public class GameManager : MonoBehaviour {
 		*/
 	}
 
-	public void RescueFriend (Friend f) {
+	public void OpenPortal (Friend f) {
+		print ("opened portal");
 		bbm.friend = f;
-		currentPortal.GetComponent<SpriteRenderer> ().color = Color.white;
+		currentPortal.opened = true;
+		SpriteRenderer[] srs = currentPortal.GetComponentsInChildren<SpriteRenderer> ();
+		for (int i = 0; i < srs.Length; i++) {
+			srs [i].color = Color.white;
+		}
 	}
 }

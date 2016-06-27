@@ -31,10 +31,6 @@ public class CargoHold : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
-		CreateCargo (rubyPrefab);
-		CreateCargo (greensPrefab);
-		CreateCargo (powerbirdPrefab);
-		CreateCargo (birdShieldPrefab);
 		CreateCargo (batteryPrefab);
 	}
 

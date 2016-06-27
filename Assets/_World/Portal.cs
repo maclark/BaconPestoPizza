@@ -4,6 +4,7 @@ using System.Collections;
 public class Portal : MonoBehaviour {
 
 	public bool bigBirdWarped = false;
+	public bool opened = false;
 	private GameManager gm;
 
 
@@ -14,11 +15,13 @@ public class Portal : MonoBehaviour {
 
 	void OnTriggerEnter2D (Collider2D other) {
 		if (other.name == "BigBirdColliders" || other.tag == "BigBird") {
-			if (gm.bbm.friend && !bigBirdWarped) {
-				gm.SpawnNewZone ();
-				Destroy (gm.bbm.friend.gameObject);
-				gm.bbm.friend = null;
-				bigBirdWarped = true;
+			if (!bigBirdWarped) {
+				if (gm.bbm.friend || opened) {
+					gm.SpawnNewZone ();
+					Destroy (gm.bbm.friend.gameObject);
+					gm.bbm.friend = null;
+					bigBirdWarped = true;
+				}
 			}
 		}
 	}

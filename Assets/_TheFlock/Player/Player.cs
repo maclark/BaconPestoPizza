@@ -150,6 +150,12 @@ public class Player : MonoBehaviour {
 		sr.sortingLayerName = "BigBird";
 		sr.sortingOrder = 2;
 
+		if (itemHeld) {
+			if (itemHeld.GetComponent<Friend> ()) {
+				print ("item held board big bird");
+				gm.OpenPortal (itemHeld.GetComponent<Friend> ());
+			}
+		}
 		transform.position = bigBird.transform.position;
 		transform.rotation = bigBird.transform.rotation;
 		transform.parent = bigBird.transform;
@@ -191,14 +197,6 @@ public class Player : MonoBehaviour {
 		reticle.gameObject.SetActive (false);
 		sr.sortingLayerName = "BigBird";
 		sr.sortingOrder = 2;
-		if (itemHeld) {
-			if (itemHeld.GetComponent<Friend> ()) {
-				gm.RescueFriend (itemHeld.GetComponent<Friend> ());
-				Debug.Log ("RESCUEED FRIEDN BUT ITS NOT COURTNEY");
-			}
-			itemHeld.GetComponent<SpriteRenderer> ().sortingLayerName = sr.sortingLayerName;
-			itemHeld.GetComponent<SpriteRenderer> ().sortingOrder = sr.sortingOrder + 1;
-		}
 		pi.station = d.transform;
 		pi.state = PlayerInput.State.DOCKED;
 		pi.CancelInvoke ();
@@ -277,9 +275,7 @@ public class Player : MonoBehaviour {
 
 		if (!itemHeld) {
 			Item it = itemTouching.GetComponent<Item> ();
-			if (it.itemType == Item.ItemType.FRIEND) {
-				it.GetComponent<Friend> ().Rescued ();
-			}
+
 			if (it.forSale) {
 				if (!it.keeper.SellToPlayer (it)) {
 					return;
@@ -293,6 +289,10 @@ public class Player : MonoBehaviour {
 			}
 
 			itemHeld = itemTouching;
+			if (itemHeld.GetComponent<Item>().itemType == Item.ItemType.FRIEND) {
+				print ("picking up friend try");
+				itemHeld.GetComponent<Friend> ().PickedUpFriend ();
+			}
 			itemTouching = null;
 			itemHeld.transform.position = transform.position;
 			itemHeld.transform.parent = transform;

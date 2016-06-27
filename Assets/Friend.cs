@@ -35,20 +35,10 @@ public class Friend : Item {
 	}
 
 	public override void Drop (Player p, string sortLayerName, int sortOrder, bool droppedItem=false, bool canDrop=true) {
-		PlayerInput.State pState = p.GetComponent<PlayerInput> ().state;
-		if (pState == PlayerInput.State.IN_HOLD) {
-			gm.bbm.friend = this;
-			GetComponent<Collider2D> ().isTrigger = true;
-			GetComponent<Rigidbody2D> ().isKinematic = true;
-			droppedItem = true;
-			GetComponentInChildren<SpriteRenderer> ().sortingLayerName = sortLayerName;
-			GetComponentInChildren<SpriteRenderer> ().sortingOrder = 1;
-			return;
-		} 
 		base.Drop (p, sortLayerName, sortOrder, droppedItem, canDrop);
 	}
 
-	public void Rescued () {
+	public void PickedUpFriend () {
 		Invoke ("SpawnKangas", 10f);
 	}
 
