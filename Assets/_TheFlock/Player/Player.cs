@@ -89,11 +89,9 @@ public class Player : MonoBehaviour {
 	void MountAndCharge () {
 		Bird mount = gm.bigBird.GetUnboardedBird ();
 		if (mount) {
+			mount.GetDock ().Man (this);
 			BoardBird (mount);
-			mount.UndockFromBigBird ();
-			if (!b.docked) {
-				pi.state = PlayerInput.State.FLYING;
-			}
+			mount.GetDock ().Launch ();
 		}
 	}
 
@@ -128,7 +126,7 @@ public class Player : MonoBehaviour {
 		sr.sortingLayerName = newParent.GetComponent<SpriteRenderer> ().sortingLayerName;
 
 		transform.parent = newParent;
-		transform.position = pi.station.position;
+		transform.position = pi.realStation.transform.position;
 
 		if (b.Shield != null) {
 			b.Shield.SetColor (new Color (0f, 0f, 0f, .5f));
@@ -194,14 +192,15 @@ public class Player : MonoBehaviour {
 	}
 
 	public void DockOnBigBird (Dock d) {
+		d.MakeUnAvailable ();
+		pi.realStation = d;
+		d.Man (this);
+
+		pi.CancelInvoke ();
+		w.firing = false;
 		reticle.gameObject.SetActive (false);
 		sr.sortingLayerName = "BigBird";
 		sr.sortingOrder = 2;
-		pi.station = d.transform;
-		pi.state = PlayerInput.State.DOCKED;
-		pi.CancelInvoke ();
-		w.firing = false;
-		d.GetComponent<BoxCollider2D> ().enabled = false;
 	}
 
 	public void Undock () {
@@ -254,7 +253,11 @@ public class Player : MonoBehaviour {
 	}
 
 	public void Disembark (Vector3 disembarkPoint) {
-		pi.AbandonStation ();
+		if (pi.realStation) {
+			pi.realStation.Abandon ();
+		} else {
+			pi.AbandonStation ();
+		}
 		sr.enabled = true;
 		ManifestFlesh (disembarkPoint, "Buildings", 2);
 		pi.state = PlayerInput.State.ON_FOOT;

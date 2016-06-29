@@ -25,6 +25,7 @@ public class Hatchling : Item {
 		base.OnAwake ();
 	}
 	void Start () {
+		
 		base.OnStart ();
 	}
 	
@@ -53,6 +54,8 @@ public class Hatchling : Item {
 	}
 
 	public bool CheckEvolutionRequirements () {
+		//Removing requirement to be killer
+		isKiller = true;
 		return (isKiller && isFlyer && gm.birds.Count < 8);
 	}
 

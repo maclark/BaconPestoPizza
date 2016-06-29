@@ -6,7 +6,7 @@ public class Torpedo : Projectile {
 	public float torpedoAccel;
 	public float maxDetonation = 4f;
 	public GameObject explosionPrefab;
-	public Turret t;
+	public TurretStation t;
 
 	void Awake () {
 		base.OnAwake ();

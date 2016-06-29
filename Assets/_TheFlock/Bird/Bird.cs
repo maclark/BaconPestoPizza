@@ -414,6 +414,15 @@ public class Bird : MonoBehaviour {
 			return docked;
 		}
 
+		transform.position = dock.transform.position;
+		transform.rotation = dock.transform.rotation;
+		transform.parent = dock.transform;
+		bigBird.AddToDockedBirds (this);
+		dock.bird = this;
+		dock.gameObject.layer = LayerMask.NameToLayer ("Stations");
+		docked = true;
+
+
 		if (rolling) {
 			transform.rotation = Quaternion.identity;
 			rolling = false;
@@ -431,11 +440,11 @@ public class Bird : MonoBehaviour {
 			panel.Reset ();
 		}
 
+
+
 		DetachOtherHarps ();
-		transform.position = dock.transform.position;
-		transform.rotation = dock.transform.rotation;
-		transform.parent = dock.transform;
 		DisableColliders ();
+
 		sr.color = color;
 		sr.sortingLayerName = "BigBird";
 		sr.sortingOrder = 1;
@@ -446,10 +455,8 @@ public class Bird : MonoBehaviour {
 		Destroy (gasLight);
 		CancelInvoke ();
 		rb.Sleep ();
-		bigBird.AddToDockedBirds (this);
-		dock.bird = this;
-		dock.gameObject.layer = LayerMask.NameToLayer ("Stations");
-		docked = true;
+
+
 
 		if (rider) {
 			rider.DockOnBigBird (dock);
@@ -497,13 +504,6 @@ public class Bird : MonoBehaviour {
 			}*/
 
 
-
-
-		dock.GetComponent<BoxCollider2D> ().enabled = false;
-		docked = false;
-		dock.bird = null;
-		dock = null;
-
 		transform.parent = null;
 		transform.rotation = Quaternion.identity;
 		rb.WakeUp ();
@@ -523,6 +523,9 @@ public class Bird : MonoBehaviour {
 				pup.flying = true;
 			}
 		}
+			
+		docked = false;
+		dock = null;
 	}
 
 	void EnableColliders () {

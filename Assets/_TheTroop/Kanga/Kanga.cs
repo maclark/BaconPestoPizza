@@ -150,6 +150,7 @@ public class Kanga : Flyer {
 						other.GetComponent<Flyer> ().Die ();
 					}
 				}
+			} else {
 				base.TriggerEnter2D (other);
 			}
 		}

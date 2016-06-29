@@ -65,7 +65,7 @@ public class NeonerInput : MonoBehaviour {
 	//private GameManager gm;
 	private SpriteRenderer sr;
 	private Neoner n;
-	private Turret turret;
+	//private Turret turret;
 	//private bool releasedRightTrigger = true;
 	//private bool isXboxController = false;
 	private bool stationcasting = false;
@@ -98,7 +98,7 @@ public class NeonerInput : MonoBehaviour {
 	public void AbandonStation () {
 		if (state == State.NEUTRAL) {
 		}  else if (state == State.ON_TURRET) {
-			turret.transform.GetComponentInChildren<SpriteRenderer> ().color = Color.grey;
+			//turret.transform.GetComponentInChildren<SpriteRenderer> ().color = Color.grey;
 		}  else if (state == State.DOCKED) {
 			if (n.kanga) {
 				n.Dekanga (station);
@@ -171,7 +171,7 @@ public class NeonerInput : MonoBehaviour {
 			}  else if (hit.collider.name == "Dock") {
 				selectedState = State.DOCKED;
 			}  else if (hit.collider.name == "Turret") {
-				turret = station.GetComponent<Turret> ();
+				//turret = station.GetComponent<Turret> ();
 				selectedState = State.ON_TURRET;
 			}  else if (hit.collider.name == "BoardingZone") {
 				selectedState = State.ON_FOOT;
@@ -279,6 +279,7 @@ public class NeonerInput : MonoBehaviour {
 	}
 
 	void HandleTurretInput () {
+		/*
 		if (FakeBCircleButton) {
 			state = State.CHANGING_STATIONS;
 			turret.transform.GetComponentInChildren<SpriteRenderer> ().color = Color.black;
@@ -292,7 +293,7 @@ public class NeonerInput : MonoBehaviour {
 
 		if (FakeACrossButtonDown) {
 			turret.PressedA ();
-		}
+		}*/
 	}
 		
 

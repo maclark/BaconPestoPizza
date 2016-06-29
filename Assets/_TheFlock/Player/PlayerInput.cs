@@ -36,13 +36,19 @@ public class PlayerInput : MonoBehaviour {
 	public State selectedState = State.NEUTRAL;
 
 
-	private GameManager gm;
-	private SpriteRenderer sr;
+	public Station realStation;
+	public Station realSelectedStation;
+
+
+	public GameManager gm;
+	public SpriteRenderer sr;
+	public SystemsHandler sysH;
+
+
 	private BigBird bigBird;
 	private StickHandler sh;
-	private SystemsHandler sysH;
 	private Player p;
-	private Turret turret;
+	//private Turret turret;
 	private bool releasedRightTrigger = true;
 	private bool isXboxController = false;
 	private bool stationcasting = false;
@@ -90,18 +96,22 @@ public class PlayerInput : MonoBehaviour {
 			}
 		}
 
-		if (state == State.NEUTRAL) {
+		if (realStation) {
+			realStation.HandleInput ();
+		} else if (state == State.NEUTRAL) {
 			HandleNeutralInput ();
 		}  else if (state == State.FLYING) {
 			HandleFlyingInput ();
 		}  else if (state == State.CHANGING_STATIONS) {
 			HandleChangingStations ();
 		}  else if (state == State.ON_TURRET) {
-			HandleTurretInput ();
+			Debug.Log ("ON TURRET WTF?");
 		}  else if (state == State.DOCKED) {
-			HandleDockedInput ();
+			Debug.Log ("ON DOCK WTF?");
+			//HandleDockedInput ();
 		}  else if (state == State.PILOTING) {
-			HandlePilotingInput ();
+			Debug.Log ("PILOTING WTF?");
+			//HandlePilotingInput ();
 		}  else if (state == State.NAVIGATING) {
 			HandleNavigationInput ();
 		}  else if (state == State.IN_WEB) {
@@ -124,11 +134,11 @@ public class PlayerInput : MonoBehaviour {
 	public void AbandonStation () {
 		if (state == State.NEUTRAL) {
 		}  else if (state == State.ON_TURRET) {
-			turret.transform.GetComponentInChildren<SpriteRenderer> ().color = Color.grey;
+			//turret.transform.GetComponentInChildren<SpriteRenderer> ().color = Color.grey;
 		}  else if (state == State.DOCKED) {
-			if (p.b) {
-				p.Debird (bigBird.transform);
-			}		
+			//if (p.b) {
+			//	p.Debird (bigBird.transform);
+			//}		
 		}  else if (state == State.PILOTING) {
 			bigBird.turn = 0;
 			station.GetComponentInChildren<SpriteRenderer> ().color = Color.grey;
@@ -157,7 +167,7 @@ public class PlayerInput : MonoBehaviour {
 			return;
 		}  else if (state == State.IN_COOP) {
 			sr.enabled = true;
-			p.ManifestFlesh (transform.position, "BigBird", 1);
+			p.ManifestFlesh (transform.position, "BigBird", 2);
 			p.body.trigger.SetActive (true);
 			p.body.transform.parent = station.transform;
 			return;
@@ -173,7 +183,10 @@ public class PlayerInput : MonoBehaviour {
 	void HandleChangingStations () {
 		//TODO can get stuck in changing stations at start because of being in Neutral
 		if (Input.GetButtonUp(bCircleButton)) {
-			ManStation ();
+			if (realSelectedStation) {
+				realSelectedStation.Man (p);
+				realStation = realSelectedStation;
+			} else ManStation ();
 			return;
 		}  
 		sr.enabled = true;
@@ -201,20 +214,44 @@ public class PlayerInput : MonoBehaviour {
 				return;
 			}
 
-			if (station) {
+
+			if (realSelectedStation) {
+				realSelectedStation.MakeAvailable ();
+			} else if (station) {
 				station.GetComponent<BoxCollider2D> ().enabled = true;
 			}
+
+
+
 			station = hit.collider.transform;
-			station.GetComponent<BoxCollider2D> ().enabled = false;
-			transform.position = station.position;
+			realSelectedStation = hit.collider.transform.GetComponent<Station> ();
+
+
+
+			if (realSelectedStation) {
+				print ("real station hit: " + hit.collider.transform.name);
+				realSelectedStation.MakeUnAvailable ();
+			} else {
+				print ("fake station hit: " + hit.collider.transform.name);
+				station.GetComponent<BoxCollider2D> ().enabled = false;
+			}
+
+
+			if (realSelectedStation) {
+				transform.position = realSelectedStation.transform.position;
+			} else {
+				transform.position = station.position;
+			}
+
+
 
 			if (hit.collider.name == "Cockpit") {
-				selectedState = State.PILOTING;
+				//selectedState = State.PILOTING;
 			}  else if (hit.collider.name == "Dock") {
-				selectedState = State.DOCKED;
+				//selectedState = State.DOCKED;
 			}  else if (hit.collider.name == "Turret") {
-				turret = station.GetComponent<Turret> ();
-				selectedState = State.ON_TURRET;
+				//turret = station.GetComponent<Turret> ();
+				//selectedState = State.ON_TURRET;
 			}  else if (hit.collider.name == "CargoPlatform") {
 				selectedState = State.ON_PLATFORM;
 			}  else if (hit.collider.name == "CargoHold") {
@@ -308,7 +345,7 @@ public class PlayerInput : MonoBehaviour {
 	}
 
 	void HandleDockedInput () {
-		if (Input.GetButtonDown (bCircleButton)) {
+		/*if (Input.GetButtonDown (bCircleButton)) {
 			if (p.b) {
 				p.Debird (bigBird.transform);
 			}		
@@ -334,7 +371,7 @@ public class PlayerInput : MonoBehaviour {
 			if (!p.b.docked) {
 				state = State.FLYING;
 			}
-		}
+		}*/
 	}
 
 	void HandleInCoopInput () {
@@ -367,7 +404,8 @@ public class PlayerInput : MonoBehaviour {
 	}
 
 	void HandleTurretInput () {
-		if (Input.GetButtonDown (bCircleButton)) {
+		print ("HandleTurretInput");
+		/*if (Input.GetButtonDown (bCircleButton)) {
 			state = State.CHANGING_STATIONS;
 			turret.transform.GetComponentInChildren<SpriteRenderer> ().color = Color.black;
 			return;
@@ -380,11 +418,11 @@ public class PlayerInput : MonoBehaviour {
 
 		if (Input.GetButtonDown (aCrossButton)) {
 			turret.PressedA ();
-		}
+		}*/
 	}
 
 	void HandlePilotingInput () {
-		if (Input.GetButtonDown (bCircleButton)) {
+		/*if (Input.GetButtonDown (bCircleButton)) {
 			bigBird.turn = 0;
 			station.GetComponentInChildren<SpriteRenderer> ().color = Color.black;
 			state = State.CHANGING_STATIONS;
@@ -398,7 +436,7 @@ public class PlayerInput : MonoBehaviour {
 			return;
 		} */
 
-		if (bigBird.Landed || bigBird.landing) {
+		/*if (bigBird.Landed || bigBird.landing) {
 			if (Input.GetButtonDown (xSquareButton)) {
 				bigBird.LiftOff ();
 			}
@@ -428,7 +466,7 @@ public class PlayerInput : MonoBehaviour {
 			sysH.FireBroadside (true);
 		}  else if (Input.GetAxisRaw (leftTrigger) > 0) {
 			sysH.FireBroadside (false);
-		}
+		}*/
 	}
 
 	void HandleNavigationInput () {

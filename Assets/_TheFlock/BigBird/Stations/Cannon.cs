@@ -1,17 +1,17 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
 
-public class Turret : MonoBehaviour {
+public class Cannon : MonoBehaviour {
 
 	public GameObject prefabProjectile;
 	public float cooldown = 1f;
 
 	private bool ready = true;
 	private Vector3 aim;
-	private List<Torpedo> torps;
+	private List<Cannonball> balls;
 
 	void Start () {
-		torps = new List<Torpedo> ();
+		balls = new List<Cannonball> ();
 	}
 
 	public void RightTrigger () {
@@ -21,8 +21,8 @@ public class Turret : MonoBehaviour {
 	}
 
 	public void PressedA () {
-		if (torps.Count > 0) {
-			torps [0].Detonate ();
+		if (balls.Count > 0) {
+			balls [0].Detonate ();
 		}
 	}
 
@@ -34,16 +34,15 @@ public class Turret : MonoBehaviour {
 	}
 
 	public void Fire () {
-		GameObject obj = Instantiate (prefabProjectile, transform.position, Quaternion.LookRotation(transform.forward, -transform.right)) as GameObject;
-		Torpedo torp = obj.GetComponent<Torpedo> ();
-		torp.t = this;
-		torps.Add (torp);
+		GameObject obj = Instantiate (prefabProjectile, transform.position, transform.rotation) as GameObject;
+		Cannonball ball = obj.GetComponent<Cannonball> ();
+		ball.t = this;
+		balls.Add (ball);
 		if (aim == Vector3.zero) {
 			//depends on base rotation of object... TODO
 			//aim = transform.up;
-			aim = transform.up;
 		}
-		torp.Fire (transform.position, aim);
+		ball.Fire (transform.position, aim);
 		ready = false;
 		Invoke ("ResetCooldown", cooldown);
 	}
@@ -52,8 +51,8 @@ public class Turret : MonoBehaviour {
 		ready = true;
 	}
 
-	public void RemoveTorp (Torpedo torp) {
-		torps.Remove (torp);
+	public void RemoveBall (Cannonball b) {
+		balls.Remove (b);
 	}
 }
 
