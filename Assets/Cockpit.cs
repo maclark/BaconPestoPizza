@@ -86,7 +86,7 @@ public class Cockpit : Station {
 		GetComponent<Collider2D> ().enabled = true;
 	}
 
-	public override void MakeUnAvailable () {
+	public override void MakeUnavailable () {
 		print ("making unavailable cockpitstation");
 		GetComponent<Collider2D> ().enabled = false;
 	}

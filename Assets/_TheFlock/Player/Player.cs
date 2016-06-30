@@ -89,6 +89,7 @@ public class Player : MonoBehaviour {
 	void MountAndCharge () {
 		Bird mount = gm.bigBird.GetUnboardedBird ();
 		if (mount) {
+			mount.GetDock ().MakeUnavailable ();
 			mount.GetDock ().Man (this);
 			BoardBird (mount);
 			mount.GetDock ().Launch ();
@@ -192,8 +193,9 @@ public class Player : MonoBehaviour {
 	}
 
 	public void DockOnBigBird (Dock d) {
-		d.MakeUnAvailable ();
+		d.MakeUnavailable ();
 		pi.realStation = d;
+		pi.realSelectedStation = d;
 		d.Man (this);
 
 		pi.CancelInvoke ();

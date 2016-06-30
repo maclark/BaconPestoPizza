@@ -59,7 +59,7 @@ public class TurretStation : Station {
 		GetComponent<Collider2D> ().enabled = true;
 	}
 
-	public override void MakeUnAvailable () {
+	public override void MakeUnavailable () {
 		print ("making unavailable turretstation");
 		GetComponent<Collider2D> ().enabled = false;
 	}

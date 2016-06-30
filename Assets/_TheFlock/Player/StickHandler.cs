@@ -60,6 +60,7 @@ public class StickHandler{
 			if (upness > 0) {
 				LStickInUse = true;
 				timeOfLastStickUse = Time.time;
+
 				p.GetComponent<PlayerInput> ().state = PlayerInput.State.IN_HOLD;
 				gm.bigBird.hold.SelectorStep (p.transform, 0, 1);
 			}

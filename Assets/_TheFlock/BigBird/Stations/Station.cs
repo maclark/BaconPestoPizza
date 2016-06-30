@@ -3,7 +3,7 @@ using System.Collections;
 
 public abstract class Station : MonoBehaviour {
 
-	public enum StationType {DOCK, TURRET, COCKPIT, CARGO_HOLD, CARGO_PLATFORM}
+	public enum StationType {DOCK, TURRET, COCKPIT, CARGO_HOLD, LOADING_PLATFORM}
 
 	protected StationType type;
 	protected Player user;
@@ -26,7 +26,7 @@ public abstract class Station : MonoBehaviour {
 
 	public abstract void MakeAvailable ();
 
-	public abstract void MakeUnAvailable ();
+	public abstract void MakeUnavailable ();
 
 	public StationType GetStationType () {
 		return type;

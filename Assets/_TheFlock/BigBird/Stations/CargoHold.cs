@@ -1,7 +1,9 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class CargoHold : MonoBehaviour {
+public class CargoHold : Station {
+
+	public LoadingPlatform platform;
 	public GameObject rubyPrefab;
 	public GameObject greensPrefab;
 	public GameObject powerbirdPrefab;
@@ -19,18 +21,19 @@ public class CargoHold : MonoBehaviour {
 	public int xSelector;
 	public int ySelector;
 
+
 	private SpriteRenderer coverRenderer;
-	private GameManager gm;
 	private bool full = false;
 
-
 	void Awake () {
-		gm = GameObject.FindObjectOfType<GameManager> ();
 		coverRenderer = GetComponentInChildren <SpriteRenderer> ();
+		base.OnAwake ();
 	}
 
 	// Use this for initialization
 	void Start () {
+		base.SetStationType (Station.StationType.TURRET);
+
 		CreateCargo (batteryPrefab);
 		CreateCargo (greensPrefab);
 		CreateCargo (greensPrefab);
@@ -101,8 +104,11 @@ public class CargoHold : MonoBehaviour {
 		}
 		Player tPlayer = t.GetComponent<Player> ();
 		if (tPlayer) {
+			//TODO what if someone else is on platform??
 			MoveSelector (t, 1, -1);
-			tPlayer.MoveToPlatform ();
+			Abandon ();
+			platform.Man (tPlayer);
+			////tPlayer.MoveToPlatform ();
 		}
 	}
 
@@ -298,5 +304,97 @@ public class CargoHold : MonoBehaviour {
 				}
 			}
 		}
+	}
+
+	public override void HandleInput () {
+		if (Input.GetButtonDown (pi.bCircleButton)) {
+			////TODO What if someone else is on platform?
+			//gm.bigBird.hold.MoveToLoadingPlatform (user.transform);
+			//pi.realSelectedStation = 
+			Abandon ();
+			return;
+		}
+
+		if (!pi.sr.enabled) {
+			pi.sr.enabled = true;
+			gm.bigBird.hold.xSelector = 1;
+			gm.bigBird.hold.ySelector = 1;
+			pi.sh.verticalStickInUse = false;
+			pi.sh.horizontalStickInUse = false;
+			gm.bigBird.hold.Occupy (true);
+		}
+
+
+		if (Input.GetButtonDown (pi.aCrossButton)) {
+			gm.bigBird.hold.GrabSwapOrStoreCargo ();
+		}
+
+		if (Input.GetButtonDown (pi.xSquareButton)) {
+			gm.bigBird.hold.PressedA (user);
+		}
+
+		HandleSticks ();
+
+	}
+
+	void HandleSticks () {
+		if (Input.GetAxisRaw (pi.LSVertical) != 0 || Input.GetAxisRaw (pi.LSHorizontal) != 0) {
+			if (pi.LStickInUse == false) {
+				pi.LStickInUse = true;
+				pi.timeOfLastStickUse = Time.time;
+				Vector3 dir = new Vector3 (Input.GetAxis (pi.LSHorizontal), Input.GetAxis (pi.LSVertical), 0);
+				float upness = Vector3.Dot (dir, gm.bigBird.transform.up);
+				float overness = Vector3.Dot (dir, gm.bigBird.transform.right);
+				if (Mathf.Abs (upness) > Mathf.Abs (overness)) {
+					//move up/down relative to player
+					if (upness > 0) {
+						gm.bigBird.hold.SelectorStep (user.transform, 0, 1);
+					} else {
+						gm.bigBird.hold.SelectorStep (user.transform, 0, -1);
+					}
+				} else {
+					//move right/left relative to player
+					if (overness > 0) {
+						gm.bigBird.hold.SelectorStep (user.transform, 1, 0);
+					} else {
+						gm.bigBird.hold.SelectorStep (user.transform, -1, 0);
+					}
+				}
+			} else if (Time.time > pi.timeOfLastStickUse + pi.moveCooldown) {
+				pi.LStickInUse =  false;
+			}
+		} else {
+			pi.LStickInUse = false;
+		}
+	}
+
+	public override void Man (Player p) {
+		print ("manning hold");
+		gm.bigBird.hold.Occupy (true);
+		user = p;
+		pi = user.GetComponent<PlayerInput> ();
+		//pi.realStation = this;
+		//pi.realSelectedStation = pi.realStation;
+		pi.state = PlayerInput.State.IN_HOLD;
+	}
+
+
+	public override void Abandon () {
+		print ("abandoning hold");
+		gm.bigBird.hold.Occupy (false);
+		pi.state = PlayerInput.State.CHANGING_STATIONS;
+		pi.realStation = null;
+		user = null;
+		pi = null;
+	}
+
+	public override void MakeAvailable () {
+		print ("making available hold");
+		GetComponent<Collider2D> ().enabled = true;
+	}
+
+	public override void MakeUnavailable () {
+		print ("making unavailable hold");
+		GetComponent<Collider2D> ().enabled = false;
 	}
 }

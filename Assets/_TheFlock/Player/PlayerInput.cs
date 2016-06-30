@@ -6,9 +6,11 @@ public class PlayerInput : MonoBehaviour {
 	public int playerNum = 0;
 	public bool checkingInput = false;
 	public bool canHighlight = false;
+	public bool LStickInUse = false;
 	public string joystick = "unset";
 	public float moveCooldown = .2f;
 	public float stationChangeDistance = 10f;
+	public float timeOfLastStickUse;
 	public LayerMask mask;
 	public Transform station;
 
@@ -43,10 +45,10 @@ public class PlayerInput : MonoBehaviour {
 	public GameManager gm;
 	public SpriteRenderer sr;
 	public SystemsHandler sysH;
+	public StickHandler sh;
 
 
 	private BigBird bigBird;
-	private StickHandler sh;
 	private Player p;
 	//private Turret turret;
 	private bool releasedRightTrigger = true;
@@ -119,9 +121,10 @@ public class PlayerInput : MonoBehaviour {
 		}  else if (state == State.POWERBIRD) {
 			HandlePowerbirdInput ();
 		}  else if (state == State.IN_HOLD) {
-			HandleInHoldInput ();
+			Debug.Log ("IN HOLD WTF?");
+			//HandleInHoldInput ();
 		}  else if (state == State.ON_PLATFORM) {
-			HandleOnPlatformInput ();
+			//HandleOnPlatformInput ();
 		}  else if (state == State.IN_COOP) {
 			HandleInCoopInput ();
 		}  else if (state == State.ON_FOOT) {
@@ -140,15 +143,15 @@ public class PlayerInput : MonoBehaviour {
 			//	p.Debird (bigBird.transform);
 			//}		
 		}  else if (state == State.PILOTING) {
-			bigBird.turn = 0;
-			station.GetComponentInChildren<SpriteRenderer> ().color = Color.grey;
-			sr.sortingOrder = 2;
+			//bigBird.turn = 0;
+			//station.GetComponentInChildren<SpriteRenderer> ().color = Color.grey;
+			//sr.sortingOrder = 2;
 		}  else if (state == State.NAVIGATING) {
 			HandleNavigationInput ();
 		}  else if (state == State.IN_HOLD) {
-			gm.bigBird.hold.Occupy (false);
+			//gm.bigBird.hold.Occupy (false);
 		}  else if (state == State.ON_PLATFORM) {
-			gm.bigBird.hold.Occupy (false);
+			//gm.bigBird.hold.Occupy (false);
 		}
 
 		if (station) {
@@ -230,7 +233,7 @@ public class PlayerInput : MonoBehaviour {
 
 			if (realSelectedStation) {
 				print ("real station hit: " + hit.collider.transform.name);
-				realSelectedStation.MakeUnAvailable ();
+				realSelectedStation.MakeUnavailable ();
 			} else {
 				print ("fake station hit: " + hit.collider.transform.name);
 				station.GetComponent<BoxCollider2D> ().enabled = false;
@@ -253,9 +256,9 @@ public class PlayerInput : MonoBehaviour {
 				//turret = station.GetComponent<Turret> ();
 				//selectedState = State.ON_TURRET;
 			}  else if (hit.collider.name == "CargoPlatform") {
-				selectedState = State.ON_PLATFORM;
+				//selectedState = State.ON_PLATFORM;
 			}  else if (hit.collider.name == "CargoHold") {
-				selectedState = State.IN_HOLD;
+				//selectedState = State.IN_HOLD;
 			}  else if (hit.collider.name == "Coop") {
 				selectedState = State.IN_COOP;
 			}  else if (hit.collider.name == "BoardingZone") {
@@ -480,7 +483,7 @@ public class PlayerInput : MonoBehaviour {
 	}
 
 	void HandleInHoldInput () {
-		if (Input.GetButtonDown (bCircleButton)) {
+		/*if (Input.GetButtonDown (bCircleButton)) {
 			gm.bigBird.hold.MoveToLoadingPlatform (p.transform);
 			gm.bigBird.hold.Occupy (false);
 			state = State.CHANGING_STATIONS;
@@ -505,11 +508,11 @@ public class PlayerInput : MonoBehaviour {
 		if (Input.GetButtonDown (xSquareButton)) {
 			gm.bigBird.hold.PressedA (p);
 		}
-
+		*/
 	}
 
 	void HandleOnPlatformInput () {
-		if (Input.GetButtonDown (bCircleButton)) {
+		/*if (Input.GetButtonDown (bCircleButton)) {
 			gm.bigBird.hold.Occupy (false);
 			state = State.CHANGING_STATIONS;
 			return;
@@ -534,7 +537,7 @@ public class PlayerInput : MonoBehaviour {
 			if (gm.bigBird.hold.platformCargo) {
 				gm.bigBird.hold.Dump (gm.bigBird.hold.platformCargo.transform);
 			}
-		}
+		}*/
 	}
 
 	void HandleOnFootInput () {

@@ -66,15 +66,16 @@ public class Dock : Station {
 		pi.realStation = null;
 		user = null;
 		pi = null;
-	
+		bird = null;	
 	}
+
 	public override void MakeAvailable () {
 		print ("making available dock");
 
 		GetComponent<Collider2D> ().enabled = true;
 	}
 
-	public override void MakeUnAvailable () {
+	public override void MakeUnavailable () {
 		print ("making unavailable dock");
 		GetComponent<Collider2D> ().enabled = false;
 	}
